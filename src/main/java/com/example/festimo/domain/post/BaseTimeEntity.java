@@ -23,4 +23,3 @@ public abstract class BaseTimeEntity {
     @Column(updatable = true)
     private LocalDateTime updatedAt;
 }
-
