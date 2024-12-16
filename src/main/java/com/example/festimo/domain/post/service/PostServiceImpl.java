@@ -22,14 +22,6 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public PostResponseDto createPost(@Valid PostRequestDto postDto) {
-
-        if (postDto.getTitle().length() > 50) {
-            throw new IllegalArgumentException("제목은 50자 이하로 입력해주세요.");
-        }
-        if (postDto.getPassword().length() < 4) {
-            throw new IllegalArgumentException("비밀번호는 최소 4자 이상이어야 합니다.");
-        }
-
         Post post = modelMapper.map(postDto, Post.class);
         Post savedEntity = postRepository.save(post);
         return modelMapper.map(savedEntity, PostResponseDto.class);
