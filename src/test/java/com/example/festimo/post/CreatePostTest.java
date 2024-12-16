@@ -109,7 +109,7 @@ public class CreatePostTest {
 
         // When & Then
         assertThatThrownBy(() -> postService.createPost(postRequestDto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(ConstraintViolationException.class)
                 .hasMessageContaining("비밀번호는 최소 4자 이상이어야 합니다.");
     }
 }
