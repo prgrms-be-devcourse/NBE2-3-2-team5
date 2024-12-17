@@ -19,8 +19,7 @@ public class SwaggerConfig {
     private Info swaggerInfo() {
         return new Info()
                 .title("Festimo API")
-                        .description("Festimo API 명세서")
-                        .version("1.0.0");
+                .description("Festimo API 명세서")
+                .version("1.0.0");
     }
-
 }
