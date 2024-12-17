@@ -3,23 +3,23 @@ package com.example.festimo.domain.festival.service;
 import com.example.festimo.domain.festival.domain.Festival;
 import com.example.festimo.domain.festival.dto.FestivalTO;
 import com.example.festimo.domain.festival.repository.FestivalRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import java.lang.reflect.Member;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +30,8 @@ public class FestivalService {
 
     @Autowired
     private FestivalRepository festivalRepository;
+    @Autowired
+    private EntityManagerFactory entityManagerFactory;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleRefreshEvents() {
@@ -39,6 +41,8 @@ public class FestivalService {
     public void refreshEvents() {
         // 기존 데이터를 삭제하여 데이터 갱신
         festivalRepository.deleteAll();
+
+        resetAutoIncrement();
 
         // API 호출로 데이터 가져오기
         List<FestivalTO> events = getAllEvents();
@@ -51,37 +55,34 @@ public class FestivalService {
 
     public List<FestivalTO> getAllEvents(){
         DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://apis.data.go.kr/B551011/KorService1");
-        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
+        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
 
-        // webClient 기본 설정
-        WebClient webClient = WebClient.builder()
-                .uriBuilderFactory(factory)
-                .baseUrl("https://apis.data.go.kr/B551011/KorService1")
-                .defaultHeader("Accept", "application/json")
-                .build();
+        String baseUrl = "https://apis.data.go.kr/B551011/KorService1";
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setUriTemplateHandler(factory);
 
         List<FestivalTO> festivalList = new ArrayList<>();
-        AtomicInteger pageNo = new AtomicInteger(1);
+        int pageNo = 1;
         int numOfRows = 100;
         try {
             while(true) {
-                // API 요청
-                Map<String, Object> response = webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path("/searchFestival1")
-                                .queryParam("serviceKey", SEARCH_FESTIVAL_API_KEY)
-                                .queryParam("eventStartDate", "20230729")
-                                .queryParam("pageNo", pageNo.get())
-                                .queryParam("numOfRows", numOfRows)
-                                .queryParam("MobileApp", "AppTest")
-                                .queryParam("MobileOS", "ETC")
-                                .queryParam("listYN", "Y")
-                                .queryParam("arrange", "O")
-                                .queryParam("_type", "json")
-                                .build())
-                        .retrieve()
-                        .bodyToMono(Map.class)
-                        .block();
+                String url = factory.expand("/searchFestival1?serviceKey={serviceKey}&eventStartDate={eventStartDate}" +
+                                "&pageNo={pageNo}&numOfRows={numOfRows}&MobileApp={MobileApp}" +
+                                "&MobileOS={MobileOS}&listYN={listYN}&arrange={arrange}&_type={_type}",
+                        Map.of(
+                                "serviceKey", SEARCH_FESTIVAL_API_KEY,
+                                "eventStartDate", "20230729",
+                                "pageNo", pageNo,
+                                "numOfRows", numOfRows,
+                                "MobileApp", "AppTest",
+                                "MobileOS", "ETC",
+                                "listYN", "Y",
+                                "arrange", "O",
+                                "_type", "json"
+                        )).toString();
+                URI uri = new URI(url);
+                ResponseEntity<Map> responseEntity = restTemplate.getForEntity(uri, Map.class);
+                Map<String, Object> response = responseEntity.getBody();
 
                 // 결과 확인
                 // JSON 데이터에서 필요한 정보 추출
@@ -123,17 +124,25 @@ public class FestivalService {
                     festivalList.add(festivalTO);
                 }
                 int totalPages = (int) Math.ceil((double) totalCount / numOfRows);
-                if(pageNo.get() >= totalPages){
+                if(pageNo >= totalPages){
                     break;
                 }
-                pageNo.incrementAndGet();
+                pageNo++;
             }
-        } catch (WebClientResponseException e) {
-            System.err.println("Error(" + e.getStatusCode() + "): " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
         return festivalList;
+    }
+
+    private void resetAutoIncrement() {
+        // SQL 쿼리를 실행해 시퀀스 초기화
+        String resetQuery = "ALTER TABLE festival AUTO_INCREMENT = 1";
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        entityManager.getTransaction().begin();
+        entityManager.createNativeQuery(resetQuery).executeUpdate();
+        entityManager.getTransaction().commit();
+        entityManager.close();
     }
 
     public void insert(FestivalTO to){
