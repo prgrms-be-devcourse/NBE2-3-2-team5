@@ -36,12 +36,20 @@ public class AdminController {
     }
 
     @PutMapping("/users/{userid}")
+    @Operation(summary = "관리자의 회원 수정", description = "회원 정보 수정")
     public ResponseEntity<AdminDTO> updateUser(
             @PathVariable Long userid,
             @Valid @RequestBody AdminUpdateUserDTO adminUpdateUserDTO) {
         AdminDTO user = adminService.updateUser(userid, adminUpdateUserDTO);
         return ResponseEntity.ok(user);
 
+    }
+
+    @DeleteMapping("/{userid}")
+    @Operation(summary = "관리자의 회원 삭제", description = "회원 정보 삭제")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userid){
+        adminService.deleteUser(userid);
+        return ResponseEntity.noContent().build();
     }
 
 }

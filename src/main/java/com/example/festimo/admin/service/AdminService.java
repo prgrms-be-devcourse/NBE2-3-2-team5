@@ -52,6 +52,16 @@ public class AdminService {
 
     }
 
+    //회원 삭제
+    public void deleteUser(Long userId) {
+
+        //유저가 존재하는지 확인
+        Users user = userRepository.findById(userId)
+                .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        userRepository.delete(user);
+    }
+
 
 
 }
