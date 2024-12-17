@@ -6,6 +6,7 @@ import com.example.festimo.domain.post.entity.PostCategory;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.domain.post.service.PostServiceImpl;
 import com.example.festimo.exception.InvalidPasswordException;
+import com.example.festimo.exception.PostNotFound;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -124,5 +125,23 @@ public class UpdatePostTest {
         assertEquals("New Title", updatedPost.getTitle(), "제목이 업데이트되어야 합니다.");
         assertEquals("New Content", updatedPost.getContent(), "내용이 업데이트되어야 합니다.");
         assertEquals(PostCategory.QNA, updatedPost.getCategory(), "카테고리가 업데이트되어야 합니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 게시글 수정 시 PostNotFound 예외 발생")
+    void testUpdatePost_NotFound() {
+        // Given
+        Long invalidPostId = 999L;
+        UpdatePostRequest request = new UpdatePostRequest(
+                "Updated Title",
+                "Updated Content",
+                null,
+                "password123"
+        );
+
+        // When & Then
+        assertThrows(PostNotFound.class, () -> {
+            postService.updatePost(invalidPostId, request);
+        }, "PostNotFound 예외가 발생해야 한다");
     }
 }
