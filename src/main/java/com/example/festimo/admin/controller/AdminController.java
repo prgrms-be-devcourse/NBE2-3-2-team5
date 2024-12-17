@@ -1,6 +1,5 @@
 package com.example.festimo.admin.controller;
 
-
 import com.example.festimo.admin.dto.AdminUpdateUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

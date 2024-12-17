@@ -20,14 +20,12 @@ public class Reviews {
     private Long reviewId;
 
     @NotNull
-    @ManyToOne
     @JoinColumn(name = "reviewer_id")
-    private Users reviewerId;
+    private Long reviewerId;
 
     @NotNull
-    @ManyToOne
     @JoinColumn(name = "reviewee_id")
-    private Users revieweeId;
+    private Long revieweeId;
 
     @NotNull
     @Column(name = "rating")
