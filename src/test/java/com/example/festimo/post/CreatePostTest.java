@@ -1,7 +1,7 @@
 package com.example.festimo.post;
 
-import com.example.festimo.domain.post.dto.PostRequestDto;
-import com.example.festimo.domain.post.dto.PostResponseDto;
+import com.example.festimo.domain.post.dto.PostRequest;
+import com.example.festimo.domain.post.dto.PostListResponse;
 import com.example.festimo.domain.post.entity.PostCategory;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.domain.post.service.PostService;
@@ -33,22 +33,21 @@ public class CreatePostTest {
     @Rollback(value = false)
     void posting() {
         // Given
-        PostRequestDto postRequestDto = new PostRequestDto();
-        postRequestDto.setTitle("테스트 게시글 제목");
-        postRequestDto.setWriter("작성자1");
-        postRequestDto.setMail("test@example.com");
-        postRequestDto.setPassword("1234");
-        postRequestDto.setContent("테스트 내용입니다.");
-        postRequestDto.setCategory(PostCategory.COMPANION);
+        PostRequest postRequest = new PostRequest();
+        postRequest.setTitle("테스트 게시글 제목");
+        postRequest.setWriter("작성자1");
+        postRequest.setMail("test@example.com");
+        postRequest.setPassword("1234");
+        postRequest.setContent("테스트 내용입니다.");
+        postRequest.setCategory(PostCategory.COMPANION);
 
         // When
-        PostResponseDto responseDto = postService.createPost(postRequestDto);
+        PostListResponse responseDto = postService.createPost(postRequest);
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getTitle()).isEqualTo(postRequestDto.getTitle());
-        assertThat(responseDto.getWriter()).isEqualTo(postRequestDto.getWriter());
-        assertThat(responseDto.getContent()).isEqualTo(postRequestDto.getContent());
+        assertThat(responseDto.getTitle()).isEqualTo(postRequest.getTitle());
+        assertThat(responseDto.getWriter()).isEqualTo(postRequest.getWriter());
 
         System.out.println("등록된 게시글 ID: " + responseDto.getId());
     }
@@ -60,16 +59,16 @@ public class CreatePostTest {
     @DisplayName("필수 입력값 누락으로 게시글 등록 실패")
     void failToPostWhenMissingRequiredFields() {
         // Given
-        PostRequestDto postRequestDto = new PostRequestDto();
-        postRequestDto.setTitle(null); // 제목 누락
-        postRequestDto.setWriter("작성자1");
-        postRequestDto.setMail("test@example.com");
-        postRequestDto.setPassword("1234");
-        postRequestDto.setContent("테스트 내용입니다.");
-        postRequestDto.setCategory(PostCategory.QNA);
+        PostRequest postRequest = new PostRequest();
+        postRequest.setTitle(null); // 제목 누락
+        postRequest.setWriter("작성자1");
+        postRequest.setMail("test@example.com");
+        postRequest.setPassword("1234");
+        postRequest.setContent("테스트 내용입니다.");
+        postRequest.setCategory(PostCategory.QNA);
 
         // When
-        Set<ConstraintViolation<PostRequestDto>> violations = validator.validate(postRequestDto);
+        Set<ConstraintViolation<PostRequest>> violations = validator.validate(postRequest);
 
         // Then
         assertThat(violations).isNotEmpty();
@@ -81,34 +80,34 @@ public class CreatePostTest {
     void failToPostWhenTitleExceedsLengthLimit() {
         // Given
         String longTitle = "a".repeat(51);
-        PostRequestDto postRequestDto = new PostRequestDto();
-        postRequestDto.setTitle(longTitle);
-        postRequestDto.setWriter("작성자1");
-        postRequestDto.setMail("test@example.com");
-        postRequestDto.setPassword("1234");
-        postRequestDto.setContent("테스트 내용입니다.");
-        postRequestDto.setCategory(PostCategory.NOTICE);
+        PostRequest postRequest = new PostRequest();
+        postRequest.setTitle(longTitle);
+        postRequest.setWriter("작성자1");
+        postRequest.setMail("test@example.com");
+        postRequest.setPassword("1234");
+        postRequest.setContent("테스트 내용입니다.");
+        postRequest.setCategory(PostCategory.NOTICE);
 
         // When & Then
-        assertThatThrownBy(() -> postService.createPost(postRequestDto))
+        assertThatThrownBy(() -> postService.createPost(postRequest))
                 .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining("제목은 50자 이하로 입력해주세요.");
+                .hasMessageContaining("제목은 30자 이하로 입력해주세요.");
     }
 
     @Test
     @DisplayName("비밀번호 형식이 맞지 않아 게시글 등록 실패")
     void failToPostWhenPasswordInvalid() {
         // Given
-        PostRequestDto postRequestDto = new PostRequestDto();
-        postRequestDto.setTitle("테스트 게시글 제목");
-        postRequestDto.setWriter("작성자1");
-        postRequestDto.setMail("test@example.com");
-        postRequestDto.setPassword("abc");
-        postRequestDto.setContent("테스트 내용입니다.");
-        postRequestDto.setCategory(PostCategory.QNA);
+        PostRequest postRequest = new PostRequest();
+        postRequest.setTitle("테스트 게시글 제목");
+        postRequest.setWriter("작성자1");
+        postRequest.setMail("test@example.com");
+        postRequest.setPassword("abc");
+        postRequest.setContent("테스트 내용입니다.");
+        postRequest.setCategory(PostCategory.QNA);
 
         // When & Then
-        assertThatThrownBy(() -> postService.createPost(postRequestDto))
+        assertThatThrownBy(() -> postService.createPost(postRequest))
                 .isInstanceOf(ConstraintViolationException.class)
                 .hasMessageContaining("비밀번호는 최소 4자 이상이어야 합니다.");
     }

@@ -1,6 +1,5 @@
 package com.example.festimo.exception;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -36,5 +35,14 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", fieldError.getDefaultMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(NoContent.class)
+    public ResponseEntity<Map<String, Object>> handleNoContent(NoContent ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.OK.value());
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
     }
 }
