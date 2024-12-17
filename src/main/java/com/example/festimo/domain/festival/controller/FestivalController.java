@@ -5,6 +5,7 @@ import com.example.festimo.domain.festival.repository.FestivalRepository;
 import com.example.festimo.domain.festival.service.FestivalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,12 +31,9 @@ public class FestivalController {
     }
 
     @RequestMapping("/api/events/{eventId}")
-    public String getEvent(int id) {
-        FestivalTO to = festivalService.findById(id);
-        return "getFestival";
+    public String getEvent(@PathVariable Integer eventId) {
+        FestivalTO to = festivalService.findById(eventId);
+        return to.toString();
     }
-
-
-
 
 }

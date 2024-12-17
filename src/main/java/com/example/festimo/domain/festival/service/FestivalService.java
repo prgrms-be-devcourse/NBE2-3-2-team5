@@ -156,7 +156,9 @@ public class FestivalService {
 
     public FestivalTO findById(int id){
         Festival festival = festivalRepository.findById(String.valueOf(id)).orElse(null);
-
+        if (festival == null) {
+            return null;
+        }
         ModelMapper modelMapper = new ModelMapper();
         FestivalTO to = modelMapper.map(festival, FestivalTO.class);
 

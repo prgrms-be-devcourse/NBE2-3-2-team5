@@ -2,11 +2,11 @@ package com.example.festimo.domain.festival.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-
+@ToString
 @Getter
 @Setter
 public class FestivalTO {
