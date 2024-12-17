@@ -2,6 +2,8 @@ package com.example.festimo.admin.service;
 
 import com.example.festimo.admin.domain.Users;
 import com.example.festimo.admin.dto.AdminUpdateUserDTO;
+import com.example.festimo.exception.CustomException;
+import com.example.festimo.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +37,7 @@ public class AdminService {
 
         //유저가 존재하는지 확인
         Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() ->new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //업데이트
         user.setUserName(dto.getUserName());

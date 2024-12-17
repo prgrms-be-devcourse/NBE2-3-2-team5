@@ -4,6 +4,7 @@ package com.example.festimo.admin.controller;
 import com.example.festimo.admin.dto.AdminUpdateUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class AdminController {
     @PutMapping("/users/{userid}")
     public ResponseEntity<AdminDTO> updateUser(
             @PathVariable Long userid,
-            @RequestBody AdminUpdateUserDTO adminUpdateUserDTO) {
+            @Valid @RequestBody AdminUpdateUserDTO adminUpdateUserDTO) {
         AdminDTO user = adminService.updateUser(userid, adminUpdateUserDTO);
         return ResponseEntity.ok(user);
 
