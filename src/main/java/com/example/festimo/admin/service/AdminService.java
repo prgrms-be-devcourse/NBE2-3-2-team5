@@ -1,9 +1,9 @@
 package com.example.festimo.admin.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.festimo.admin.Mapper.AdminMapper;
@@ -21,11 +21,11 @@ public class AdminService {
     }
 
     //모든 회원 조회
-    public List<AdminDTO> getAllUsers(){
+    public Page<AdminDTO> getAllUsers(int page, int size) {
 
-        return userRepository.findAll().stream()
-                .map(AdminMapper.INSTANCE::toDto)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findAll(pageable)
+                .map(AdminMapper.INSTANCE::toDto);
     }
 
 }
