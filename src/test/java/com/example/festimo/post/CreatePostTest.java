@@ -1,7 +1,7 @@
 package com.example.festimo.post;
 
 import com.example.festimo.domain.post.dto.PostRequest;
-import com.example.festimo.domain.post.dto.PostResponse;
+import com.example.festimo.domain.post.dto.PostListResponse;
 import com.example.festimo.domain.post.entity.PostCategory;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.domain.post.service.PostService;
@@ -42,13 +42,12 @@ public class CreatePostTest {
         postRequest.setCategory(PostCategory.COMPANION);
 
         // When
-        PostResponse responseDto = postService.createPost(postRequest);
+        PostListResponse responseDto = postService.createPost(postRequest);
 
         // Then
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getTitle()).isEqualTo(postRequest.getTitle());
         assertThat(responseDto.getWriter()).isEqualTo(postRequest.getWriter());
-        assertThat(responseDto.getContent()).isEqualTo(postRequest.getContent());
 
         System.out.println("등록된 게시글 ID: " + responseDto.getId());
     }

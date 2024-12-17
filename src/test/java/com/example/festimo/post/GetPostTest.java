@@ -1,7 +1,7 @@
 package com.example.festimo.post;
 
 import com.example.festimo.domain.post.controller.PostController;
-import com.example.festimo.domain.post.dto.PostResponse;
+import com.example.festimo.domain.post.dto.PostListResponse;
 import com.example.festimo.domain.post.service.PostService;
 import com.example.festimo.exception.InvalidPageRequest;
 import com.example.festimo.exception.NoContent;
@@ -22,8 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
-import static com.example.festimo.domain.post.entity.PostCategory.COMPANION;
-import static com.example.festimo.domain.post.entity.PostCategory.REVIEW;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -50,13 +48,13 @@ public class GetPostTest {
     @DisplayName("전체 게시글 조회")
     public void testGetAllPosts() throws Exception {
         // Given
-        List<PostResponse> postResponses = List.of(
-                new PostResponse(1L, "Title 1", "Writer 1", "mail1@example.com", "Content 1", COMPANION),
-                new PostResponse(2L, "Title 2", "Writer 2", "mail2@example.com", "Content 2", REVIEW)
+        List<PostListResponse> postListRespons = List.of(
+                new PostListResponse(1L, "Title 1", "Writer 1", 1, "2024-12-17"),
+                new PostListResponse(2L, "Title 2", "Writer 2", 2, "2024-12-18")
         );
 
-        PageResponse<PostResponse> pageResponse = new PageResponse<>(
-                new PageImpl<>(postResponses, PageRequest.of(0, 10), 20)
+        PageResponse<PostListResponse> pageResponse = new PageResponse<>(
+                new PageImpl<>(postListRespons, PageRequest.of(0, 10), 20)
         );
 
         when(postService.getAllPosts(Mockito.anyInt(), Mockito.anyInt())).thenReturn(pageResponse);
