@@ -5,7 +5,7 @@ import lombok.*;
 
 @Getter
 @Setter
-public class PostResponseDto {
+public class PostResponse {
     private Long id;
     private String title;
     private String writer;
