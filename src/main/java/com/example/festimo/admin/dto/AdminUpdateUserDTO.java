@@ -1,9 +1,6 @@
 package com.example.festimo.admin.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,15 +11,19 @@ import lombok.Setter;
 public class AdminUpdateUserDTO {
 
     @NotNull(message = "이름은 필수 입력 값입니다.")
+    @NotBlank
     private String userName;
 
     @NotNull(message = "닉네임은 필수 입력 값입니다.")
+    @NotBlank
     private String nickname;
 
     @NotNull(message = "이메일은 필수 입력 값입니다.")
+    @NotBlank
     private String email;
 
     @NotNull(message = "성별은 필수 입력 값입니다.")
+    @NotBlank
     @Pattern(regexp = "^(M|F)$", message = "성별은 F 또는 M만 가능합니다.")
     private String gender; // F, M만 허용
 
