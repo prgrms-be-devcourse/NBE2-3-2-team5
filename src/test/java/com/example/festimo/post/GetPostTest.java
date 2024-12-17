@@ -3,6 +3,8 @@ package com.example.festimo.post;
 import com.example.festimo.domain.post.controller.PostController;
 import com.example.festimo.domain.post.dto.PostResponse;
 import com.example.festimo.domain.post.service.PostService;
+import com.example.festimo.exception.InvalidPageRequest;
+import com.example.festimo.exception.NoContent;
 import com.example.festimo.global.dto.PageResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +24,8 @@ import java.util.List;
 
 import static com.example.festimo.domain.post.entity.PostCategory.COMPANION;
 import static com.example.festimo.domain.post.entity.PostCategory.REVIEW;
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -46,6 +49,7 @@ public class GetPostTest {
     @Test
     @DisplayName("전체 게시글 조회")
     public void testGetAllPosts() throws Exception {
+        // Given
         List<PostResponse> postResponses = List.of(
                 new PostResponse(1L, "Title 1", "Writer 1", "mail1@example.com", "Content 1", COMPANION),
                 new PostResponse(2L, "Title 2", "Writer 2", "mail2@example.com", "Content 2", REVIEW)
@@ -55,8 +59,9 @@ public class GetPostTest {
                 new PageImpl<>(postResponses, PageRequest.of(0, 10), 20)
         );
 
-        Mockito.when(postService.getAllPosts(any())).thenReturn(pageResponse);
+        when(postService.getAllPosts(Mockito.anyInt(), Mockito.anyInt())).thenReturn(pageResponse);
 
+        // When & Then
         mockMvc.perform(get("/api/companions?page=1&size=10")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -70,5 +75,37 @@ public class GetPostTest {
                 .andExpect(jsonPath("$.totalPages").value(2))
                 .andExpect(jsonPath("$.hasNext").value(true))
                 .andExpect(jsonPath("$.hasPrevious").value(false));
+    }
+
+    @Test
+    @DisplayName("페이지 또는 크기 값이 잘못된 경우")
+    void testInvalidPageRequestException() {
+        // Given
+        int invalidPage = 0;
+        int invalidSize = -1;
+
+        // When
+        when(postService.getAllPosts(invalidPage, invalidSize)).thenThrow(new InvalidPageRequest());
+
+        // Then
+        assertThatThrownBy(() -> postService.getAllPosts(invalidPage, invalidSize))
+                .isInstanceOf(InvalidPageRequest.class)
+                .hasMessageContaining("페이지 번호는 1 이상, 페이지 크기는 1 이상이어야 합니다.");
+    }
+
+    @Test
+    @DisplayName("게시글이 없는 경우")
+    void testNoContentException() {
+        // Given
+        int validPage = 1;
+        int validSize = 10;
+
+        // When
+        when(postService.getAllPosts(validPage, validSize)).thenThrow(new NoContent());
+
+        // Then
+        assertThatThrownBy(() -> postService.getAllPosts(validPage, validSize))
+                .isInstanceOf(NoContent.class)
+                .hasMessageContaining("조회된 데이터가 없습니다.");
     }
 }
