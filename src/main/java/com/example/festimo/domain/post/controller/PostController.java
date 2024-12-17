@@ -6,13 +6,9 @@ import com.example.festimo.domain.post.service.PostService;
 import com.example.festimo.global.dto.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,8 +28,7 @@ public class PostController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        PageResponse<PostResponse> allPosts = postService.getAllPosts(pageable);
+        PageResponse<PostResponse> allPosts = postService.getAllPosts(page, size);
         return ResponseEntity.status(HttpStatus.OK).body(allPosts);
     }
 }
