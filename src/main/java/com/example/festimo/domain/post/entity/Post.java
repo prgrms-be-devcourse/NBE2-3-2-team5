@@ -33,4 +33,11 @@ public class Post extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private PostCategory category;
+
+    @Column(nullable = false)
+    private int views = 0;
+
+    public void increaseViews() {
+        this.views++;
+    }
 }
