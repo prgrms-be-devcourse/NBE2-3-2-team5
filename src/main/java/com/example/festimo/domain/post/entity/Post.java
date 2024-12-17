@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Optional;
+
 @Entity
 @Getter
 @Builder
@@ -34,10 +36,16 @@ public class Post extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private PostCategory category;
 
-    @Column(nullable = false)
+    @Builder.Default
     private int views = 0;
 
     public void increaseViews() {
         this.views++;
+    }
+
+    public void update(String title, String content, PostCategory category) {
+        this.title = title;
+        this.content = content;
+        this.category = category;
     }
 }
