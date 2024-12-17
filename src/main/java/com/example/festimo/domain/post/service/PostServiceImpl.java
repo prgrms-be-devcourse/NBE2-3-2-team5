@@ -57,7 +57,6 @@ public class PostServiceImpl implements PostService {
     public PostDetailResponse getPostById(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
         post.increaseViews();
-        postRepository.save(post);
         return modelMapper.map(post, PostDetailResponse.class);
     }
 }
