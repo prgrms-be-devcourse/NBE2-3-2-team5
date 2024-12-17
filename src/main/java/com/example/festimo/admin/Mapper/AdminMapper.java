@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import com.example.festimo.admin.domain.Users;
+import com.example.festimo.admin.Entity.Users;
 import com.example.festimo.admin.dto.AdminDTO;
 
 @Mapper

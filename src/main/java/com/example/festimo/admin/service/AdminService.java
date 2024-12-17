@@ -1,6 +1,6 @@
 package com.example.festimo.admin.service;
 
-import com.example.festimo.admin.domain.Users;
+import com.example.festimo.admin.Entity.Users;
 import com.example.festimo.admin.dto.AdminUpdateUserDTO;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;

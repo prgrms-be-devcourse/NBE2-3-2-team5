@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import lombok.NonNull;
 
-import com.example.festimo.admin.domain.Users;
+import com.example.festimo.admin.Entity.Users;
 
 public interface UserRepository extends JpaRepository<Users,Long> {
     @NonNull
