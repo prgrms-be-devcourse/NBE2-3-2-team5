@@ -69,7 +69,7 @@ public class PostServiceImpl implements PostService {
 
         List<CommentResponse> comments = post.getComments().stream()
                 .map(comment -> new CommentResponse(
-                        comment.getId(),
+                        comment.getSequence(),
                         comment.getComment(),
                         comment.getNickname(),
                         post.getId()))
@@ -118,10 +118,14 @@ public class PostServiceImpl implements PostService {
     public CommentResponse createComment(Long postId, @Valid CommentRequest request) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
 
+        Integer maxSequence = commentRepository.findMaxSequenceByPost(post);
+        Integer nextSequence = maxSequence + 1;
+
         Comment comment = Comment.builder()
                 .comment(request.getComment())
-                .post(post)
                 .nickname(request.getNickname())
+                .post(post)
+                .sequence(nextSequence)
                 .build();
         commentRepository.save(comment);
 

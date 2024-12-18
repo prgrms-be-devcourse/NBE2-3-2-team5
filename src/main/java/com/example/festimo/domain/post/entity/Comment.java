@@ -27,4 +27,8 @@ public class Comment extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
+
+    // 게시글별 댓글 순번
+    @Column(nullable = false)
+    private Integer sequence;
 }
