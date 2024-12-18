@@ -1,11 +1,10 @@
 package com.example.festimo.domain.post.service;
 
-import com.example.festimo.domain.post.dto.PostDetailResponse;
-import com.example.festimo.domain.post.dto.PostRequest;
-import com.example.festimo.domain.post.dto.PostListResponse;
-import com.example.festimo.domain.post.dto.UpdatePostRequest;
+import com.example.festimo.domain.post.dto.*;
+import com.example.festimo.domain.post.entity.Comment;
 import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.entity.PostCategory;
+import com.example.festimo.domain.post.repository.CommentRepository;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.exception.InvalidPageRequest;
 import com.example.festimo.exception.InvalidPasswordException;
@@ -23,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 @Service
 @Validated
 @RequiredArgsConstructor
@@ -30,15 +31,18 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
+    private final CommentRepository commentRepository;
 
+    // 게시글 등록
     @Transactional
     @Override
-    public PostListResponse createPost(@Valid PostRequest postDto) {
-        Post post = modelMapper.map(postDto, Post.class);
+    public PostListResponse createPost(@Valid PostRequest request) {
+        Post post = modelMapper.map(request, Post.class);
         Post savedEntity = postRepository.save(post);
         return modelMapper.map(savedEntity, PostListResponse.class);
     }
 
+    // 게시글 전체 조회
     @Override
     public PageResponse<PostListResponse> getAllPosts(int page, int size) {
         if (page < 1 || size <= 0) {
@@ -56,14 +60,27 @@ public class PostServiceImpl implements PostService {
         return new PageResponse<>(responsePage);
     }
 
+    // 게시글 상세 조회
     @Transactional
     @Override
     public PostDetailResponse getPostById(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
         post.increaseViews();
-        return modelMapper.map(post, PostDetailResponse.class);
+
+        List<CommentResponse> comments = post.getComments().stream()
+                .map(comment -> new CommentResponse(
+                        comment.getId(),
+                        comment.getComment(),
+                        comment.getNickname(),
+                        post.getId()))
+                .toList();
+
+        PostDetailResponse response = modelMapper.map(post, PostDetailResponse.class);
+        response.setComments(comments);
+        return response;
     }
 
+    // 게시글 수정
     @Transactional
     @Override
     public PostDetailResponse updatePost(Long postId, @Valid UpdatePostRequest request) {
@@ -82,6 +99,7 @@ public class PostServiceImpl implements PostService {
         return modelMapper.map(post, PostDetailResponse.class);
     }
 
+    // 게시글 삭제
     @Transactional
     @Override
     public void deletePost(Long postId, String password) {
@@ -92,5 +110,21 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
+    }
+
+    // 댓글 등록
+    @Transactional
+    @Override
+    public CommentResponse createComment(Long postId, @Valid CommentRequest request) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
+
+        Comment comment = Comment.builder()
+                .comment(request.getComment())
+                .post(post)
+                .nickname(request.getNickname())
+                .build();
+        commentRepository.save(comment);
+
+        return modelMapper.map(comment, CommentResponse.class);
     }
 }
