@@ -16,12 +16,14 @@ public class PostController {
 
     private final PostService postService;
 
+    // 게시글 등록
     @PostMapping
     public ResponseEntity<PostListResponse> createPost(@Valid @RequestBody PostRequest request) {
         PostListResponse responseDto = postService.createPost(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
+    // 게시글 전체 조회
     @GetMapping
     public ResponseEntity<PageResponse<PostListResponse>> getAllPosts(
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -31,12 +33,14 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(allPosts);
     }
 
+    // 게시글 상세 조회
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPostById(@PathVariable Long postId) {
         PostDetailResponse postById = postService.getPostById(postId);
         return ResponseEntity.status(HttpStatus.OK).body(postById);
     }
 
+    // 게시글 수정
     @PutMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> updatePost(
             @PathVariable Long postId,
@@ -45,11 +49,21 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(updatePost);
     }
 
+    // 게시글 삭제
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
             @RequestBody DeletePostRequest request) {
         postService.deletePost(postId, request.getPassword());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    // 댓글 등록
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<CommentResponse> createComment(
+            @PathVariable Long postId,
+            @RequestBody @Valid CommentRequest request) {
+        CommentResponse comment = postService.createComment(postId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 }

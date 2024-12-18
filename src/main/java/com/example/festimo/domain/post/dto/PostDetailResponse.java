@@ -4,10 +4,14 @@ import com.example.festimo.domain.post.entity.PostCategory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostDetailResponse {
@@ -19,16 +23,5 @@ public class PostDetailResponse {
     private PostCategory category;
     private int views;
     private String createdAt;
-
-    public PostDetailResponse(Long id, String title, String writer, String mail, String content,
-                              PostCategory category, int views, LocalDateTime createdAt) {
-        this.id = id;
-        this.title = title;
-        this.writer = writer;
-        this.mail = mail;
-        this.content = content;
-        this.category = category;
-        this.views = views;
-        this.createdAt = createdAt.toString();
-    }
+    private List<CommentResponse> comments = new ArrayList<>();
 }
