@@ -11,4 +11,6 @@ public interface PostService {
     PostDetailResponse updatePost(Long postId, @Valid UpdatePostRequest request);
     void deletePost(Long postId, String password);
     CommentResponse createComment(Long postId, @Valid CommentRequest commentDto);
+    CommentResponse updateComment(Long postId, Integer sequence, @Valid UpdateCommentRequest commentDto);
+    void deleteComment(Long postId, Integer sequence);
 }

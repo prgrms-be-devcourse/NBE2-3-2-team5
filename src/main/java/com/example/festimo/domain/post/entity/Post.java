@@ -41,7 +41,7 @@ public class Post extends BaseTimeEntity {
     private int views = 0;
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @OrderBy("id asc")
+    @OrderBy("sequence asc")
     private List<Comment> comments;
 
     public void increaseViews() {

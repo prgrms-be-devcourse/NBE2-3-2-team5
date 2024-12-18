@@ -6,10 +6,7 @@ import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.entity.PostCategory;
 import com.example.festimo.domain.post.repository.CommentRepository;
 import com.example.festimo.domain.post.repository.PostRepository;
-import com.example.festimo.exception.InvalidPageRequest;
-import com.example.festimo.exception.InvalidPasswordException;
-import com.example.festimo.exception.NoContent;
-import com.example.festimo.exception.PostNotFound;
+import com.example.festimo.exception.*;
 import com.example.festimo.global.dto.PageResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -69,10 +66,12 @@ public class PostServiceImpl implements PostService {
 
         List<CommentResponse> comments = post.getComments().stream()
                 .map(comment -> new CommentResponse(
-                        comment.getId(),
+                        comment.getSequence(),
                         comment.getComment(),
                         comment.getNickname(),
-                        post.getId()))
+                        post.getId(),
+                        comment.getCreatedAt(),
+                        comment.getUpdatedAt()))
                 .toList();
 
         PostDetailResponse response = modelMapper.map(post, PostDetailResponse.class);
@@ -118,13 +117,40 @@ public class PostServiceImpl implements PostService {
     public CommentResponse createComment(Long postId, @Valid CommentRequest request) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
 
+        Integer maxSequence = commentRepository.findMaxSequenceByPost(post);
+        Integer nextSequence = maxSequence + 1;
+
         Comment comment = Comment.builder()
                 .comment(request.getComment())
-                .post(post)
                 .nickname(request.getNickname())
+                .post(post)
+                .sequence(nextSequence)
                 .build();
         commentRepository.save(comment);
 
         return modelMapper.map(comment, CommentResponse.class);
+    }
+
+    // 댓글 수정
+    @Transactional
+    @Override
+    public CommentResponse updateComment(Long postId, Integer sequence, @Valid UpdateCommentRequest request) {
+        Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence)
+                .orElseThrow(() -> new CommentNotFound());
+
+        comment.updateContent(request.getComment());
+        commentRepository.saveAndFlush(comment);
+        return modelMapper.map(comment, CommentResponse.class);
+    }
+
+    // 댓글 삭제
+    @Transactional
+    @Override
+    public void deleteComment(Long postId, Integer sequence) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
+        Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence)
+                .orElseThrow(() -> new CommentNotFound());
+
+        commentRepository.delete(comment);
     }
 }
