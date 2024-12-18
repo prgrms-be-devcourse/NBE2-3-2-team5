@@ -1,6 +1,6 @@
 package com.example.festimo.admin.service;
 
-import com.example.festimo.admin.Mapper.AdminReviewMapper;
+import com.example.festimo.admin.mapper.AdminReviewMapper;
 import com.example.festimo.admin.dto.AdminReviewDTO;
 import com.example.festimo.admin.repository.ReviewsRepository;
 import com.example.festimo.exception.CustomException;

@@ -1,10 +1,10 @@
-package com.example.festimo.admin.Mapper;
+package com.example.festimo.admin.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import com.example.festimo.admin.Entity.Users;
+import com.example.festimo.admin.entity.Users;
 import com.example.festimo.admin.dto.AdminDTO;
 
 @Mapper

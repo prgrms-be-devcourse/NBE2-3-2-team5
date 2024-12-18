@@ -1,6 +1,6 @@
-package com.example.festimo.admin.Mapper;
+package com.example.festimo.admin.mapper;
 
-import com.example.festimo.admin.Entity.Reviews;
+import com.example.festimo.admin.entity.Reviews;
 import com.example.festimo.admin.dto.AdminReviewDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

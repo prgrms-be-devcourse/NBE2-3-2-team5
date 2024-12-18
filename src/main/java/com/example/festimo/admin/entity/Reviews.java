@@ -1,4 +1,4 @@
-package com.example.festimo.admin.Entity;
+package com.example.festimo.admin.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
