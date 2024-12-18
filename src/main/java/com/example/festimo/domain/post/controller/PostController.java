@@ -1,9 +1,6 @@
 package com.example.festimo.domain.post.controller;
 
-import com.example.festimo.domain.post.dto.PostDetailResponse;
-import com.example.festimo.domain.post.dto.PostRequest;
-import com.example.festimo.domain.post.dto.PostListResponse;
-import com.example.festimo.domain.post.dto.UpdatePostRequest;
+import com.example.festimo.domain.post.dto.*;
 import com.example.festimo.domain.post.service.PostService;
 import com.example.festimo.global.dto.PageResponse;
 import jakarta.validation.Valid;
@@ -51,8 +48,8 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
-            @RequestParam String password) {
-        postService.deletePost(postId, password);
+            @RequestBody DeletePostRequest request) {
+        postService.deletePost(postId, request.getPassword());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
