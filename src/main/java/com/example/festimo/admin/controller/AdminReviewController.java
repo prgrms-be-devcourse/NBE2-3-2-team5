@@ -5,6 +5,7 @@ import com.example.festimo.admin.service.AdminReviewService;
 
 import io.swagger.v3.oas.annotations.Operation;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/admin/reviews")
+@Tag(name = "관리자 API", description = "관리자가 리뷰를 관리하는 API")
 public class AdminReviewController {
 
     AdminReviewService adminReviewService;
