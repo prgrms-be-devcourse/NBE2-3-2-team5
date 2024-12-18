@@ -6,10 +6,7 @@ import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.entity.PostCategory;
 import com.example.festimo.domain.post.repository.CommentRepository;
 import com.example.festimo.domain.post.repository.PostRepository;
-import com.example.festimo.exception.InvalidPageRequest;
-import com.example.festimo.exception.InvalidPasswordException;
-import com.example.festimo.exception.NoContent;
-import com.example.festimo.exception.PostNotFound;
+import com.example.festimo.exception.*;
 import com.example.festimo.global.dto.PageResponse;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -72,7 +69,9 @@ public class PostServiceImpl implements PostService {
                         comment.getSequence(),
                         comment.getComment(),
                         comment.getNickname(),
-                        post.getId()))
+                        post.getId(),
+                        comment.getCreatedAt(),
+                        comment.getUpdatedAt()))
                 .toList();
 
         PostDetailResponse response = modelMapper.map(post, PostDetailResponse.class);
@@ -129,6 +128,18 @@ public class PostServiceImpl implements PostService {
                 .build();
         commentRepository.save(comment);
 
+        return modelMapper.map(comment, CommentResponse.class);
+    }
+
+    // 댓글 수정
+    @Transactional
+    @Override
+    public CommentResponse updateComment(Long postId, Integer sequence, @Valid UpdateCommentRequest request) {
+        Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence)
+                .orElseThrow(() -> new CommentNotFound());
+
+        comment.updateContent(request.getComment());
+        commentRepository.saveAndFlush(comment);
         return modelMapper.map(comment, CommentResponse.class);
     }
 }

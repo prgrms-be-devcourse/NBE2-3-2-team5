@@ -66,4 +66,15 @@ public class PostController {
         CommentResponse comment = postService.createComment(postId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
+
+    // 댓글 수정
+    @PutMapping("/{postId}/comments/{sequence}")
+    public ResponseEntity<CommentResponse> updateComment(
+            @PathVariable Long postId,
+            @PathVariable Integer sequence,
+            @RequestBody @Valid UpdateCommentRequest request
+    ) {
+        CommentResponse comment = postService.updateComment(postId, sequence, request);
+        return ResponseEntity.status(HttpStatus.OK).body(comment);
+    }
 }
