@@ -77,4 +77,14 @@ public class PostController {
         CommentResponse comment = postService.updateComment(postId, sequence, request);
         return ResponseEntity.status(HttpStatus.OK).body(comment);
     }
+
+    // 댓글 삭제
+    @DeleteMapping("/{postId}/comments/{sequence}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Integer sequence
+    ) {
+        postService.deleteComment(postId, sequence);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

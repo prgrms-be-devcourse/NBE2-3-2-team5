@@ -142,4 +142,15 @@ public class PostServiceImpl implements PostService {
         commentRepository.saveAndFlush(comment);
         return modelMapper.map(comment, CommentResponse.class);
     }
+
+    // 댓글 삭제
+    @Transactional
+    @Override
+    public void deleteComment(Long postId, Integer sequence) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new PostNotFound());
+        Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence)
+                .orElseThrow(() -> new CommentNotFound());
+
+        commentRepository.delete(comment);
+    }
 }
