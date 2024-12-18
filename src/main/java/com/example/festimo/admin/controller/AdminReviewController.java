@@ -21,6 +21,12 @@ public class AdminReviewController {
         this.adminReviewService = adminReviewService;
     }
 
+    /**
+     * 관리자의 리뷰 조회
+     * @param page 조회할 페이지 번호 (기본값: 0)
+     * @param size 한 페이지에 표시할 리뷰 개수 (기본값: 10)
+     * @return 페이지네이션된 리뷰 목록
+     */
     @GetMapping()
     @Operation(summary = "관리자의 리뷰 조회", description = "모든 리뷰 조회")
     public ResponseEntity<Page<AdminReviewDTO>> getReviews(
@@ -31,6 +37,11 @@ public class AdminReviewController {
 
     }
 
+    /**
+     * 관리자의 리뷰 삭제
+     * @param reviewId 삭제할 리뷰의 ID
+     * @return 성공적인 삭제 응답
+     */
     @DeleteMapping("/{reviewId}")
     @Operation(summary = "관리자의 리뷰 삭제", description = "특정 리뷰 삭제")
     public ResponseEntity<Void> deleteReview(@PathVariable("reviewId") Long reviewId) {

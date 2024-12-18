@@ -25,6 +25,11 @@ public class AdminController {
         this.adminService = adminService;
     }
 
+    /**
+     * 모든 회원 조회
+     * @param page 조회할 페이지
+     * @param size  페이지 사이즈
+     */
     @GetMapping("/users")
     @Operation(summary = "관리자의 회원 조회", description = "모든 회원 정보")
     public ResponseEntity<Page<AdminDTO>> getAllUsers(
@@ -34,6 +39,12 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    /**
+     * 회원 정보 수정
+     * @param userid 수정할 회원의 ID
+     * @param adminUpdateUserDTO 수정할 회원 정보
+     * @return 수정된 회원의 정보
+     */
     @PutMapping("/users/{userid}")
     @Operation(summary = "관리자의 회원 수정", description = "회원 정보 수정")
     public ResponseEntity<AdminDTO> updateUser(
@@ -43,7 +54,10 @@ public class AdminController {
         return ResponseEntity.ok(user);
 
     }
-
+    /**
+     * 회원 삭제
+     * @param userid 삭제할 회원의 ID
+     */
     @DeleteMapping("/{userid}")
     @Operation(summary = "관리자의 회원 삭제", description = "회원 정보 삭제")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userid){

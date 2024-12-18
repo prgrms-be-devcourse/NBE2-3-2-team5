@@ -19,10 +19,14 @@ public class AdminCommunityPostController {
         this.adminCommunityPostService = adminCommunityPostService;
     }
 
+    /**
+     * 특정 게시글 삭제
+     * @param companionId 삭제할 게시글의 ID
+     */
     @DeleteMapping("/{companionId}")
     @Operation(summary = "관리자의 게시글 삭제", description = "특정 게시글을 삭제")
-    public ResponseEntity<Void> deletePost(@RequestParam Long postId) {
-        adminCommunityPostService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(@PathVariable Long companionId) {
+        adminCommunityPostService.deletePost(companionId);
         return ResponseEntity.noContent().build();
     }
 }

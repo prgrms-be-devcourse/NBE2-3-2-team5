@@ -11,9 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "community_posts")
-
-public class CommunityPosts {
+public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +31,7 @@ public class CommunityPosts {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "category", nullable = true)
+    @Column(name = "category")
     private Category category;
 
 
