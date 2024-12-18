@@ -1,7 +1,7 @@
-package com.example.festimo.admin.service;
+package com.example.festimo.domain.admin.service;
 
-import com.example.festimo.admin.entity.Users;
-import com.example.festimo.admin.dto.AdminUpdateUserDTO;
+import com.example.festimo.domain.admin.entity.Users;
+import com.example.festimo.domain.admin.dto.AdminUpdateUserDTO;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.example.festimo.admin.mapper.AdminMapper;
-import com.example.festimo.admin.dto.AdminDTO;
-import com.example.festimo.admin.repository.UserRepository;
+import com.example.festimo.domain.admin.mapper.AdminMapper;
+import com.example.festimo.domain.admin.dto.AdminDTO;
+import com.example.festimo.domain.admin.repository.UserRepository;
 
 @Service
 public class AdminService {

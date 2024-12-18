@@ -1,4 +1,4 @@
-package com.example.festimo.admin.entity;
+package com.example.festimo.domain.admin.entity;
 
 import java.time.LocalDateTime;
 

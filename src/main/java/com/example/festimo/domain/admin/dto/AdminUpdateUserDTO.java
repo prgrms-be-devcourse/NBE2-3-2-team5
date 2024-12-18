@@ -1,4 +1,4 @@
-package com.example.festimo.admin.dto;
+package com.example.festimo.domain.admin.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;

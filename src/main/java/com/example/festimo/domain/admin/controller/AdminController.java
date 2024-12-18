@@ -1,6 +1,6 @@
-package com.example.festimo.admin.controller;
+package com.example.festimo.domain.admin.controller;
 
-import com.example.festimo.admin.dto.AdminUpdateUserDTO;
+import com.example.festimo.domain.admin.dto.AdminUpdateUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -9,8 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.festimo.admin.dto.AdminDTO;
-import com.example.festimo.admin.service.AdminService;
+import com.example.festimo.domain.admin.dto.AdminDTO;
+import com.example.festimo.domain.admin.service.AdminService;
 
 
 @RestController

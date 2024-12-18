@@ -1,6 +1,6 @@
-package com.example.festimo.admin.controller;
+package com.example.festimo.domain.admin.controller;
 
-import com.example.festimo.admin.service.AdminCommunityPostService;
+import com.example.festimo.domain.admin.service.AdminCommunityPostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;

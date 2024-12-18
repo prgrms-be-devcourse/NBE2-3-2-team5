@@ -1,4 +1,4 @@
-package com.example.festimo.admin.dto;
+package com.example.festimo.domain.admin.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

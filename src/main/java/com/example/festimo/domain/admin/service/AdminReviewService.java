@@ -1,8 +1,8 @@
-package com.example.festimo.admin.service;
+package com.example.festimo.domain.admin.service;
 
-import com.example.festimo.admin.mapper.AdminReviewMapper;
-import com.example.festimo.admin.dto.AdminReviewDTO;
-import com.example.festimo.admin.repository.ReviewsRepository;
+import com.example.festimo.domain.admin.mapper.AdminReviewMapper;
+import com.example.festimo.domain.admin.dto.AdminReviewDTO;
+import com.example.festimo.domain.admin.repository.ReviewsRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;

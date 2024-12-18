@@ -1,6 +1,6 @@
-package com.example.festimo.admin.service;
+package com.example.festimo.domain.admin.service;
 
-import com.example.festimo.admin.repository.CommunityPostsRepository;
+import com.example.festimo.domain.admin.repository.CommunityPostsRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;

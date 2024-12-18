@@ -1,6 +1,6 @@
-package com.example.festimo.admin.repository;
+package com.example.festimo.domain.admin.repository;
 
-import com.example.festimo.admin.entity.Reviews;
+import com.example.festimo.domain.admin.entity.Reviews;
 
 import lombok.NonNull;
 

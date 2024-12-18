@@ -1,7 +1,7 @@
-package com.example.festimo.admin.controller;
+package com.example.festimo.domain.admin.controller;
 
-import com.example.festimo.admin.dto.AdminReviewDTO;
-import com.example.festimo.admin.service.AdminReviewService;
+import com.example.festimo.domain.admin.dto.AdminReviewDTO;
+import com.example.festimo.domain.admin.service.AdminReviewService;
 
 import io.swagger.v3.oas.annotations.Operation;
 
