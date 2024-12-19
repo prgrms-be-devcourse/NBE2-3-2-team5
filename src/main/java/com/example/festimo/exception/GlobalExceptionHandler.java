@@ -3,29 +3,54 @@ package com.example.festimo.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleGeneralException(Exception ex) {
-        // 로그 출력
-        ex.printStackTrace();
-        // 500 에러와 함께 예외 메시지 반환
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", errorCode.getStatus().value());
+        errorResponse.put("error", errorCode.getMessage());
+
+        return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        // 400 에러와 함께 메시지 반환
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+
+
+        // 첫 번째 필드 에러만 반환
+
+        FieldError fieldError = ex.getBindingResult().getFieldErrors().get(0);
+        errorResponse.put("error", fieldError.getDefaultMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<String> handleNullPointerException(NullPointerException ex) {
-        // 500 에러와 함께 메시지 반환
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Null value found: " + ex.getMessage());
+
+    @ExceptionHandler(NoContent.class)
+    public ResponseEntity<Map<String, Object>> handleNoContent(NoContent ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.OK.value());
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
+
     }
 }
+
