@@ -98,8 +98,28 @@ public class ApplicationService {
         Companions companions = new Companions(companionId, LocalDateTime.now());
         companionRepository.save(companions);
 
+    }
+
+    //리더의 신청 거절
+    public void rejectApplication(Long applicationId){
+
+        //신청 Id로 조회
+        Applications application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new CustomException(APPLICATION_NOT_FOUND));
+
+
+        //리더인지 확인 -->로그인 하고 나서
+
+
+        //상태 바꾸기
+        if (!application.getStatus().equals(Applications.Status.PENDING)) {
+            throw new CustomException(INVALID_APPLICATION_STATUS);
+        }
+        application.setStatus(Applications.Status.REJECTED);
+        applicationRepository.save(application);
 
     }
+
 
 
 

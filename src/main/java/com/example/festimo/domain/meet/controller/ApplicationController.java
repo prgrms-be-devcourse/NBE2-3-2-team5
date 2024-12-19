@@ -66,5 +66,12 @@ public class ApplicationController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/{applicationId}/reject")
+    @Operation(summary = "리더의 동행 신청 거절")
+    public ResponseEntity<Void> rejectApplication(@PathVariable Long applicationId){
+        applicationService.rejectApplication(applicationId);
+        return ResponseEntity.ok().build();
+    }
+
 
 }
