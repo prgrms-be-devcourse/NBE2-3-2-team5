@@ -3,6 +3,7 @@ package com.example.festimo.domain.meet.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,7 @@ public class Applications {
     private Long companyId;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Status status = Status.PENDING; // 기본값은 'PENDING'
 
     @Column(nullable = false)
@@ -32,9 +34,10 @@ public class Applications {
         this.companyId = companyId;
     }
 
+
     public enum Status {
         PENDING,
-        APPROVED,
+        ACCEPTED,
         REJECTED
     }
 

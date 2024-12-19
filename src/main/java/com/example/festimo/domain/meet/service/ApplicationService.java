@@ -2,6 +2,8 @@ package com.example.festimo.domain.meet.service;
 
 import org.springframework.stereotype.Service;
 
+import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
+import com.example.festimo.domain.meet.mapper.LeaderApplicationMapper;
 import com.example.festimo.domain.meet.dto.ApplicationResponse;
 import com.example.festimo.domain.meet.entity.Applications;
 import com.example.festimo.domain.meet.mapper.ApplicationMapper;
@@ -10,6 +12,8 @@ import com.example.festimo.domain.meet.repository.CompanyRepository;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 
+
+import java.util.List;
 
 import static com.example.festimo.exception.ErrorCode.*;
 
@@ -51,5 +55,11 @@ public class ApplicationService {
         application = applicationRepository.save(application);
 
         return ApplicationMapper.INSTANCE.toDto(application);
+    }
+
+    //신청리스트 확인
+    public List<LeaderApplicationResponse> getAllApplications(Long companyId){
+       List<Applications> applications = applicationRepository.findByCompanyId(companyId);
+       return LeaderApplicationMapper.INSTANCE.toDtoList(applications);
     }
 }

@@ -1,27 +1,25 @@
 package com.example.festimo.domain.meet.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
+import java.util.List;
 
-import com.example.festimo.domain.meet.dto.ApplicationResponse;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
+
+import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
 import com.example.festimo.domain.meet.entity.Applications;
 
+
 @Mapper
-public interface ApplicationMapper {
+public interface LeaderApplicationMapper {
 
-    // Mapper 인스턴스 생성
-    ApplicationMapper INSTANCE= Mappers.getMapper(ApplicationMapper.class);
+    LeaderApplicationMapper INSTANCE = Mappers.getMapper(LeaderApplicationMapper.class);
 
-    // Entity → DTO 매핑
     @Mapping(source = "applicationId", target = "applicationId")
     @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "companyId", target = "companyId")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "appliedDate", target = "appliedDate")
-    ApplicationResponse toDto(Applications application);
+    LeaderApplicationResponse toDto(Applications application);
 
+    List<LeaderApplicationResponse> toDtoList(List<Applications> applications);
 }
-
-
-
