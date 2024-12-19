@@ -1,5 +1,6 @@
 package com.example.festimo.exception;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
         ErrorCode errorCode = ex.getErrorCode();
@@ -31,11 +33,15 @@ public class GlobalExceptionHandler {
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
 
+
+        // 첫 번째 필드 에러만 반환
+
         FieldError fieldError = ex.getBindingResult().getFieldErrors().get(0);
         errorResponse.put("error", fieldError.getDefaultMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
 
     @ExceptionHandler(NoContent.class)
     public ResponseEntity<Map<String, Object>> handleNoContent(NoContent ex) {
@@ -46,3 +52,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
     }
 }
+
