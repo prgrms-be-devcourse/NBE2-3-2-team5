@@ -16,6 +16,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,6 +173,46 @@ public class FestivalService {
         FestivalTO to = modelMapper.map(festival, FestivalTO.class);
 
         return to;
+    }
+
+    public List<FestivalTO> search(String keyword) {
+        List<Festival> festivalList = festivalRepository.findByTitleContainingIgnoreCase(keyword);
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<FestivalTO> list = festivalList.stream()
+                .map(p -> modelMapper.map(p, FestivalTO.class))
+                .collect(Collectors.toList());
+        return list;
+    }
+
+    public List<FestivalTO> filterByMonth(int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<FestivalTO> list = festivalRepository.findAll().stream()
+                .filter(festival -> isFestivalInMonth(festival, firstDayOfMonth, lastDayOfMonth))
+                .map(festival -> modelMapper.map(festival, FestivalTO.class))
+                .collect(Collectors.toList());
+        return list;
+    }
+
+    private boolean isFestivalInMonth(Festival festival, LocalDate firstDayOfMonth, LocalDate lastDayOfMonth) {
+        LocalDate startDate = festival.getStartDate();
+        LocalDate endDate = festival.getEndDate();
+
+        return !startDate.isAfter(lastDayOfMonth) && !endDate.isBefore(firstDayOfMonth);
+    }
+
+    public List<FestivalTO> filterByRegion(String region) {
+        List<Festival> festivals = festivalRepository.findByAddressContainingIgnoreCase(region);
+
+        ModelMapper modelMapper = new ModelMapper();
+        List<FestivalTO> list = festivals.stream()
+                .map(festival -> modelMapper.map(festival, FestivalTO.class))
+                .collect(Collectors.toList());
+        return list;
     }
 }
 

@@ -5,9 +5,7 @@ import com.example.festimo.domain.festival.repository.FestivalRepository;
 import com.example.festimo.domain.festival.service.FestivalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class FestivalController {
     @Autowired
     private FestivalService festivalService;
 
-    @RequestMapping("/api/events")
+    @GetMapping("/api/events")
     public String getAllEvents() {
         // schedule이 아닌 수동으로 확인할 때
         // festivalService.refreshEvents();
@@ -30,10 +28,26 @@ public class FestivalController {
         return "getAllFestivals";
     }
 
-    @RequestMapping("/api/events/{eventId}")
+    @GetMapping("/api/events/{eventId}")
     public String getEvent(@PathVariable Integer eventId) {
         FestivalTO to = festivalService.findById(eventId);
         return to.toString();
     }
 
+    @GetMapping("/api/events/search")
+    public List<FestivalTO> search(@RequestParam String keyword) {
+        return festivalService.search(keyword);
+    }
+
+    @GetMapping("/api/events/filter/month")
+    public List<FestivalTO> filterByMonth(
+            @RequestParam int year,
+            @RequestParam int month) {
+        return festivalService.filterByMonth(year, month);
+    }
+
+    @GetMapping("/api/events/filter/region")
+    public List<FestivalTO> filterByRegion(@RequestParam String region) {
+        return festivalService.filterByRegion(region);
+    }
 }
