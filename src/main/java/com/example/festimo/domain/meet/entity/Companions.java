@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,7 +20,6 @@ public class Companions {
     private CompanionId id;
 
     @Column(nullable = false)
-    private LocalDateTime joinDate;
-
+    private LocalDateTime joinedDate;
 
 }

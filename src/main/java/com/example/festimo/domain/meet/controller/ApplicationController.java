@@ -15,7 +15,7 @@ import com.example.festimo.domain.meet.service.ApplicationService;
 import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
 
 @RestController
-@RequestMapping("/applications")
+@RequestMapping("/api/meet")
 @Tag(name = "동행 API", description ="동행 관련 API")
 public class ApplicationController {
 
@@ -31,7 +31,7 @@ public class ApplicationController {
      * @param request - 사용자의 userId와 companyId를 포함하는 ApplicationRequest 객체
      * @return  생성된 신청 정보를 반환, HTTP 상태 코드는 CREATED(201)
      */
-    @PostMapping
+    @PostMapping("/applications")
     @Operation(summary= "동행 신청")
     public ResponseEntity<ApplicationResponse> apply (
             @RequestBody ApplicationRequest request) {
@@ -54,4 +54,17 @@ public class ApplicationController {
         List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companyId);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
+
+    /**
+     * 리더의 동행 신청 승인 API
+     * @param applicationId - 승인하고 싶은 신청 ID
+     */
+    @PostMapping("/{applicationId}/accept")
+    @Operation(summary = "리더의 동행 신청 승인")
+    public ResponseEntity<Void> acceptApplication(@PathVariable Long applicationId){
+        applicationService.acceptApplication(applicationId);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

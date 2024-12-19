@@ -15,18 +15,18 @@ import lombok.Setter;
 public class CompanionId implements Serializable {
 
     private Long userId;
-    private Long companionId;
+    private Long companyId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CompanionId that = (CompanionId) o;
-        return Objects.equals(userId, that.userId) && Objects.equals(companionId, that.companionId);
+        return Objects.equals(userId, that.userId) && Objects.equals(companyId, that.companyId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId, companionId);
+        return Objects.hash(userId, companyId);
     }
 }
