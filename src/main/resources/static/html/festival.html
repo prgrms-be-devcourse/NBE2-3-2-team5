@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventory</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../css/festival.css">
+    <!-- <script href="../js/festival.js" defer></script> -->
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo">
+            <img src="../imgs/eventoryLogo.jpg" alt="Eventory Logo">
+        </a>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">Mypage</a>
+            <a href="#">Festival</a>
+            <a href="#">Community</a>
+            <a href="#">Login</a>
+            <a href="#" class="get-started">Get started</a>
+        </nav>
+    </header>
+
+    <div class="search-container">
+        <div class="search-bar-wrapper">
+            <input type="text" class="search-bar" placeholder="검색어를 입력하세요">
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        
+        <div class="filter-buttons">
+            <button class="filter-btn active" onclick="showMonths()">날짜별</button>
+            <button class="filter-btn" onclick="showRegions()">지역별</button>
+        </div>
+
+        <div class="navigation-options" id="monthOptions">
+            <span>1월</span>
+            <span>2월</span>
+            <span>3월</span>
+            <span>4월</span>
+            <span>5월</span>
+            <span>6월</span>
+            <span>7월</span>
+            <span>8월</span>
+            <span>9월</span>
+            <span>10월</span>
+            <span>11월</span>
+            <span>12월</span>
+        </div>
+
+        <div class="region-options" id="regionOptions">
+            <span>서울</span>
+            <span>경기</span>
+            <span>인천</span>
+            <span>강원</span>
+            <span>대전</span>
+            <span>충북</span>
+            <span>충남</span>
+            <span>세종</span>
+            <span>부산</span>
+            <span>울산</span>
+            <span>대구</span>
+            <span>경북</span>
+            <span>경남</span>
+            <span>전북</span>
+            <span>전남</span>
+            <span>광주</span>
+            <span>제주</span>
+        </div>
+    </div>
+
+    <div class="event-grid">
+        <div class="event-card">
+            <div class="event-badge">진행중</div>
+            <div class="event-image">
+                <img src="/api/placeholder/280/200" alt="Event image">
+            </div>
+            <div class="event-info">
+                <h3 class="event-title">구미선진 페스티벌</h3>
+                <a href="#" class="learn-more">Learn more →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination">
+        <a href="#" class="page-number">&lt</a>
+        <a href="#" class="page-number active">1</a>
+        <a href="#" class="page-number">2</a>
+        <a href="#" class="page-number">3</a>
+        <a href="#" class="page-number">4</a>
+        <a href="#" class="page-number">5</a>
+        <a href="#" class="page-number">6</a>
+        <a href="#" class="page-number">7</a>
+        <a href="#" class="page-number">8</a>
+        <a href="#" class="page-number">9</a>
+        <a href="#" class="page-number">10</a>
+        <a href="#" class="page-number">&gt</a>
+    </div>
+    <script>
+        function showMonths() {
+            document.getElementById('monthOptions').style.display = 'flex';
+            document.getElementById('regionOptions').style.display = 'none';
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function showRegions() {
+            document.getElementById('monthOptions').style.display = 'none';
+            document.getElementById('regionOptions').style.display = 'flex';
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('monthOptions').style.display = 'flex';
+            document.getElementById('regionOptions').style.display = 'none';
+        });
+    </script>
+</body>
+</html>

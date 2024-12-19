@@ -33,7 +33,9 @@ public class GlobalExceptionHandler {
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
 
+
         // 첫 번째 필드 에러만 반환
+
         FieldError fieldError = ex.getBindingResult().getFieldErrors().get(0);
         errorResponse.put("error", fieldError.getDefaultMessage());
 
@@ -41,5 +43,13 @@ public class GlobalExceptionHandler {
     }
 
 
-
+    @ExceptionHandler(NoContent.class)
+    public ResponseEntity<Map<String, Object>> handleNoContent(NoContent ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.OK.value());
+        errorResponse.put("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
+    }
 }
+
