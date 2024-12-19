@@ -1,12 +1,18 @@
 package com.example.festimo.domain.user.repository;
 
-import com.example.festimo.domain.user.entity.Users;
-import lombok.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
+import com.example.festimo.domain.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<Users,Long> {
-    @NonNull
-    Page<Users> findAll(@NonNull Pageable pageable);
-}
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByNickname(String nickname);
+
+    Optional<User> findByRefreshToken(String refreshToken);
+
+

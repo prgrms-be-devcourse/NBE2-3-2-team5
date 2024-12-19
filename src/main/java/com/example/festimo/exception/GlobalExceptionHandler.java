@@ -50,6 +50,7 @@ public class GlobalExceptionHandler {
         errorResponse.put("status", HttpStatus.OK.value());
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
+
     }
 }
 
