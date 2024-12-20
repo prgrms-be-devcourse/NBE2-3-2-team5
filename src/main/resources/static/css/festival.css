@@ -126,6 +126,10 @@ body {
     color: #505199;
 }
 
+.navigation-options .active{
+    color: #505199;
+}
+
 .region-options {
     display: none;
     flex-wrap: wrap;
@@ -140,6 +144,10 @@ body {
 }
 
 .region-options span:hover {
+    color: #505199;
+}
+
+.region-options .active{
     color: #505199;
 }
 
