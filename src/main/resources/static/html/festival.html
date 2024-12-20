@@ -77,16 +77,6 @@
     </div>
 
     <div id="eventgrid">
-<!--        <div class="event-card">-->
-<!--            <div class="event-badge">진행중</div>-->
-<!--            <div class="event-image">-->
-<!--                <img src="/api/placeholder/280/200" alt="Event image">-->
-<!--            </div>-->
-<!--            <div class="event-info">-->
-<!--                <h3 class="event-title">구미선진 페스티벌</h3>-->
-<!--                <a href="#" class="learn-more">Learn more →</a>-->
-<!--            </div>-->
-<!--        </div>-->
     </div>
 
     <div class="pagination">
@@ -146,6 +136,18 @@
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
+
+        // 지역 클릭 이벤트 처리
+        document.getElementById('regionOptions').onclick = function (event) {
+            const target = event.target;
+            if (target.tagName === 'SPAN') {
+                const selectedRegion = target.textContent.trim();
+                console.log(`Selected Region: ${selectedRegion}`);
+                document.querySelectorAll('#regionOptions span').forEach(span => span.classList.remove('active'));
+                target.classList.add('active');
+                filterEventsByRegion(selectedRegion); // 지역별 필터링
+            }
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('yearOptions').style.display = 'flex';
