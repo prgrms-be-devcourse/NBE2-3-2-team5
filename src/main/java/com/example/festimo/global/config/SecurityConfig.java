@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
+                        "/api-docs/**",
                         "/swagger-ui.html"
                 ).permitAll()
                 .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"

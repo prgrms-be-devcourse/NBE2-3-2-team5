@@ -9,4 +9,6 @@ import com.example.festimo.domain.meet.entity.Companions;
 @Repository
 public interface CompanionRepository extends JpaRepository<Companions, CompanionId> {
 
+    boolean existsById(CompanionId companionId);  // 참가 여부 확인
+
 }

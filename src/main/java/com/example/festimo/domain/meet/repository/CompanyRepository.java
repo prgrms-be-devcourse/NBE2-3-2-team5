@@ -10,8 +10,8 @@ import java.util.Optional;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<Companies, Long> {
-    Optional<Companies> findByCompanyId(Long CompanyId);
 
+    // 동행의 리더 찾기
     @Query("SELECT c.leaderId FROM Companies c WHERE c.companyId = :companyId")
     Optional<Long> findLeaderIdByCompanyId( Long companyId);
 

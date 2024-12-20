@@ -22,11 +22,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 인증 제외 경로 처리
         String requestPath = request.getRequestURI();
-        if (requestPath.startsWith("/swagger-ui") || requestPath.startsWith("/v3/api-docs") ||
-                requestPath.startsWith("/api/register") || requestPath.startsWith("/api/login")) {
-            chain.doFilter(request, response);
-            return;
-        }
+        if (requestPath.startsWith("/swagger-ui") || requestPath.startsWith("/v3/api-docs") || requestPath.equals("/api-docs") || requestPath.startsWith("/api/register") || requestPath.startsWith("/api/login")) {
+            System.out.println("Excluding path from authentication: " + requestPath); chain.doFilter(request, response);
+            return;}
 
 
         String token = jwtTokenProvider.resolveToken(request);
