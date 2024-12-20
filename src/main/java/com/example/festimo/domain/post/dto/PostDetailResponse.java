@@ -25,5 +25,7 @@ public class PostDetailResponse {
     private int views;
     private String createdAt;
     private String updatedAt;
+    private boolean isOwner;
+    private boolean isAdmin;
     private List<CommentResponse> comments = new ArrayList<>();
 }
