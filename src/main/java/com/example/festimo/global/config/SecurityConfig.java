@@ -20,7 +20,6 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final AccessDeniedHandler customAccessDeniedHandler;
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -38,6 +37,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
+                                "/api-docs/**",
                         ).permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll()

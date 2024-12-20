@@ -36,7 +36,6 @@ public class Applications {
         this.companyId = companyId;
     }
 
-
     public enum Status {
         PENDING,
         ACCEPTED,
