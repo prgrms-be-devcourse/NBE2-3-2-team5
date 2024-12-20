@@ -122,10 +122,11 @@
             const target = event.target;
             if (target.tagName === 'SPAN') {
                 const selectedMonth = target.textContent.trim().replace('월', '');
-                document.querySelectorAll('#MonthOptions span').forEach(span => span.classList.remove('active'));
                 console.log(`Selected Month: ${selectedMonth}`);
                 const selectedYear = document.querySelector('#yearOptions .active')?.textContent || '2023'; // 선택된 연도
                 filterEventsByDate(selectedYear, selectedMonth); // 연도와 월 필터링
+                document.querySelectorAll('#monthOptions span').forEach(span => span.classList.remove('active'));
+                target.classList.add('active');
             }
         };
 
