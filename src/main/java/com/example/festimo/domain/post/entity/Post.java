@@ -1,16 +1,15 @@
 package com.example.festimo.domain.post.entity;
 
 import com.example.festimo.domain.post.BaseTimeEntity;
+import com.example.festimo.domain.user.domain.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -39,6 +38,10 @@ public class Post extends BaseTimeEntity {
 
     @Builder.Default
     private int views = 0;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @OrderBy("sequence asc")

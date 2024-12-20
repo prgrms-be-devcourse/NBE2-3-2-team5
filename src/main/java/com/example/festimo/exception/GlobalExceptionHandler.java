@@ -4,8 +4,10 @@ package com.example.festimo.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
@@ -33,15 +35,12 @@ public class GlobalExceptionHandler {
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
 
-
         // 첫 번째 필드 에러만 반환
-
         FieldError fieldError = ex.getBindingResult().getFieldErrors().get(0);
         errorResponse.put("error", fieldError.getDefaultMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
-
 
     @ExceptionHandler(NoContent.class)
     public ResponseEntity<Map<String, Object>> handleNoContent(NoContent ex) {
@@ -50,7 +49,16 @@ public class GlobalExceptionHandler {
         errorResponse.put("status", HttpStatus.OK.value());
         errorResponse.put("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
+    }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.FORBIDDEN.value());
+        errorResponse.put("error", "회원만 사용할 수 있는 기능입니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 }
 

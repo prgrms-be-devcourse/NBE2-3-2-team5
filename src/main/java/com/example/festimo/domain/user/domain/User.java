@@ -60,7 +60,8 @@ public class User {
     private LocalDateTime modifiedDate;
 
     @Column(name = "rating_avg", nullable = false)
-    private Float ratingAvg;
+    @Builder.Default
+    private Float ratingAvg = 0.0f;
 
     // Enum Classes
     public enum Gender {

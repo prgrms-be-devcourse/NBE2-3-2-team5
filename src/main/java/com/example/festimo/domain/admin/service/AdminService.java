@@ -1,7 +1,7 @@
 package com.example.festimo.domain.admin.service;
 
 import com.example.festimo.domain.admin.dto.AdminUpdateUserDTO;
-import com.example.festimo.domain.user.entity.Users;
+import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
@@ -36,17 +36,17 @@ public class AdminService {
     public AdminDTO updateUser(Long userId, AdminUpdateUserDTO dto) {
 
         //유저가 존재하는지 확인
-        Users user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() ->new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //업데이트
         user.setUserName(dto.getUserName());
         user.setNickname(dto.getNickname());
         user.setEmail(dto.getEmail());
-        user.setGender(Users.Gender.valueOf(dto.getGender()));
+        user.setGender(User.Gender.valueOf(dto.getGender()));
         user.setRatingAvg(dto.getRatingAvg());
 
-        Users updatedUser = userRepository.save(user);
+        User updatedUser = userRepository.save(user);
 
         return AdminMapper.INSTANCE.toDto(updatedUser);
 
@@ -56,7 +56,7 @@ public class AdminService {
     public void deleteUser(Long userId) {
 
         //유저가 존재하는지 확인
-        Users user = userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(()->new CustomException(ErrorCode.USER_NOT_FOUND));
 
         userRepository.delete(user);
