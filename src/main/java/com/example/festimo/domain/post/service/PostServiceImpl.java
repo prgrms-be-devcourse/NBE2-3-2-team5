@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Validated
@@ -40,7 +41,9 @@ public class PostServiceImpl implements PostService {
     public PostListResponse createPost(@Valid PostRequest request, Authentication authentication) {
         validateAuthentication(authentication);
 
+        System.out.println("Authentication email: " + authentication.getName());
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
+        System.out.println("Found User: " + user.getEmail());
 
         Post post = modelMapper.map(request, Post.class);
         post.setUser(user);
@@ -113,6 +116,10 @@ public class PostServiceImpl implements PostService {
             throw new InvalidPasswordException();
         }
 
+        if (request.getTitle() == null && request.getContent() == null && request.getCategory() == null) {
+            throw new IllegalArgumentException("수정할 필드가 없습니다.");
+        }
+
         String newTitle = request.getTitle() != null ? request.getTitle() : post.getTitle();
         String newContent = request.getContent() != null ? request.getContent() : post.getContent();
         PostCategory newCategory = request.getCategory() != null ? request.getCategory() : post.getCategory();
@@ -143,9 +150,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public CommentResponse createComment(Long postId, @Valid CommentRequest request, Authentication authentication) {
+        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
+
         validateAuthentication(authentication);
 
-        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
 
         Integer maxSequence = commentRepository.findMaxSequenceByPost(post);
@@ -191,8 +199,18 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public void deleteComment(Long postId, Integer sequence, Authentication authentication) {
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFound();
+        }
+
         Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence).orElseThrow(CommentNotFound::new);
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
+
+        // 인증된 사용자 조회
+        Optional<User> optionalUser = userRepository.findByEmail(authentication.getName());
+        if (optionalUser.isEmpty()) {
+            throw new UnauthorizedException();
+        }
+        User user = optionalUser.get();
 
         if (!comment.getNickname().equals(user.getNickname()) && !user.getRole().equals(User.Role.ADMIN)) {
             throw new CommentDeleteAuthorizationException();

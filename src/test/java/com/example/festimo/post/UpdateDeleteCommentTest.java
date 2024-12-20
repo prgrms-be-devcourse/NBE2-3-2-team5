@@ -5,93 +5,145 @@ import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.repository.CommentRepository;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.domain.post.service.PostServiceImpl;
+import com.example.festimo.domain.user.domain.User;
+import com.example.festimo.domain.user.repository.UserRepository;
+import com.example.festimo.exception.CommentDeleteAuthorizationException;
 import com.example.festimo.exception.CommentNotFound;
 import com.example.festimo.exception.PostNotFound;
+import com.example.festimo.exception.UnauthorizedException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+@SpringBootTest
+@Transactional
+public class UpdateDeleteCommentTest {
 
-@ExtendWith(MockitoExtension.class)
-class UpdateDeleteCommentTest {
-
-    @Mock
-    private CommentRepository commentRepository;
-
-    @Mock
+    @Autowired
     private PostRepository postRepository;
 
-    @InjectMocks
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private PostServiceImpl postService;
 
-    @Test
-    @DisplayName("댓글이 존재하면 삭제")
-    void deleteComment_Success() {
-        // Given
-        Long postId = 1L;
-        Integer sequence = 1;
+    private Post savedPost;
+    private Comment savedComment;
+    private Authentication authentication;
 
-        Post post = mock(Post.class);
-        Comment comment = Comment.builder()
-                .id(1L)
-                .sequence(sequence)
-                .post(post)
-                .comment("Test comment")
-                .nickname("hayeon")
+    @BeforeEach
+    void setUp() {
+        commentRepository.deleteAll();
+        postRepository.deleteAll();
+        userRepository.deleteAll();
+
+        User user = User.builder()
+                .userName("user")
+                .email("example@example.com")
+                .nickname("nickname")
+                .password("password1234")
+                .role(User.Role.USER)
                 .build();
+        userRepository.save(user);
 
-        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(commentRepository.findByPostIdAndSequence(postId, sequence))
-                .thenReturn(Optional.of(comment));
+        // 게시글 저장
+        savedPost = Post.builder()
+                .title("테스트 제목")
+                .writer("테스트 작성자")
+                .mail("example@example.com")
+                .password("1234")
+                .content("테스트 내용")
+                .build();
+        postRepository.save(savedPost);
 
+        // 댓글 저장
+        savedComment = Comment.builder()
+                .post(savedPost)
+                .nickname("nickname")
+                .comment("테스트 댓글")
+                .sequence(1)
+                .build();
+        commentRepository.save(savedComment);
+
+        userRepository.save(User.builder()
+                .userName("user2")
+                .email("other@example.com")
+                .nickname("otherUser")
+                .role(User.Role.USER)
+                .build());
+
+        // 인증 객체 생성
+        authentication = new TestingAuthenticationToken(user.getEmail(), null, "ROLE_USER");
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 성공")
+    void testDeleteComment_Success() {
         // When
-        postService.deleteComment(postId, sequence);
+        postService.deleteComment(savedPost.getId(), savedComment.getSequence(), authentication);
 
         // Then
-        verify(commentRepository, times(1)).delete(comment);
+        assertFalse(commentRepository.findById(savedComment.getId()).isPresent());
     }
 
     @Test
-    @DisplayName(" 존재하지 않는 게시글")
-    void deleteComment_Fail_PostNotFound() {
-        // Given
-        Long postId = 1L;
-        Integer sequence = 1;
-
-        when(postRepository.findById(postId)).thenReturn(Optional.empty());
+    @DisplayName("본인이 아닌 사용자에 의한 댓글 삭제 실패")
+    void testDeleteComment_Unauthorized() {
+        // Given: 다른 사용자를 인증 객체로 설정
+        Authentication otherAuthentication = new TestingAuthenticationToken("other@example.com", null, "ROLE_USER");
 
         // When & Then
-        assertThatThrownBy(() -> postService.deleteComment(postId, sequence))
-                .isInstanceOf(PostNotFound.class)
-                .hasMessageContaining("게시글을 찾을 수 없습니다.");
-
-        verify(commentRepository, never()).delete(any());
+        assertThrows(CommentDeleteAuthorizationException.class, () -> {
+            postService.deleteComment(savedPost.getId(), savedComment.getSequence(), otherAuthentication);
+        });
     }
 
     @Test
-    @DisplayName("존재하지 않는 댓글")
-    void deleteComment_Fail_CommentNotFound() {
-        // Given
-        Long postId = 1L;
-        Integer sequence = 1;
-
-        Post post = mock(Post.class);
-
-        when(postRepository.findById(postId)).thenReturn(Optional.of(post));
-        when(commentRepository.findByPostIdAndSequence(postId, sequence)).thenReturn(Optional.empty());
+    @DisplayName("존재하지 않는 댓글 삭제 실패")
+    void testDeleteComment_CommentNotFound() {
+        // Given: 잘못된 댓글 시퀀스
+        int invalidSequence = 999;
 
         // When & Then
-        assertThatThrownBy(() -> postService.deleteComment(postId, sequence))
-                .isInstanceOf(CommentNotFound.class)
-                .hasMessageContaining("댓글을 찾을 수 없습니다.");
+        assertThrows(CommentNotFound.class, () -> {
+            postService.deleteComment(savedPost.getId(), invalidSequence, authentication);
+        });
+    }
 
-        verify(commentRepository, never()).delete(any());
+    @Test
+    @DisplayName("존재하지 않는 게시글에 댓글 삭제 실패")
+    void testDeleteComment_PostNotFound() {
+        // Given: 잘못된 게시글 ID
+        Long invalidPostId = -1L;
+
+        // When & Then
+        assertThrows(PostNotFound.class, () -> {
+            postService.deleteComment(invalidPostId, savedComment.getSequence(), authentication);
+        });
+    }
+
+    @Test
+    @DisplayName("비로그인 사용자의 댓글 삭제 실패")
+    void testDeleteComment_Unauthorized2() {
+        // Given: 인증되지 않은 사용자 (null authentication)
+        Authentication unauthenticated = new TestingAuthenticationToken(null, null);
+
+        // When & Then
+        assertThrows(UnauthorizedException.class, () -> {
+            postService.deleteComment(savedPost.getId(), savedComment.getSequence(), unauthenticated);
+        });
     }
 }
