@@ -2,6 +2,7 @@ package com.example.festimo.domain.admin.service;
 
 import com.example.festimo.domain.admin.dto.AdminUpdateUserDTO;
 import com.example.festimo.domain.user.domain.User;
+
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
