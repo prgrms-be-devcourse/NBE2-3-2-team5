@@ -40,8 +40,8 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")// 권한 기반 접근 제어 관리자만 사용 가능
-                .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
-                .and();
+                .anyRequest().authenticated();    // 나머지는 로그인한 사용자만
+//                .and();
 //                .oauth2Login()
 //                .defaultSuccessUrl("/api/oauth2/success");
 
