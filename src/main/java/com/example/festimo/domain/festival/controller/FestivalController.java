@@ -64,6 +64,7 @@ public class FestivalController {
         return festivalService.filterByMonth(year, month);
     }
 
+    @ResponseBody
     @GetMapping("/api/events/filter/region")
     public List<FestivalTO> filterByRegion(@RequestParam String region) {
         return festivalService.filterByRegion(region);
