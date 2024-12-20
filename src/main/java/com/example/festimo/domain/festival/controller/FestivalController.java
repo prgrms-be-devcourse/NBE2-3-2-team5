@@ -45,6 +45,7 @@ public class FestivalController {
         return to.toString();
     }
 
+    @ResponseBody
     @GetMapping("/api/events/search")
     public List<FestivalTO> search(@RequestParam String keyword) {
         return festivalService.search(keyword);
