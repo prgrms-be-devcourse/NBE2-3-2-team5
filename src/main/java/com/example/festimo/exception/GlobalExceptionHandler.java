@@ -50,5 +50,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.OK).body(errorResponse);
     }
 
-
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Map<String, Object>> handleUnauthorizedException(UnauthorizedException ex) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.FORBIDDEN.value());
+        errorResponse.put("error", "회원만 사용할 수 있는 기능입니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
 }
