@@ -30,8 +30,14 @@
         </div>
         
         <div class="filter-buttons">
-            <button class="filter-btn active" onclick="showMonths()">날짜별</button>
+            <button class="filter-btn active" onclick="showDateFilter()">날짜별</button>
             <button class="filter-btn" onclick="showRegions()">지역별</button>
+        </div>
+
+        <div class="navigation-options" id="yearOptions">
+            <span>2023</span>
+            <span>2024</span>
+            <span>2025</span>
         </div>
 
         <div class="navigation-options" id="monthOptions">
@@ -98,14 +104,43 @@
         <a href="#" class="page-number">&gt</a>
     </div>
     <script>
-        function showMonths() {
+        function showDateFilter() {
+            // 연도와 월을 표시
+            document.getElementById('yearOptions').style.display = 'flex';
             document.getElementById('monthOptions').style.display = 'flex';
             document.getElementById('regionOptions').style.display = 'none';
+
+            // 버튼 활성화 상태 조정
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
         }
 
+        // 연도 클릭 이벤트 처리
+        document.getElementById('yearOptions').onclick = function (event) {
+            const target = event.target;
+            if (target.tagName === 'SPAN') {
+                const selectedYear = target.textContent.trim();
+                console.log(`Selected Year: ${selectedYear}`);
+                // 클릭된 연도에 활성화 클래스 추가
+                document.querySelectorAll('#yearOptions span').forEach(span => span.classList.remove('active'));
+                target.classList.add('active');
+            }
+        };
+
+        // 월 클릭 이벤트 처리
+        document.getElementById('monthOptions').onclick = function (event) {
+            const target = event.target;
+            if (target.tagName === 'SPAN') {
+                const selectedMonth = target.textContent.trim().replace('월', '');
+                document.querySelectorAll('#MonthOptions span').forEach(span => span.classList.remove('active'));
+                console.log(`Selected Month: ${selectedMonth}`);
+                const selectedYear = document.querySelector('#yearOptions .active')?.textContent || '2023'; // 선택된 연도
+                filterEventsByDate(selectedYear, selectedMonth); // 연도와 월 필터링
+            }
+        };
+
         function showRegions() {
+            document.getElementById('yearOptions').style.display = 'none';
             document.getElementById('monthOptions').style.display = 'none';
             document.getElementById('regionOptions').style.display = 'flex';
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -113,6 +148,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('yearOptions').style.display = 'flex';
             document.getElementById('monthOptions').style.display = 'flex';
             document.getElementById('regionOptions').style.display = 'none';
         });
