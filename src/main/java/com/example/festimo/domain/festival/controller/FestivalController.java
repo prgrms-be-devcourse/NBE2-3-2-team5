@@ -56,6 +56,7 @@ public class FestivalController {
         return festivalService.search(keyword);
     }
 
+    @ResponseBody
     @GetMapping("/api/events/filter/month")
     public List<FestivalTO> filterByMonth(
             @RequestParam int year,
