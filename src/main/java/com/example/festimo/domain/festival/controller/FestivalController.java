@@ -5,19 +5,30 @@ import com.example.festimo.domain.festival.repository.FestivalRepository;
 import com.example.festimo.domain.festival.service.FestivalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RequiredArgsConstructor
-@RestController
+@Controller
 public class FestivalController {
+
+    @Value("${KAKAO_MAP_API_KEY}")
+    private String KAKAO_MAP_API_KEY;
+
+    @GetMapping("/api/map-key")
+    public String getApiKey() {
+        return KAKAO_MAP_API_KEY;
+    }
+
 
     @Autowired
     private FestivalService festivalService;
 
     @GetMapping("/api/events")
-    public String getAllEvents() {
+    public List<FestivalTO> getAllEvents() {
         // schedule이 아닌 수동으로 확인할 때
         // festivalService.refreshEvents();
 
@@ -50,5 +61,4 @@ public class FestivalController {
     public List<FestivalTO> filterByRegion(@RequestParam String region) {
         return festivalService.filterByRegion(region);
     }
-
 }
