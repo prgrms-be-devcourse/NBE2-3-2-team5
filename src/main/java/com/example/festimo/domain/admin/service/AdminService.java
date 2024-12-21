@@ -2,7 +2,6 @@ package com.example.festimo.domain.admin.service;
 
 import com.example.festimo.domain.admin.dto.AdminUpdateUserDTO;
 import com.example.festimo.domain.user.domain.User;
-
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
@@ -32,7 +31,6 @@ public class AdminService {
         return userRepository.findAll(pageable)
                 .map(AdminMapper.INSTANCE::toDto);
     }
-
 
     //회원 정보 수정
     public AdminDTO updateUser(Long userId, AdminUpdateUserDTO dto) {

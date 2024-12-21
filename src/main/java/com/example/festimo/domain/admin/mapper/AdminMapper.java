@@ -14,7 +14,7 @@ public interface AdminMapper {
     AdminMapper INSTANCE = Mappers.getMapper(AdminMapper.class);
 
     // Entity → DTO 매핑
-    @Mapping(source = "id", target = "userId") // User의 `id`를 AdminDTO의 `userId`로 매핑
+    @Mapping(source = "id", target = "userId")
     @Mapping(source = "userName", target = "userName")
     @Mapping(source = "nickname", target = "nickname")
     @Mapping(source = "email", target = "email")
