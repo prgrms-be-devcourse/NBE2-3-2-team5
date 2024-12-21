@@ -20,13 +20,13 @@ public class CompanionController {
         this.companionService = companionService;
     }
 
-    @DeleteMapping("/{companyId}/users/{userId}")
+    @DeleteMapping("/{companionId}/users/{userId}")
     @Operation(summary = "동행 취소")
     public ResponseEntity<Void>  deleteCompaion(
-            @PathVariable Long companyId,
+            @PathVariable Long companionId,
             @PathVariable Long userId
     ){
-        companionService.deleteCompaion(companyId, userId);
+        companionService.deleteCompaion(companionId, userId);
         return ResponseEntity.noContent().build();
     }
 }

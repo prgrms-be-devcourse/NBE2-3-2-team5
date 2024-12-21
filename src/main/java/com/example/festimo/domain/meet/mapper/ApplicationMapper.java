@@ -16,7 +16,7 @@ public interface ApplicationMapper {
     // Entity → DTO 매핑
     @Mapping(source = "applicationId", target = "applicationId")
     @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "companyId", target = "companyId")
+    @Mapping(source = "companionId", target = "companionId")
     @Mapping(source = "status", target = "status")
     @Mapping(source = "appliedDate", target = "appliedDate")
     ApplicationResponse toDto(Applications application);

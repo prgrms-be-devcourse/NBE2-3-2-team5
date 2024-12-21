@@ -16,7 +16,7 @@ import com.example.festimo.domain.meet.entity.Applications;
 public class ApplicationResponse {
     private Long applicationId;
     private Long userId;
-    private Long companyId;
+    private Long companionId;
     private Applications.Status status;
     private LocalDateTime appliedDate;
 }

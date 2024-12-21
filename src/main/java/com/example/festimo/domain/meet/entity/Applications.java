@@ -22,7 +22,7 @@ public class Applications {
     private Long userId;
 
     @Column( nullable = false)
-    private Long companyId;
+    private Long companionId;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -31,9 +31,9 @@ public class Applications {
     @Column(nullable = false)
     private LocalDateTime appliedDate = LocalDateTime.now();
 
-    public Applications(Long userId, Long companyId) {
+    public Applications(Long userId, Long companionId) {
         this.userId = userId;
-        this.companyId = companyId;
+        this.companionId = companionId;
     }
 
     public enum Status {
