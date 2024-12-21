@@ -35,7 +35,7 @@ public class ApplicationController {
     @Operation(summary = "동행 신청")
     public ResponseEntity<ApplicationResponse> apply(
             @RequestBody ApplicationRequest request) {
-        ApplicationResponse response = applicationService.createApplication(request.getUserId(), request.getCompanyId());
+        ApplicationResponse response = applicationService.createApplication(request.getUserId(), request.getCompanionId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

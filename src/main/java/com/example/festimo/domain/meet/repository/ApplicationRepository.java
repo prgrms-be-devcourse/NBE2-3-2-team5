@@ -9,10 +9,10 @@ import com.example.festimo.domain.meet.entity.Applications;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Applications, Long> {
-    boolean existsByUserIdAndCompanyId(Long userId, Long companyId);
+    boolean existsByUserIdAndCompanionId(Long userId, Long companionId);
 
     //특정 활동의 신청 리스트 조회
-    List<Applications> findByCompanyId(Long companyId);
+    List<Applications> findByCompanionId(Long companionId);
 
 
 }
