@@ -10,15 +10,16 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Getter
-public class Companies {
+@Table(name = "companion")
+public class Companion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long companyId;
+    private Long companionId;
 
     @Column(nullable = false)
     private Long leaderId;
 
     @Column(nullable = false)
-    private LocalDateTime companyDate;
+    private LocalDateTime companionDate;
 }

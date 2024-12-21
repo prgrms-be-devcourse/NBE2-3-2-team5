@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class LeaderApplicationRequest {
-    Long companyId;
+    Long companionId;
     Long LeaderId;
 }

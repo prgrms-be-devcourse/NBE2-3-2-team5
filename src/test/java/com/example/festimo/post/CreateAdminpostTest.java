@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
-public class CreatePostTest {
+public class CreateAdminpostTest {
 
     @Autowired
     private PostRepository postRepository;
