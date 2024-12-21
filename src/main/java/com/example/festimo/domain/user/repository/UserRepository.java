@@ -1,6 +1,5 @@
 package com.example.festimo.domain.user.repository;
 
-
 import com.example.festimo.domain.user.domain.User;
 import io.micrometer.common.lang.NonNull;
 import org.springframework.data.domain.Page;
@@ -20,6 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     @NonNull
-    Page<User> findAll(@NonNull Pageable pageable);  //추가,,,
+    Page<User> findAll(@NonNull Pageable pageable);
 
 }
