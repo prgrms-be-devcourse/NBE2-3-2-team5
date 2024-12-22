@@ -6,8 +6,7 @@ window.onload = function() {
                 const events = JSON.parse(xhr.responseText.trim());
                 let cards = '';
                 for(let i=0; i<events.length; i++) {
-                    cards += '<div class="event-card">';
-                    cards += '<input type="hidden" name="id" value="' + events[i].id + '">';
+                    cards += '<div class="event-card" data-festival-id="' + events[i].festival_id + '">'
                     cards += '<div class="event-badge">진행중</div>';
                     cards += '<div class="event-image">';
                     cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
@@ -20,6 +19,17 @@ window.onload = function() {
                 }
                 document.getElementById('eventgrid').innerHTML = cards;
 
+                const efrm = document.getElementById('efrm');
+                const hiddenInput = document.getElementById('hiddenFestivalId');
+
+                document.querySelectorAll('.event-card').forEach(card => {
+                    card.addEventListener('click', function () {
+                        const festivalId = this.getAttribute('data-festival-id');
+
+                        hiddenInput.value = festivalId; // 선택된 festival_id 설정
+                        efrm.submit();
+                    });
+                });
             } else {
                 alert(`[에러] 축제 불러오기 요청 실패: ${xhr.status}`)
             }

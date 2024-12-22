@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>구미선단 페스티벌 - Eventory</title>
+    <title></title>
     <link rel="stylesheet" type="text/css" href="../css/festival_detail.css">
+    <script src="../js/festival_detail.js" defer></script>
 </head>
 <body>
     <header class="header">
         <a href="#" class="logo">
-            <img src="../imgs/eventoryLogo.jpg" alt="Eventory Logo">
+            <img src="../imgs/festimoLogo.svg" alt="Festimo Logo">
         </a>
         <nav class="nav-links">
             <a href="#">Home</a>
@@ -25,8 +26,8 @@
         
         <div class="event-badge">진행중</div>
         <h1 class="event-title">
-            구미선단 페스티벌
-            <span class="event-category">행사</span>
+
+            <span class="event-category"></span>
         </h1>
         
 
@@ -70,7 +71,9 @@
         <div class="location-section">
             <h2 class="location-title">찾아가기</h2>
             <div class="map-container">
-                <img src="/api/placeholder/1200/400" alt="Map">
+                <div id="map" style="width:500px;height:400px;">
+<!--                    <script type="text/javascript" src="../js/festival_detail.js"></script>-->
+                </div>
                 <button class="map-button">길찾기 ⬈</button>
             </div>
         </div>

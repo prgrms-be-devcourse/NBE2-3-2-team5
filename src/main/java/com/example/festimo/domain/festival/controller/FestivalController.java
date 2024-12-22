@@ -39,10 +39,11 @@ public class FestivalController {
         return "getAllFestivals";
     }
 
+    @ResponseBody
     @GetMapping("/api/events/{eventId}")
-    public String getEvent(@PathVariable Integer eventId) {
+    public FestivalTO getEvent(@PathVariable Integer eventId) {
         FestivalTO to = festivalService.findById(eventId);
-        return to.toString();
+        return to;
     }
 
     @ResponseBody
