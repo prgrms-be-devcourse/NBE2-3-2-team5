@@ -49,11 +49,11 @@ function displayEventDetails(event) {
     imageElement.src = event.image;
     imageElement.alt = event.title;
 
-    document.querySelectorAll('.info-row .info-value')[0].textContent = `${event.startDate} ~ ${event.endDate}`;
+    document.querySelectorAll('.info-row .info-value')[0].innerHTML = `${event.startDate} ~ ${event.endDate}`;
 
-    document.querySelectorAll('.info-row .info-value')[1].textContent = event.address;
+    document.querySelectorAll('.info-row .info-value')[1].innerHTML = event.address;
 
-    document.querySelectorAll('.info-row .info-value')[2].textContent = event.phone;
+    document.querySelectorAll('.info-row .info-value')[2].innerHTML = event.phone;
 
     const descriptions = document.querySelectorAll('.event-description');
     descriptions[0].textContent = event.mainDescription; // 메인 설명
