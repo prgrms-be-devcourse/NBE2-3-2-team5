@@ -55,9 +55,24 @@ function displayEventDetails(event) {
 
     document.querySelectorAll('.info-row .info-value')[2].innerHTML = event.phone;
 
-    const descriptions = document.querySelectorAll('.event-description');
-    descriptions[0].textContent = event.mainDescription; // 메인 설명
-    descriptions[1].innerHTML = event.programDetails.replace(/\n/g, '<br>'); // 프로그램 세부내용 HTML 변환
+    let mainDescription = "";
+    let programDetails = "";
+
+    event.festivalDetails.details.forEach((detail) => {
+        if (detail.infoName === "행사소개") {
+            mainDescription = detail.infoText;
+        } else if (detail.infoName === "행사내용") {
+            programDetails = detail.infoText;
+        }
+    });
+
+    const descriptions = document.querySelectorAll(".event-description");
+    if (descriptions.length > 0) {
+        descriptions[0].textContent = mainDescription; // 메인 설명
+    }
+    if (descriptions.length > 1) {
+        descriptions[1].innerHTML = programDetails;
+    }
 
     // // 위치 섹션의 지도 (예: 좌표를 사용하여 지도 생성)
     // const mapButton = document.querySelector('.map-button');
