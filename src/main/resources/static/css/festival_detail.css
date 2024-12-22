@@ -18,14 +18,10 @@ body {
     font-size: 14.5px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1.5rem;
-    color: #4a4a4a;
-    text-decoration: none;
-    
+.logo img{
+    max-width: 140px;
+    height: auto;
+
 }
 
 .nav-links {
@@ -114,6 +110,12 @@ body {
     background-color: #f0f0f0;
     border-radius: 8px;
     overflow: hidden;
+}
+
+.event-image img {
+    width: 100%; /* 부모의 너비에 맞춤 */
+    height: 100%; /* 부모의 높이에 맞춤 */
+    object-fit: cover; /* 비율을 유지하면서 잘림 방지 */
 }
 
 .event-info {
