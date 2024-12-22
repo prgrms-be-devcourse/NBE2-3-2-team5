@@ -30,4 +30,5 @@ public class Festival {
     private Float xCoordinate;
     private Float yCoordinate;
     private String phone;
+    private int contentId;
 }
