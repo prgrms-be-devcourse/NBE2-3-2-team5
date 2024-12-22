@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class FestivalTO {
+    private int festival_id;
     private String title;
     private String category;
     private String description;
