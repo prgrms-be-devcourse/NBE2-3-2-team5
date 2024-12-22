@@ -130,11 +130,11 @@ public class ApplicationService {
         applicationRepository.save(application);
 
         // User 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+        User user = userRepository.findById(application.getUserId())
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         // CompanionMember 생성 및 설정
-        CompanionMemberId companionMemberId = new CompanionMemberId(companionId, userId);
+        CompanionMemberId companionMemberId = new CompanionMemberId(companionId, user.getId());
         Companion_member companionMember = new Companion_member();
         companionMember.setId(companionMemberId);
         companionMember.setUser(user); // 연관 관계 설정

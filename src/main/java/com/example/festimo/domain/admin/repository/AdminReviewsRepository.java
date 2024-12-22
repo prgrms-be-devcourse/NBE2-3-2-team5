@@ -1,6 +1,6 @@
 package com.example.festimo.domain.admin.repository;
 
-import com.example.festimo.domain.admin.entity.Reviews;
+import com.example.festimo.domain.admin.entity.AdminReviews;
 
 import lombok.NonNull;
 
@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ReviewsRepository extends JpaRepository<Reviews, Long> {
+public interface AdminReviewsRepository extends JpaRepository<AdminReviews, Long> {
 
     @NonNull
-    Page<Reviews> findAll(@NonNull Pageable pageable);
+    Page<AdminReviews> findAll(@NonNull Pageable pageable);
 }
