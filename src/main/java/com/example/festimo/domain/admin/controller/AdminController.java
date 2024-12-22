@@ -14,7 +14,7 @@ import com.example.festimo.domain.admin.service.AdminService;
 
 
 @RestController
-@RequestMapping("/adi/admin")
+@RequestMapping("/api/admin")
 @Tag(name = "관리자 API", description = "관리자가 회원 정보를 관리하는 API")
 public class AdminController {
 
