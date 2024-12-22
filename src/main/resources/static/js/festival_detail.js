@@ -22,13 +22,28 @@ window.onload = function() {
 }
 
 function displayEventDetails(event) {
-    console.log(event)
     document.title = `${event.title} - Festimo`;
 
     document.querySelector('.event-title').innerHTML = `${event.title} <span class="event-category">${event.category}</span>`;
 
+    // 진행상태 뱃지
     const badge = document.querySelector('.event-badge');
-    badge.textContent = event.status === 'ongoing' ? '진행중' : '종료';
+    const today = new Date();
+
+    const startDate = new Date(event.startDate);
+    const endDate = new Date(event.endDate);
+
+    let badgeText = '';
+    if (today >= startDate && today <= endDate) {
+        badgeText = '진행중';
+    } else if (today < startDate) {
+        badgeText = '예정';
+    } else if (today > endDate) {
+        badgeText = '종료';
+    }
+
+    badge.textContent = badgeText;
+
 
     const imageElement = document.querySelector('.event-image img');
     imageElement.src = event.image;
