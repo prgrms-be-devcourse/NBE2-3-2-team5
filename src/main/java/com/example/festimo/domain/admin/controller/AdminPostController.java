@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("admin/posts")
-@Tag(name = "관리자 게시글 API", description = "관리자가 게시글을 관리하는 API")
+@Tag(name = "관리자 API", description = "관리자가 게시글을 관리하는 API")
 public class AdminPostController {
 
     private final AdminPostService adminPostService;
