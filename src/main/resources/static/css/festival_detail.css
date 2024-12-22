@@ -196,3 +196,8 @@ body {
     border: none;
     cursor: pointer;
 }
+
+#map{
+    width: auto;
+    height: 400px;
+}
