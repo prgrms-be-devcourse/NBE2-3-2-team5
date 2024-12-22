@@ -4,10 +4,24 @@ window.onload = function() {
         if ( xhr.readyState == 4 ) {
             if ( xhr.status == 200 ) {
                 const events = JSON.parse(xhr.responseText.trim());
+                const today = new Date();
                 let cards = '';
                 for(let i=0; i<events.length; i++) {
                     cards += '<div class="event-card" data-festival-id="' + events[i].festival_id + '">'
-                    cards += '<div class="event-badge">진행중</div>';
+
+                    const startDate = new Date(events[i].startDate); // startDate가 ISO 문자열 형식이라면 Date로 변환
+                    const endDate = new Date(events[i].endDate); // endDate도 마찬가지로 변환
+
+                    let badgeText = '';
+                    if (today >= startDate && today <= endDate) {
+                        badgeText = '진행중';
+                    } else if (today < startDate) {
+                        badgeText = '예정';
+                    } else if (today > endDate) {
+                        badgeText = '종료';
+                    }
+                    cards += '<div class="event-badge">' + badgeText + '</div>';
+
                     cards += '<div class="event-image">';
                     cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
                     cards += '</div>';
