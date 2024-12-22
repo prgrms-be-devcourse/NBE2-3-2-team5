@@ -74,27 +74,46 @@ function displayEventDetails(event) {
         descriptions[1].innerHTML = programDetails;
     }
 
-    // // 위치 섹션의 지도 (예: 좌표를 사용하여 지도 생성)
-    // const mapButton = document.querySelector('.map-button');
-    // mapButton.onclick = () => {
-    //     window.open(`https://maps.google.com/?q=${event.latitude},${event.longitude}`, '_blank');
-    // };
+    loadMap(event.ycoordinate, event.xcoordinate);
+
 }
-/*
-fetch('/api/map-key')
-    .then(response => response.text())
-    .then(apiKey => {
-        const script = document.createElement('script');
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}`;
-        document.head.appendChild(script);
-    })
-    .catch(error => console.error('Error fetching API key:', error));
 
-var container = document.getElementById('map');
-var options = {
-    center: new kakao.maps.LatLng(33.450701, 126.570667),
-    level: 3
-};
+function loadMap(latitude, longitude) {
+    fetch('/api/map-key')
+        .then(response => response.text())
+        .then(apiKey => {
+            const script = document.getElementById('kakao-map-script');
+            if (script) {
+                script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&autoload=false`;
+                script.onload = () => {
+                    kakao.maps.load(() => {
+                        initMap(latitude, longitude);
+                    });
+                };
+            } else {
+                console.error('카카오 지도 스크립트 태그를 찾을 수 없습니다.');
+            }
+        })
+        .catch(error => console.error('Error fetching API key:', error));
+}
 
-var map = new kakao.maps.Map(container, options);
- */
+// 지도 초기화 함수
+function initMap(latitude, longitude) {
+    const container = document.getElementById('map');
+
+    const options = {
+        center: new kakao.maps.LatLng(latitude, longitude),
+        level: 3,
+    };
+
+    // 지도 생성
+    const map = new kakao.maps.Map(container, options);
+
+    // 마커 추가
+    const markerPosition = new kakao.maps.LatLng(latitude, longitude); // 마커 위치
+    const marker = new kakao.maps.Marker({
+        position: markerPosition,
+    });
+    marker.setMap(map);
+
+}

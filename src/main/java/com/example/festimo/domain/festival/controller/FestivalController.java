@@ -19,11 +19,11 @@ public class FestivalController {
     @Value("${KAKAO_MAP_API_KEY}")
     private String KAKAO_MAP_API_KEY;
 
+    @ResponseBody
     @GetMapping("/api/map-key")
     public String getApiKey() {
         return KAKAO_MAP_API_KEY;
     }
-
 
     @Autowired
     private FestivalService festivalService;
@@ -71,4 +71,6 @@ public class FestivalController {
     public List<FestivalTO> filterByRegion(@RequestParam String region) {
         return festivalService.filterByRegion(region);
     }
+
+
 }
