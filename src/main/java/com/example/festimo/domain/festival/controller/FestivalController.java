@@ -56,6 +56,7 @@ public class FestivalController {
 
         Pageable pageable = PageRequest.of(page, size);
 
+
         Page<FestivalTO> paginatedEvent;
         if (year != null && month != null) {
             paginatedEvent = festivalService.filterByMonth(year, month, pageable);
@@ -65,6 +66,7 @@ public class FestivalController {
             paginatedEvent = festivalService.search(keyword, pageable);
         } else {
             paginatedEvent = festivalService.findPaginated(pageable);
+
         }
 
         PagedModel<EntityModel<FestivalTO>> pagedModel = pagedResourcesAssembler.toModel(paginatedEvent, festival -> EntityModel.of(festival));

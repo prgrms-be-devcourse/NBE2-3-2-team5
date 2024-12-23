@@ -1,12 +1,16 @@
 package com.example.festimo.global.config;
 
 
+import com.example.festimo.domain.user.service.NaverOauth2UserService;
+import com.example.festimo.global.utils.jwt.CustomUserDetailsService;
 import com.example.festimo.global.utils.jwt.JwtAuthenticationFilter;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
+import com.example.festimo.global.utils.jwt.NaverLoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,10 +20,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final NaverOauth2UserService naverOauth2UserService;
+    private final NaverLoginSuccessHandler naverLoginSuccessHandler;
+
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider, NaverOauth2UserService naverOauth2UserService, NaverLoginSuccessHandler naverLoginSuccessHandler) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.naverOauth2UserService = naverOauth2UserService;
+        this.naverLoginSuccessHandler = naverLoginSuccessHandler;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,6 +70,11 @@ public class SecurityConfig {
                 new JwtAuthenticationFilter(jwtTokenProvider),
                 UsernamePasswordAuthenticationFilter.class
         );
+        http
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(naverOauth2UserService))
+                        .successHandler(naverLoginSuccessHandler));
 
         return http.build();
     }
