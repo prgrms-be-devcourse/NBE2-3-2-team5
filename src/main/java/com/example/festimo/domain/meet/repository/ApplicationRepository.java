@@ -12,7 +12,8 @@ public interface ApplicationRepository extends JpaRepository<Applications, Long>
     boolean existsByUserIdAndCompanionId(Long userId, Long companionId);
 
     //특정 활동의 신청 리스트 조회
-    List<Applications> findByCompanionId(Long companionId);
+    List<Applications> findByCompanionIdAndStatus(Long companionId, Applications.Status status);
+
 
 
 }

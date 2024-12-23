@@ -80,21 +80,23 @@ public class ApplicationService {
      * 신청 리스트 확인
      *
      * @param companyId 확인하려는 회사의 ID
-     * @param userId    신청 리스트를 확인하려는 리더의 ID
+   //  * @param userId    신청 리스트를 확인하려는 리더의 ID
      * @return 신청 리스트 정보
      */
-    public List<LeaderApplicationResponse> getAllApplications(Long companyId, Long userId) {
+    public List<LeaderApplicationResponse> getAllApplications(Long companyId) {
 
+        /*
         // 리더인지 확인
         Long company = companionRepository.findLeaderIdByCompanyId(companyId)
                 .orElseThrow(() -> new CustomException(COMPANY_NOT_FOUND));
 
         if (!userId.equals(company)) {
             throw new CustomException(ACCESS_DENIED);
-        }
+        }*/
 
-        // 리스트 확인
-        List<Applications> applications = applicationRepository.findByCompanionId(companyId);
+
+        // 상태가 PENDING인 신청 리스트 확인
+        List<Applications> applications = applicationRepository.findByCompanionIdAndStatus(companyId, Applications.Status.PENDING);
         return LeaderApplicationMapper.INSTANCE.toDtoList(applications);
     }
 
@@ -102,16 +104,16 @@ public class ApplicationService {
      * 리더의 신청 승인
      *
      * @param applicationId 승인하고 싶은 신청 ID
-     * @param userId        신청을 승인하려는 리더의 ID
+     //* @param userId        신청을 승인하려는 리더의 ID
      */
     @Transactional
-    public void acceptApplication(Long applicationId, Long userId) {
+    public void acceptApplication(Long applicationId) {
 
 
         // 신청 ID로 조회
         Applications application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new CustomException(APPLICATION_NOT_FOUND));
-
+/*
 
         // 리더인지 확인
         Long companionId = application.getCompanionId();
@@ -121,7 +123,7 @@ public class ApplicationService {
         if (!userId.equals(company)) {
             throw new CustomException(ACCESS_DENIED);
         }
-
+*/
         // 상태 바꾸기
         if (!application.getStatus().equals(Applications.Status.PENDING)) {
             throw new CustomException(INVALID_APPLICATION_STATUS);
@@ -134,7 +136,8 @@ public class ApplicationService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         // CompanionMember 생성 및 설정
-        CompanionMemberId companionMemberId = new CompanionMemberId(companionId, user.getId());
+        //CompanionMemberId companionMemberId = new CompanionMemberId(companionId, user.getId());
+        CompanionMemberId companionMemberId = new CompanionMemberId(application.getCompanionId(), user.getId());
         Companion_member companionMember = new Companion_member();
         companionMember.setId(companionMemberId);
         companionMember.setUser(user); // 연관 관계 설정
@@ -148,14 +151,15 @@ public class ApplicationService {
      * 리더의 신청 거절
      *
      * @param applicationId 거절하고 싶은 신청 ID
-     * @param userId        신청을 거절하려는 리더의 ID
+     //* @param userId        신청을 거절하려는 리더의 ID
      */
-    public void rejectApplication(Long applicationId, Long userId) {
+    public void rejectApplication(Long applicationId) {
 
         // 신청 ID로 조회
         Applications application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new CustomException(APPLICATION_NOT_FOUND));
 
+        /*
         // 리더인지 확인
         Long companyId = application.getCompanionId();
         Long company = companionRepository.findLeaderIdByCompanyId(companyId)
@@ -164,6 +168,8 @@ public class ApplicationService {
         if (!userId.equals(company)) {
             throw new CustomException(ACCESS_DENIED);
         }
+
+         */
 
         // 상태 바꾸기
         if (!application.getStatus().equals(Applications.Status.PENDING)) {
