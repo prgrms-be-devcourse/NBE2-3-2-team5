@@ -1,6 +1,5 @@
 package com.example.festimo.global.config;
 
-
 import com.example.festimo.global.utils.jwt.JwtAuthenticationFilter;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -63,3 +62,5 @@ public class SecurityConfig {
         return http.build();
     }
 }
+
+
