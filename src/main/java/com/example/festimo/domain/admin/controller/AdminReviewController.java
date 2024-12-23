@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/admin/reviews")
-@Tag(name = "관리자 리뷰 관리 API", description = "관리자가 리뷰를 관리하는 API")
+@RequestMapping("/api/admin/reviews")
+@Tag(name = "관리자 API")
 public class AdminReviewController {
 
     AdminReviewService adminReviewService;

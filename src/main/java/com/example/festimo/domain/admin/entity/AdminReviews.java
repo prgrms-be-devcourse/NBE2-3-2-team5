@@ -12,8 +12,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-
-public class Reviews {
+@Table(name = "reviews")
+public class AdminReviews {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

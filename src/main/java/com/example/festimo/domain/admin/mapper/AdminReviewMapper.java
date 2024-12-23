@@ -1,6 +1,6 @@
 package com.example.festimo.domain.admin.mapper;
 
-import com.example.festimo.domain.admin.entity.Reviews;
+import com.example.festimo.domain.admin.entity.AdminReviews;
 import com.example.festimo.domain.admin.dto.AdminReviewDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -20,6 +20,6 @@ public interface AdminReviewMapper {
     @Mapping(source = "content", target = "content")
     @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(source = "updatedAt", target = "updatedAt")
-    AdminReviewDTO toDTO(Reviews reviews);
+    AdminReviewDTO toDTO(AdminReviews adminReviews);
 
 }
