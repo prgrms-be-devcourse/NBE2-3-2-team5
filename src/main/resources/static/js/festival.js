@@ -1,5 +1,9 @@
 let currentPage = 0;
 const pageSize = 28;
+let filterYear = null;
+let filterMonth = null;
+let filterRegion = null;
+let filterKeyword = null;
 
 window.onload = function () {
     loadEvents(currentPage);
@@ -7,6 +11,18 @@ window.onload = function () {
 
 function loadEvents(page) {
     currentPage = page;
+    let url = `/api/events?page=${page}&size=${pageSize}`;
+    if (filterMonth) {
+        url += `&year=${encodeURIComponent(filterYear)}`;
+        url += `&month=${encodeURIComponent(filterMonth)}`;
+    }
+    if (filterRegion) {
+        url += `&region=${encodeURIComponent(filterRegion)}`;
+    }
+    if (filterKeyword) {
+        url += `&keyword=${encodeURIComponent(filterKeyword)}`;
+    }
+
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if ( xhr.readyState == 4 ) {
@@ -24,7 +40,6 @@ function loadEvents(page) {
 
         }
     }
-    const url = `/api/events?page=${page}&size=${pageSize}`;
     xhr.open("GET", url, true);
     xhr.send();
 }
@@ -66,7 +81,7 @@ function renderEvents(events) {
         card.addEventListener('click', function () {
             const festivalId = this.getAttribute('data-festival-id');
 
-            hiddenInput.value = festivalId; // 선택된 festival_id 설정
+            hiddenInput.value = festivalId;
             efrm.submit();
         });
     });
@@ -78,7 +93,6 @@ function renderPagination(totalPages, currentPage) {
     const currentGroup = Math.floor(currentPage / pagesPerGroup);
     const startPage = currentGroup * pagesPerGroup;
     const endPage = Math.min(startPage + pagesPerGroup - 1, totalPages - 1);
-
 
     paginationHTML += `<a href="#" class="page-number" onclick="loadEvents(0); return false;">&lt&lt;</a>`;
     if (currentGroup > 0) {
@@ -98,67 +112,21 @@ function renderPagination(totalPages, currentPage) {
 }
 
 function filterEventsByDate(year, month){
-        const xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4) {
-                if (xhr.status == 200) {
-                    const events = JSON.parse(xhr.responseText.trim());
-                    let cards = '';
-                    for(let i=0; i<events.length; i++) {
-                        cards += '<div class="event-card">';
-                        cards += '<input type="hidden" name="id" value="' + events[i].id + '">';
-                        cards += '<div class="event-badge">진행중</div>';
-                        cards += '<div class="event-image">';
-                        cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
-                        cards += '</div>';
-                        cards += '<div class="event-info">';
-                        cards += '<h3 class="event-title">' + events[i].title + '</h3>';
-                        cards += '<div class="learn-more">Learn more →</div>';
-                        cards += '</div>';
-                        cards += '</div>';
-                    }
-                    document.getElementById('eventgrid').innerHTML = cards;
-                } else {
-                    alert(`[에러] 날짜별 필터링 요청 실패: ${xhr.status}`)
-                }
-            }
-        }
-    const url = `/api/events/filter/month?year=${encodeURIComponent(year)}&month=${encodeURIComponent(month || '')}`;
-    xhr.open("Get", url, true);
-    xhr.send();
+    filterYear = year;
+    filterMonth = month;
+    filterKeyword = "";
+    filterRegion = "";
+
+    loadEvents(0);
 }
 
 function filterEventsByRegion(region) {
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                const events = JSON.parse(xhr.responseText.trim());
-                let cards = '';
-                for(let i=0; i<events.length; i++) {
-                    cards += '<div class="event-card">';
-                    cards += '<input type="hidden" name="id" value="' + events[i].id + '">';
-                    cards += '<div class="event-badge">진행중</div>';
-                    cards += '<div class="event-image">';
-                    cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
-                    cards += '</div>';
-                    cards += '<div class="event-info">';
-                    cards += '<h3 class="event-title">' + events[i].title + '</h3>';
-                    cards += '<div class="learn-more">Learn more →</div>';
-                    cards += '</div>';
-                    cards += '</div>';
-                }
-                document.getElementById('eventgrid').innerHTML = cards;
-            } else {
-                alert(`[에러] 지역별 필터링 요청 실패: ${xhr.status}`)
-            }
-        }
-    };
+    filterYear = "";
+    filterMonth = "";
+    filterKeyword = "";
+    filterRegion = region;
 
-    // 지역 정보를 URL에 추가
-    const url = `/api/events/filter/region?region=${encodeURIComponent(region)}`;
-    xhr.open("GET", url, true);
-    xhr.send();
+    loadEvents(0);
 }
 
 function searchFestivals() {
@@ -167,34 +135,10 @@ function searchFestivals() {
         alert("검색어를 입력해주세요.");
         return;
     }
-    console.log(keyword)
-    const xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-                const events = JSON.parse(xhr.responseText.trim());
-                let cards = '';
-                for(let i=0; i<events.length; i++) {
-                    cards += '<div class="event-card">';
-                    cards += '<input type="hidden" name="id" value="' + events[i].id + '">';
-                    cards += '<div class="event-badge">진행중</div>';
-                    cards += '<div class="event-image">';
-                    cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
-                    cards += '</div>';
-                    cards += '<div class="event-info">';
-                    cards += '<h3 class="event-title">' + events[i].title + '</h3>';
-                    cards += '<div class="learn-more">Learn more →</div>';
-                    cards += '</div>';
-                    cards += '</div>';
-                }
-                document.getElementById('eventgrid').innerHTML = cards;
-            } else {
-                alert(`[에러] 검색 요청 실패: ${xhr.status}`)
-            }
-        }
-    };
+    filterYear = "";
+    filterMonth = "";
+    filterKeyword = keyword;
+    filterRegion = "";
 
-    // 검색 API 호출
-    xhr.open("GET", `/api/events/search?keyword=${keyword}`, true);
-    xhr.send();
+    loadEvents(0);
 }
