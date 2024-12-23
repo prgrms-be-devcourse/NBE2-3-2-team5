@@ -1,9 +1,12 @@
 let editingUserId = null; // 현재 수정 중인 회원 ID
+let memberCurrentPage = 1; // 회원 관리 현재 페이지
+const memberPageSize = 10; // 회원 관리 페이지당 아이템 수
 
 document.addEventListener("DOMContentLoaded", function () {
     const tabs = document.querySelectorAll(".tab");
     const tabContents = document.querySelectorAll(".tab-content");
 
+    // 탭 전환 기능
     tabs.forEach(tab => {
         tab.addEventListener("click", () => {
             tabs.forEach(t => t.classList.remove("active"));
@@ -13,17 +16,47 @@ document.addEventListener("DOMContentLoaded", function () {
             const activeTabContent = document.getElementById(`${tab.id}-management`);
             activeTabContent.classList.add("active");
 
-            if (tab.id === "member") loadMembers();
-            if (tab.id === "post") loadPosts();
-            if (tab.id === "review") loadReviews();
+            if (tab.id === "member") {
+                loadMembers();
+                updateMemberPagination();
+            }
         });
     });
 
-    loadMembers(); // 페이지 로드 시 회원 목록 불러오기
+    // 초기 로드
+    loadMembers();
+    updateMemberPagination();
 });
 
+// 회원 관리 페이지네이션 버튼 동작
+document.getElementById("member-prev-page").addEventListener("click", () => {
+    if (memberCurrentPage > 1) {
+        memberCurrentPage--;
+        updateMemberPagination();
+        loadMembers();
+    }
+});
+
+document.getElementById("member-next-page").addEventListener("click", () => {
+    memberCurrentPage++;
+    updateMemberPagination();
+    loadMembers();
+});
+
+function updateMemberPagination() {
+    document.getElementById("member-current-page").textContent = memberCurrentPage;
+    document.getElementById("member-prev-page").disabled = memberCurrentPage === 1;
+
+    fetch(`/api/admin/users?page=${memberCurrentPage}&size=${memberPageSize}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("member-next-page").disabled = data.content.length < memberPageSize;
+        })
+        .catch(error => console.error("Error updating member pagination:", error));
+}
+
 function loadMembers() {
-    fetch("/api/admin/users?page=1&size=10") // REST API 호출
+    fetch(`/api/admin/users?page=${memberCurrentPage}&size=${memberPageSize}`)
         .then(response => response.json())
         .then(data => {
             const memberTable = document.getElementById("member-table");
@@ -53,27 +86,23 @@ function loadMembers() {
 }
 
 function editMember(userId) {
-    // 테이블에서 해당 userId를 가진 행을 찾음
     const row = document.querySelector(`tr[data-user-id="${userId}"]`);
 
     if (row) {
-        // 행에서 각 데이터를 가져와서 수정 폼에 채우기
         const userName = row.querySelector('.user-name').textContent;
         const nickname = row.querySelector('.user-nickname').textContent;
         const email = row.querySelector('.user-email').textContent;
         const role = row.querySelector('.user-role').textContent;
         const gender = row.querySelector('.user-gender').textContent === '남성' ? 'M' : 'F';
 
-        // 수정 폼에 데이터 채우기
         document.getElementById("edit-name").value = userName;
         document.getElementById("edit-nickname").value = nickname;
         document.getElementById("edit-email").value = email;
         document.getElementById("edit-role").value = role;
         document.getElementById("edit-gender").value = gender;
 
-        // 수정 섹션 표시
         document.getElementById("edit-section").style.display = "block";
-        editingUserId = userId; // 수정 중인 사용자 ID 저장
+        editingUserId = userId;
     }
 }
 
@@ -85,6 +114,7 @@ document.getElementById("edit-form").addEventListener("submit", function (event)
         nickname: document.getElementById("edit-nickname").value,
         email: document.getElementById("edit-email").value,
         gender: document.getElementById("edit-gender").value,
+        role: document.getElementById("edit-role").value,
         ratingAvg: 5
     };
 
@@ -96,21 +126,18 @@ document.getElementById("edit-form").addEventListener("submit", function (event)
         body: JSON.stringify(updatedUser),
     })
         .then(response => {
-            if (response.ok) {
-                // 테이블 데이터 업데이트
-                const row = document.querySelector(`tr[data-user-id="${editingUserId}"]`);
-                row.querySelector('.user-name').textContent = updatedUser.userName;
-                row.querySelector('.user-nickname').textContent = updatedUser.nickname;
-                row.querySelector('.user-email').textContent = updatedUser.email;
-                row.querySelector('.user-gender').textContent = updatedUser.gender === "M" ? "남성" : "여성";
-
-                alert("회원 정보가 수정되었습니다.");
-                cancelEdit();
-            } else {
+            if (!response.ok) {
                 throw new Error('수정 실패');
             }
+            return response.json();
+        })
+        .then(data => {
+            alert("회원 정보가 수정되었습니다.");
+            cancelEdit();
+            loadMembers();
         })
         .catch(error => {
+            console.error("Error updating user:", error);
             alert("수정에 실패했습니다.");
         });
 });
@@ -129,23 +156,65 @@ function deleteMember(userId) {
             "Content-Type": "application/json",
         },
     })
-        .then(response => {
-            if (response.ok) {
-                const row = document.querySelector(`tr[data-user-id="${userId}"]`);
-                if (row) row.remove();
-                alert("회원이 삭제되었습니다.");
-            } else {
-                throw new Error(`Failed to delete user: ${response.statusText}`);
+        .then(async response => {
+            // 응답 상태 확인 및 에러 메시지 추출
+            if (!response.ok) {
+                // 서버에서 보낸 에러 메시지가 있다면 추출
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || `삭제 실패 (${response.status})`);
             }
+            return response;
+        })
+        .then(() => {
+            alert("회원이 삭제되었습니다.");
+            loadMembers(); // 회원 목록 다시 로드
+            updateMemberPagination(); // 페이지네이션 업데이트
         })
         .catch(error => {
-            console.error("Error deleting user:", error);
-            alert("회원 삭제에 실패했습니다.");
+            console.error("회원 삭제 중 오류 발생:", error);
+            alert(`회원 삭제에 실패했습니다. ${error.message}`);
         });
 }
 
+
+/**
+ *
+ *
+ *
+ *
+ * */
+
+
+
+
+let currentPage = 1; // 현재 페이지
+const pageSize = 10; // 페이지당 아이템 수
+
+document.getElementById("prev-page").addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        updatePagination();
+        loadPosts();
+    }
+});
+
+document.getElementById("next-page").addEventListener("click", () => {
+    currentPage++;
+    updatePagination();
+    loadPosts();
+});
+
+function updatePagination() {
+    document.getElementById("current-page").textContent = currentPage;
+
+    // 이전 페이지 버튼 활성화/비활성화
+    document.getElementById("prev-page").disabled = currentPage === 1;
+
+    // 다음 페이지 버튼은 조건에 따라 활성화 (예: 서버에서 총 페이지 수를 반환하면 활용 가능)
+}
+
 function loadPosts() {
-    fetch("/api/companions?page=1&size=10")
+    fetch(`/api/companions?page=${currentPage}&size=${pageSize}`)
         .then(response => response.json())
         .then(data => {
             const postTable = document.getElementById("post-table");
@@ -166,9 +235,16 @@ function loadPosts() {
                 `;
                 postTable.appendChild(row);
             });
+
+            // 다음 페이지 버튼 활성화/비활성화 (예: 데이터가 비었을 때 비활성화)
+            document.getElementById("next-page").disabled = data.content.length < pageSize;
         })
         .catch(error => console.error("Error loading posts:", error));
 }
+
+// 초기 페이지 로드
+loadPosts();
+updatePagination();
 
 function deletePost(postId) {
     if (!confirm("정말로 삭제하시겠습니까?")) return;
