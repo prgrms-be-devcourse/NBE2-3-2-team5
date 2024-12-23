@@ -43,15 +43,17 @@ public class ApplicationController {
      * 리더의 동행 신청 리스트 조회 API
      *
      * @param companyId 조회할 동행의 ID
-     * @param userId    조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
+     //* @param userId    조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
      * @return 해당 동행을 신청한 유저의 정보
      */
     @GetMapping("/company/{companyId}")
     @Operation(summary = "리더의 동행 신청 리스트")
     public ResponseEntity<List<LeaderApplicationResponse>> getAllApplications(
-            @PathVariable Long companyId,
-            @RequestParam Long userId) {
-        List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companyId, userId);
+            @PathVariable Long companyId
+            //@RequestParam Long userId
+    ) {
+       // List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companyId, userId);
+        List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companyId);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
@@ -59,14 +61,15 @@ public class ApplicationController {
      * 리더의 동행 신청 승인 API
      *
      * @param applicationId 승인하고 싶은 신청 ID
-     * @param userId        조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
+    // * @param userId        조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
      */
     @PostMapping("/{applicationId}/accept")
     @Operation(summary = "리더의 동행 신청 승인")
     public ResponseEntity<Void> acceptApplication(
-            @PathVariable Long applicationId,
-            @RequestParam Long userId) {
-        applicationService.acceptApplication(applicationId, userId);
+            @PathVariable Long applicationId
+    //        @RequestParam Long userId
+    ) {
+        applicationService.acceptApplication(applicationId);
         return ResponseEntity.ok().build();
     }
 
@@ -74,14 +77,15 @@ public class ApplicationController {
      * 리더의 동행 신청 거절 API
      *
      * @param applicationId 거절하고 싶은 신청 ID
-     * @param userId        조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
+   //  * @param userId        조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
      */
     @PatchMapping("/{applicationId}/reject")
     @Operation(summary = "리더의 동행 신청 거절")
     public ResponseEntity<Void> rejectApplication(
-            @PathVariable Long applicationId,
-            @RequestParam Long userId) {
-        applicationService.rejectApplication(applicationId, userId);
+            @PathVariable Long applicationId
+    //        @RequestParam Long userId
+    ) {
+        applicationService.rejectApplication(applicationId);
         return ResponseEntity.ok().build();
     }
 }
