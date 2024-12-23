@@ -246,27 +246,24 @@ public class FestivalService {
         return to;
     }
 
-    public List<FestivalTO> search(String keyword) {
-        List<Festival> festivalList = festivalRepository.findByTitleContainingIgnoreCase(keyword);
+    public Page<FestivalTO> search(String keyword, Pageable pageable) {
+        Page<Festival> festivalPage = festivalRepository.findByTitleContainingIgnoreCase(keyword, pageable);
 
         ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivalList.stream()
-                .map(p -> modelMapper.map(p, FestivalTO.class))
-                .collect(Collectors.toList());
-        return list;
+        Page<FestivalTO> page = festivalPage.map(festival -> modelMapper.map(festival, FestivalTO.class));
+        return page;
     }
 
-    public List<FestivalTO> filterByMonth(int year, int month) {
+    public Page<FestivalTO> filterByMonth(int year, int month, Pageable pageable) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
         ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivalRepository.findAll().stream()
-                .filter(festival -> isFestivalInMonth(festival, firstDayOfMonth, lastDayOfMonth))
-                .map(festival -> modelMapper.map(festival, FestivalTO.class))
-                .collect(Collectors.toList());
-        return list;
+        Page<Festival> festivals = festivalRepository.findByMonth(firstDayOfMonth, lastDayOfMonth, pageable);
+        Page<FestivalTO> page = festivals.map(festival -> new ModelMapper().map(festival, FestivalTO.class));
+
+        return page;
     }
 
     private boolean isFestivalInMonth(Festival festival, LocalDate firstDayOfMonth, LocalDate lastDayOfMonth) {
@@ -276,14 +273,12 @@ public class FestivalService {
         return !startDate.isAfter(lastDayOfMonth) && !endDate.isBefore(firstDayOfMonth);
     }
 
-    public List<FestivalTO> filterByRegion(String region) {
-        List<Festival> festivals = festivalRepository.findByAddressContainingIgnoreCase(region);
+    public Page<FestivalTO> filterByRegion(String region, Pageable pageable) {
+        Page<Festival> festivals = festivalRepository.findByAddressContainingIgnoreCase(region, pageable);
 
         ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivals.stream()
-                .map(festival -> modelMapper.map(festival, FestivalTO.class))
-                .collect(Collectors.toList());
-        return list;
+        Page<FestivalTO> page = festivals.map(festival -> modelMapper.map(festival, FestivalTO.class));
+        return page;
     }
 }
 

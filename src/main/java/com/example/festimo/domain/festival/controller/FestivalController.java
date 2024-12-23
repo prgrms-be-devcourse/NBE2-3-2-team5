@@ -48,10 +48,24 @@ public class FestivalController {
     @ResponseBody
     @GetMapping("/api/events")
     public PagedModel<FestivalTO> getAllEvents(@RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "28") int size) {
+                                               @RequestParam(defaultValue = "28") int size,
+                                               @RequestParam(required = false) Integer year,
+                                               @RequestParam(required = false) Integer month,
+                                               @RequestParam(required = false) String region,
+                                               @RequestParam(required = false) String keyword) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<FestivalTO> paginatedEvent = festivalService.findPaginated(pageable);
+
+        Page<FestivalTO> paginatedEvent;
+        if (year != null && month != null) {
+            paginatedEvent = festivalService.filterByMonth(year, month, pageable);
+        } else if (region != null) {
+            paginatedEvent = festivalService.filterByRegion(region, pageable);
+        } else if (keyword != null && !keyword.isEmpty()) {
+            paginatedEvent = festivalService.search(keyword, pageable);
+        } else {
+            paginatedEvent = festivalService.findPaginated(pageable);
+        }
 
         PagedModel<EntityModel<FestivalTO>> pagedModel = pagedResourcesAssembler.toModel(paginatedEvent, festival -> EntityModel.of(festival));
         PagedModel<FestivalTO> pagination = PagedModel.of(pagedModel.getContent().stream()
@@ -69,22 +83,33 @@ public class FestivalController {
 
     @ResponseBody
     @GetMapping("/api/events/search")
-    public List<FestivalTO> search(@RequestParam String keyword) {
-        return festivalService.search(keyword);
+    public Page<FestivalTO> search(
+            @RequestParam String keyword,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return festivalService.search(keyword, pageable);
     }
 
     @ResponseBody
     @GetMapping("/api/events/filter/month")
-    public List<FestivalTO> filterByMonth(
+    public Page<FestivalTO> filterByMonth(
             @RequestParam int year,
-            @RequestParam int month) {
-        return festivalService.filterByMonth(year, month);
+            @RequestParam int month,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return festivalService.filterByMonth(year, month, pageable);
     }
 
     @ResponseBody
     @GetMapping("/api/events/filter/region")
-    public List<FestivalTO> filterByRegion(@RequestParam String region) {
-        return festivalService.filterByRegion(region);
+    public Page<FestivalTO> filterByRegion(
+            @RequestParam String region,
+            @RequestParam int page,
+            @RequestParam int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return festivalService.filterByRegion(region, pageable);
     }
 
 
