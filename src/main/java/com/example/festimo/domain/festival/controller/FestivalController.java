@@ -22,7 +22,7 @@ public class FestivalController {
         // festivalService.refreshEvents();
 
         List<FestivalTO> events = festivalService.findAll();
-        for(FestivalTO to : events) {
+        for (FestivalTO to : events) {
             System.out.println(to.getTitle());
         }
         return "getAllFestivals";
@@ -50,4 +50,5 @@ public class FestivalController {
     public List<FestivalTO> filterByRegion(@RequestParam String region) {
         return festivalService.filterByRegion(region);
     }
+
 }
