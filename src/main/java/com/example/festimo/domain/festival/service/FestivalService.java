@@ -1,6 +1,7 @@
 package com.example.festimo.domain.festival.service;
 
 import com.example.festimo.domain.festival.domain.Festival;
+import com.example.festimo.domain.festival.dto.FestivalDetailsTO;
 import com.example.festimo.domain.festival.dto.FestivalTO;
 import com.example.festimo.domain.festival.repository.FestivalRepository;
 import jakarta.persistence.EntityManager;
@@ -8,6 +9,8 @@ import jakarta.persistence.EntityManagerFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -28,9 +31,12 @@ public class FestivalService {
 
     @Value("${SEARCH_FESTIVAL_API_KEY}")
     private String SEARCH_FESTIVAL_API_KEY;
+    @Value("${INFO_FESTIVAL_API_KEY}")
+    private String INFO_FESTIVAL_API_KEY;
 
     @Autowired
     private FestivalRepository festivalRepository;
+
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
@@ -121,7 +127,9 @@ public class FestivalService {
                     festivalTO.setXCoordinate(Float.parseFloat((String) item.get("mapx")));
                     festivalTO.setYCoordinate(Float.parseFloat((String) item.get("mapy")));
                     festivalTO.setPhone((String) item.get("tel"));
-                    festivalTO.setDescription("description");
+
+                    festivalTO.setContentId(Integer.parseInt((String) item.get("contentid")));
+
                     festivalList.add(festivalTO);
                 }
                 int totalPages = (int) Math.ceil((double) totalCount / numOfRows);
@@ -134,6 +142,57 @@ public class FestivalService {
             System.err.println("Error: " + e.getMessage());
         }
         return festivalList;
+    }
+
+    private FestivalDetailsTO getFestivalDescription(int contentId) {
+        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory("https://apis.data.go.kr/B551011/KorService1");
+        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.NONE);
+
+        String baseUrl = "https://apis.data.go.kr/B551011/KorService1";
+        RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setUriTemplateHandler(factory);
+
+        FestivalDetailsTO details = new FestivalDetailsTO();
+        try{
+            String url = factory.expand("/detailInfo1?serviceKey={serviceKey}&MobileApp={MobileApp}" +
+                            "&MobileOS={MobileOS}&contentId={contentId}&contentTypeId={contentTypeId}&_type={_type}",
+                    Map.of(
+                            "serviceKey", INFO_FESTIVAL_API_KEY,
+                            "MobileApp", "AppTest",
+                            "MobileOS", "ETC",
+                            "contentId", contentId,
+                            "contentTypeId", "15",
+                            "_type", "json"
+                    )).toString();
+            URI uri = new URI(url);
+            ResponseEntity<Map> responseEntity = restTemplate.getForEntity(uri, Map.class);
+            Map<String, Object> response = responseEntity.getBody();
+
+            // 결과 확인
+            Map<String, Object> body = (Map<String, Object>) ((Map<String, Object>) response.get("response")).get("body");
+            Object items = body.get("items");
+
+            if (items instanceof Map) {
+                List<Map<String, Object>> itemList = (List<Map<String, Object>>) ((Map<String, Object>) items).get("item");
+                if (itemList != null) {
+                    for (Map<String, Object> item : itemList) {
+                        String infoName = (String) item.get("infoname");
+                        String infoText = (String) item.get("infotext");
+                        details.getDetails().add(new FestivalDetailsTO.Detail(infoName, infoText));
+                    }
+                }
+            } else if (items instanceof List) {
+                List<Map<String, Object>> itemList = (List<Map<String, Object>>) items;
+                for (Map<String, Object> item : itemList) {
+                    String infoName = (String) item.get("infoname");
+                    String infoText = (String) item.get("infotext");
+                    details.getDetails().add(new FestivalDetailsTO.Detail(infoName, infoText));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching description: " + e.getMessage());
+        }
+        return details;
     }
 
     private void resetAutoIncrement() {
@@ -164,6 +223,13 @@ public class FestivalService {
         return list;
     }
 
+    public Page<FestivalTO> findPaginated(Pageable pageable) {
+        Page<Festival> festivals = festivalRepository.findAll(pageable);
+        ModelMapper modelMapper = new ModelMapper();
+        Page<FestivalTO> page = festivals.map(festival -> modelMapper.map(festival, FestivalTO.class));
+        return page;
+    }
+
     public FestivalTO findById(int id){
         Festival festival = festivalRepository.findById(String.valueOf(id)).orElse(null);
         if (festival == null) {
@@ -172,30 +238,32 @@ public class FestivalService {
         ModelMapper modelMapper = new ModelMapper();
         FestivalTO to = modelMapper.map(festival, FestivalTO.class);
 
+        int contentId = festival.getContentId();
+        FestivalDetailsTO details = getFestivalDescription(contentId);
+
+        to.setFestivalDetails(details);
+
         return to;
     }
 
-    public List<FestivalTO> search(String keyword) {
-        List<Festival> festivalList = festivalRepository.findByTitleContainingIgnoreCase(keyword);
+    public Page<FestivalTO> search(String keyword, Pageable pageable) {
+        Page<Festival> festivalPage = festivalRepository.findByTitleContainingIgnoreCase(keyword, pageable);
 
         ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivalList.stream()
-                .map(p -> modelMapper.map(p, FestivalTO.class))
-                .collect(Collectors.toList());
-        return list;
+        Page<FestivalTO> page = festivalPage.map(festival -> modelMapper.map(festival, FestivalTO.class));
+        return page;
     }
 
-    public List<FestivalTO> filterByMonth(int year, int month) {
+    public Page<FestivalTO> filterByMonth(int year, int month, Pageable pageable) {
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate firstDayOfMonth = yearMonth.atDay(1);
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
         ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivalRepository.findAll().stream()
-                .filter(festival -> isFestivalInMonth(festival, firstDayOfMonth, lastDayOfMonth))
-                .map(festival -> modelMapper.map(festival, FestivalTO.class))
-                .collect(Collectors.toList());
-        return list;
+        Page<Festival> festivals = festivalRepository.findByMonth(firstDayOfMonth, lastDayOfMonth, pageable);
+        Page<FestivalTO> page = festivals.map(festival -> new ModelMapper().map(festival, FestivalTO.class));
+
+        return page;
     }
 
     private boolean isFestivalInMonth(Festival festival, LocalDate firstDayOfMonth, LocalDate lastDayOfMonth) {
@@ -205,14 +273,12 @@ public class FestivalService {
         return !startDate.isAfter(lastDayOfMonth) && !endDate.isBefore(firstDayOfMonth);
     }
 
-    public List<FestivalTO> filterByRegion(String region) {
-        List<Festival> festivals = festivalRepository.findByAddressContainingIgnoreCase(region);
+    public Page<FestivalTO> filterByRegion(String region, Pageable pageable) {
+        Page<Festival> festivals = festivalRepository.findByAddressContainingIgnoreCase(region, pageable);
 
         ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivals.stream()
-                .map(festival -> modelMapper.map(festival, FestivalTO.class))
-                .collect(Collectors.toList());
-        return list;
+        Page<FestivalTO> page = festivals.map(festival -> modelMapper.map(festival, FestivalTO.class));
+        return page;
     }
 }
 

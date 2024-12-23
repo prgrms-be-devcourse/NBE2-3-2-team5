@@ -10,9 +10,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class FestivalTO {
+    private int festival_id;
     private String title;
     private String category;
-    private String description;
     private LocalDate startDate;
     private LocalDate endDate;
     private String address;
@@ -20,4 +20,6 @@ public class FestivalTO {
     private Float xCoordinate;
     private Float yCoordinate;
     private String phone;
+    private int contentId;
+    private FestivalDetailsTO festivalDetails;
 }
