@@ -9,6 +9,8 @@ import jakarta.persistence.EntityManagerFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -219,6 +221,13 @@ public class FestivalService {
                 .collect(Collectors.toList());
 
         return list;
+    }
+
+    public Page<FestivalTO> findPaginated(Pageable pageable) {
+        Page<Festival> festivals = festivalRepository.findAll(pageable);
+        ModelMapper modelMapper = new ModelMapper();
+        Page<FestivalTO> page = festivals.map(festival -> modelMapper.map(festival, FestivalTO.class));
+        return page;
     }
 
     public FestivalTO findById(int id){
