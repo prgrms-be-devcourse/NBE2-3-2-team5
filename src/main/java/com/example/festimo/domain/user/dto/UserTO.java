@@ -1,13 +1,14 @@
 package com.example.festimo.domain.user.dto;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Data
 @Getter
 @Setter
-public class UserLoginRequestDTO {
+public class UserTO {
+    private String username;
+    private String role;
+    private String Nickname;
     private String email;
-    private String password;
+
 }

@@ -18,6 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByRefreshToken(String refreshToken);
 
+    User findByUserName(String username);
+
 
     @NonNull
     Page<User> findAll(@NonNull Pageable pageable);
