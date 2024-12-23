@@ -2,34 +2,6 @@ document.addEventListener("DOMContentLoaded", function () {
     loadApplications(2); // 2는 예제 companyId
 });
 
-/*
-function loadApplications(companyId) {
-    fetch(`/api/meet/company/${companyId}`)
-        .then(response => response.json())
-        .then(data => {
-            const applicationTable = document.getElementById("application-table");
-            applicationTable.innerHTML = ""; // 기존 데이터 초기화
-
-            data.forEach(application => {
-                const row = document.createElement("div");
-                row.classList.add("application-row");
-                row.setAttribute("data-application-id", application.applicationId);
-
-                row.innerHTML = `
-                    <div class="application-info">
-                        사용자 ID: ${application.userId}
-                    </div>
-                    <div class="application-actions">
-                        <button onclick="acceptApplication(${application.applicationId})" class="accept-button">수락</button>
-                        <button onclick="rejectApplication(${application.applicationId})" class="reject-button">거절</button>
-                    </div>
-                `;
-                applicationTable.appendChild(row);
-            });
-        })
-        .catch(error => console.error("Error loading applications:", error));
-}
-*/
 function loadApplications(companionId) {
     fetch(`/api/meet/company/${companionId}`)
         .then(response => response.json())
