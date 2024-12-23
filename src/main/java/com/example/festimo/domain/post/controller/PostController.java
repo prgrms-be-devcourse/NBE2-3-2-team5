@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +22,8 @@ public class PostController {
 
     @Operation(summary = "게시글 등록")
     @PostMapping
-    public ResponseEntity<PostListResponse> createPost(@Valid @RequestBody PostRequest request) {
-        PostListResponse responseDto = postService.createPost(request);
+    public ResponseEntity<PostListResponse> createPost(@Valid @RequestBody PostRequest request, Authentication authentication) {
+        PostListResponse responseDto = postService.createPost(request, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 
@@ -38,8 +39,8 @@ public class PostController {
 
     @Operation(summary = "게시글 상세 조회")
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDetailResponse> getPostById(@PathVariable Long postId) {
-        PostDetailResponse postById = postService.getPostById(postId);
+    public ResponseEntity<PostDetailResponse> getPostById(@PathVariable Long postId, Authentication authentication) {
+        PostDetailResponse postById = postService.getPostById(postId, authentication);
         return ResponseEntity.status(HttpStatus.OK).body(postById);
     }
 
@@ -56,8 +57,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
-            @RequestBody DeletePostRequest request) {
-        postService.deletePost(postId, request.getPassword());
+            @RequestBody DeletePostRequest request,
+            Authentication authentication) {
+        postService.deletePost(postId, request.getPassword(), authentication);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -65,8 +67,9 @@ public class PostController {
     @PostMapping("/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
-            @RequestBody @Valid CommentRequest request) {
-        CommentResponse comment = postService.createComment(postId, request);
+            @RequestBody @Valid CommentRequest request,
+            Authentication authentication) {
+        CommentResponse comment = postService.createComment(postId, request, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(comment);
     }
 
@@ -75,9 +78,10 @@ public class PostController {
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long postId,
             @PathVariable Integer sequence,
-            @RequestBody @Valid UpdateCommentRequest request
+            @RequestBody @Valid UpdateCommentRequest request,
+            Authentication authentication
     ) {
-        CommentResponse comment = postService.updateComment(postId, sequence, request);
+        CommentResponse comment = postService.updateComment(postId, sequence, request, authentication);
         return ResponseEntity.status(HttpStatus.OK).body(comment);
     }
 
@@ -85,9 +89,10 @@ public class PostController {
     @DeleteMapping("/{postId}/comments/{sequence}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long postId,
-            @PathVariable Integer sequence
+            @PathVariable Integer sequence,
+            Authentication authentication
     ) {
-        postService.deleteComment(postId, sequence);
+        postService.deleteComment(postId, sequence, authentication);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -22,10 +22,17 @@ public enum ErrorCode {
     INVALID_APPLICATION_STATUS(HttpStatus.BAD_REQUEST, "신청 상태가 유효하지 않습니다."),
 
     /*
+     * 401 UNAUTHORIZED
+     */
+    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인된 사용자가 아닙니다."),
+
+    /*
      * 403 FORBIDDEN: 권한 없음
      */
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "권한이 없습니다."),
-
+    POST_DELETE_AUTHORIZATION_EXCEPTION(HttpStatus.FORBIDDEN, "작성자 본인 또는 관리자만 게시글을 삭제할 수 있습니다."),
+    COMMENT_UPDATE_AUTHORIZATION_EXCEPTION(HttpStatus.FORBIDDEN, "작성자 본인만 댓글을 수정할 수 있습니다."),
+    COMMENT_DELETE_AUTHORIZATION_EXCEPTION(HttpStatus.FORBIDDEN, "작성자 본인 또는 관리자만 댓글을 삭제할 수 있습니다."),
 
     /*
      * 404 NOT_FOUND: 리소스를 찾을 수 없음
@@ -51,10 +58,8 @@ public enum ErrorCode {
      * 409 CONFLICT: 사용자의 요청이 서버의 상태와 충돌
      */
     DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 신청된 사용자입니다."),
-
-
-
     ;
+
 
     private final HttpStatus status;
     private final String message;
