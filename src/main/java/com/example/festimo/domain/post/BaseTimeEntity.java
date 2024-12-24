@@ -26,6 +26,9 @@ public abstract class BaseTimeEntity {
 
     @PrePersist
     public void prePersist() {
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
         this.updatedAt = null;
     }
 }
