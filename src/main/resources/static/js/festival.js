@@ -6,6 +6,7 @@ let filterRegion = null;
 let filterKeyword = null;
 
 window.onload = function () {
+    document.getElementById('loading').style.display = 'flex';
     loadEvents(currentPage);
 };
 
@@ -26,6 +27,7 @@ function loadEvents(page) {
     const xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if ( xhr.readyState == 4 ) {
+            document.getElementById('loading').style.display = 'none';
             if ( xhr.status == 200 ) {
                 const response = JSON.parse(xhr.responseText.trim());
                 const events = response._embedded ? response._embedded.festivalTOList : [];
@@ -33,7 +35,6 @@ function loadEvents(page) {
 
                 renderEvents(events);
                 renderPagination(totalPages, page);
-
             } else {
                 alert(`[에러] 축제 불러오기 요청 실패: ${xhr.status}`)
             }
