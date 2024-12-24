@@ -12,19 +12,26 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final AccessDeniedHandler customAccessDeniedHandler;
+    private final NaverOauth2UserService naverOauth2UserService;
+    private final NaverLoginSuccessHandler naverLoginSuccessHandler;
+
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider, NaverOauth2UserService naverOauth2UserService, NaverLoginSuccessHandler naverLoginSuccessHandler) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.naverOauth2UserService = naverOauth2UserService;
+        this.naverLoginSuccessHandler = naverLoginSuccessHandler;
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -37,6 +44,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers(
                                 "/static/**",
                                 "/v3/api-docs/**",
@@ -52,10 +60,7 @@ public class SecurityConfig {
                         ).authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
-                        .anyRequest().permitAll()    // 나머지는 로그인한 사용자만
-                )
-                .exceptionHandling(exception -> exception
-                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
                 );
 //                .oauth2Login()
 //                .defaultSuccessUrl("/api/oauth2/success");
