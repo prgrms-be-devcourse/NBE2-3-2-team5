@@ -35,6 +35,11 @@ function loadEvents(page) {
 
                 renderEvents(events);
                 renderPagination(totalPages, page);
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
             } else {
                 alert(`[에러] 축제 불러오기 요청 실패: ${xhr.status}`)
             }
