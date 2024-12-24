@@ -9,5 +9,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CompanionRequest {
     private Long userId;
-    private Long companyId;
+    private Long compaionId;
 }

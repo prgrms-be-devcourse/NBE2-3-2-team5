@@ -12,6 +12,6 @@ import lombok.Setter;
 public class ApplicationRequest {
 
     private Long userId;
-    private Long companyId;
+    private Long companionId;
 
 }

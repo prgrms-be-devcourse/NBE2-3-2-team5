@@ -20,13 +20,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws java.io.IOException, ServletException {
 
 
-        // 인증 제외 경로 처리
-        String requestPath = request.getRequestURI();
-        if (requestPath.startsWith("/swagger-ui") || requestPath.startsWith("/v3/api-docs") ||
-                requestPath.startsWith("/api/register") || requestPath.startsWith("/api/login")) {
-            chain.doFilter(request, response);
-            return;
-        }
+        // 인증 제외 경로 처리  - SecurityConfig로 잘 작동 안할 시
+//        String requestPath = request.getRequestURI();
+//        if (requestPath.startsWith("/swagger-ui") || requestPath.startsWith("/v3/api-docs") ||
+//                requestPath.startsWith("/api/register") || requestPath.startsWith("/api/login")) {
+//            chain.doFilter(request, response);
+//            return;
+//        }
 
 
         String token = jwtTokenProvider.resolveToken(request);

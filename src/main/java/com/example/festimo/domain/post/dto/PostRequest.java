@@ -4,18 +4,20 @@ import com.example.festimo.domain.post.entity.PostCategory;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PostRequest {
     @NotBlank(message = "제목은 필수 입력 항목입니다.")
     @Size(max = 30, message = "제목은 30자 이하로 입력해주세요.")
     private String title;
 
     @NotBlank(message = "작성자는 필수 입력 항목입니다.")
-    @Size(max = 10, message = "작성자는 10자 이하로 입력해주세요.")
+    @Size(max = 15, message = "작성자는 15자 이하로 입력해주세요.")
     private String writer;
 
     @NotBlank(message = "이메일은 필수 입력 항목입니다.")

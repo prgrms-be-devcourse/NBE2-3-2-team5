@@ -2,7 +2,7 @@ package com.example.festimo.domain.admin.service;
 
 import com.example.festimo.domain.admin.mapper.AdminReviewMapper;
 import com.example.festimo.domain.admin.dto.AdminReviewDTO;
-import com.example.festimo.domain.admin.repository.ReviewsRepository;
+import com.example.festimo.domain.admin.repository.AdminReviewsRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +14,18 @@ import org.springframework.stereotype.Service;
 @Service
 public class AdminReviewService {
 
-    private final ReviewsRepository reviewsRepository;
+    private final AdminReviewsRepository adminReviewsRepository;
 
     @Autowired
-    public AdminReviewService(ReviewsRepository reviewsRepository) {
-        this.reviewsRepository = reviewsRepository;
+    public AdminReviewService(AdminReviewsRepository adminReviewsRepository) {
+        this.adminReviewsRepository = adminReviewsRepository;
     }
 
     //리뷰 조회
     public Page<AdminReviewDTO> getReviews(int page, int size) {
 
         Pageable pageable= PageRequest.of(page,size);
-        return reviewsRepository.findAll(pageable)
+        return adminReviewsRepository.findAll(pageable)
                 .map(AdminReviewMapper.INSTANCE::toDTO);
 
     }
@@ -33,9 +33,9 @@ public class AdminReviewService {
     //리뷰 삭제
     public void deleteReview(Long reviewId) {
         //존재하는지 확인
-         reviewsRepository.findById(reviewId)
+         adminReviewsRepository.findById(reviewId)
                         .orElseThrow(()-> new CustomException(ErrorCode. REVIEW_NOT_FOUND));
 
-        reviewsRepository.deleteById(reviewId);
+        adminReviewsRepository.deleteById(reviewId);
     }
 }
