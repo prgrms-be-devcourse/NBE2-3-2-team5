@@ -45,6 +45,11 @@ public class FestivalController {
     }
      */
 
+    @GetMapping("/api/mauallyGetAllEvents")
+    public void mauallyGetAllEvents() {
+        festivalService.refreshEvents();
+    }
+
     @ResponseBody
     @GetMapping("/api/events")
     public PagedModel<FestivalTO> getAllEvents(@RequestParam(defaultValue = "0") int page,
