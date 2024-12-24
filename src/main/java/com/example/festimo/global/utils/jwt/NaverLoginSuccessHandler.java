@@ -25,6 +25,6 @@ public class NaverLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
                 naverOauth2User.getEmail(), naverOauth2User.getRole());
         System.out.println("token: " + token);
         response.setHeader("Authorization", "Bearer " + token);
-        System.out.println("Authorization : Bearer " + token);
+        response.sendRedirect("/");
     }
 }
