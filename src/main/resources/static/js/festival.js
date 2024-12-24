@@ -65,7 +65,12 @@ function renderEvents(events) {
         cards += '<div class="event-badge">' + badgeText + '</div>';
 
         cards += '<div class="event-image">';
-        cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
+        if(!events[i].image){
+            cards += '<img src="/imgs/alt_img.jpg" alt="' + events[i].title + '" />';
+        }else{
+            cards += '<img src="' + events[i].image + '" alt="' + events[i].title + '" />';
+        }
+
         cards += '</div>';
         cards += '<div class="event-info">';
         cards += '<h3 class="event-title">' + events[i].title + '</h3>';
