@@ -51,6 +51,11 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
+                        .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll() // 게시글 전체 조회는 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/companions/{postId}").authenticated() // 게시글 상세 조회 인증 필요
                         .requestMatchers(HttpMethod.POST, "/api/companions").authenticated() // 게시글 등록 인증 필요
