@@ -46,7 +46,7 @@ function displayEventDetails(event) {
 
 
     const imageElement = document.querySelector('.event-image img');
-    if(!imageElement.src){
+    if(!event.image){
         imageElement.src = "/imgs/alt_img.jpg"
     } else {
         imageElement.src = event.image;
