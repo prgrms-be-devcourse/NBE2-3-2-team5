@@ -16,17 +16,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final NaverOauth2UserService naverOauth2UserService;
     private final NaverLoginSuccessHandler naverLoginSuccessHandler;
-
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider, NaverOauth2UserService naverOauth2UserService, NaverLoginSuccessHandler naverLoginSuccessHandler) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.naverOauth2UserService = naverOauth2UserService;
-        this.naverLoginSuccessHandler = naverLoginSuccessHandler;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -59,6 +54,11 @@ public class SecurityConfig {
                                 "/api/companions/{postId}/**"            // 게시글 상세 관련 모든 요청
                         ).authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
+                        .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
                         .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
                 );
