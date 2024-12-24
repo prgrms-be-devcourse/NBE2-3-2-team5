@@ -1,5 +1,6 @@
 package com.example.festimo.domain.meet.repository;
 
+import com.example.festimo.domain.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,8 @@ public interface CompanionRepository extends JpaRepository<Companion, Long> {
     // 동행의 리더 찾기
     @Query("SELECT c.leaderId FROM Companion c WHERE c.companionId = :companyId")
     Optional<Long> findLeaderIdByCompanyId( Long companyId);
+
+    //중복체크
+    Optional<Companion> findByPost(Post post);
 
 }
