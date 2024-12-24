@@ -27,6 +27,9 @@ public class User {
     @Column(name = "nickname", nullable = false, unique = true, length = 255)
     private String nickname;
 
+    @Column
+    private String avatar = "default-avatar.png";
+
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
