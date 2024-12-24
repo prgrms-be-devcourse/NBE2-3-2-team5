@@ -33,6 +33,7 @@ public class CompanionController {
 
     }
 
+
     /**
      * 동행원의 동행 취소
      *
