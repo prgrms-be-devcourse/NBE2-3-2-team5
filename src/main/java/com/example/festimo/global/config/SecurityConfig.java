@@ -16,12 +16,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final NaverOauth2UserService naverOauth2UserService;
     private final NaverLoginSuccessHandler naverLoginSuccessHandler;
+
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider, NaverOauth2UserService naverOauth2UserService, NaverLoginSuccessHandler naverLoginSuccessHandler) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.naverOauth2UserService = naverOauth2UserService;
+        this.naverLoginSuccessHandler = naverLoginSuccessHandler;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -40,7 +45,8 @@ public class SecurityConfig {
                                 "/static/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
