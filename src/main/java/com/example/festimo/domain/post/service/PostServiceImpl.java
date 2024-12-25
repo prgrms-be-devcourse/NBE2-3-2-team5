@@ -10,23 +10,39 @@ import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.*;
 import com.example.festimo.global.dto.PageResponse;
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.domain.*;
+import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.security.core.Authentication;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Validated
 @RequiredArgsConstructor
+@EnableCaching
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -37,18 +53,41 @@ public class PostServiceImpl implements PostService {
     // 게시글 등록
     @Transactional
     @Override
-    public PostListResponse createPost(@Valid PostRequest request, Authentication authentication) {
-        validateAuthentication(authentication);
+    public void createPostWithImage(
+            @Valid PostRequest request,
+            MultipartFile image,
+            Authentication authentication) {
+        User user = validateAuthenticationAndGetUser(authentication);
 
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
+        // 파일 업로드 처리
+        String imagePath = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                String uploadDir = "uploads/";
+                String filename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+                Path path = Paths.get(uploadDir, filename);
+                Files.createDirectories(path.getParent()); // 디렉토리가 없으면 생성
+                Files.write(path, image.getBytes());
+                imagePath = "/uploads/" + filename;
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 업로드에 실패하였습니다", e);
+            }
+        }
 
-        Post post = modelMapper.map(request, Post.class);
-        post.setUser(user);
-        post.setWriter(user.getNickname());
-        post.setMail(user.getEmail());
+        Post post = Post.builder()
+                .title(request.getTitle())
+                .writer(user.getNickname())
+                .mail(user.getEmail())
+                .password(request.getPassword())
+                .content(request.getContent())
+                .category(request.getCategory())
+                .tags(request.getTags() != null ? new ArrayList<>(request.getTags()) : new ArrayList<>())
+                .imagePath(imagePath)
+                .user(user)
+                .build();
 
-        Post savedEntity = postRepository.save(post);
-        return modelMapper.map(savedEntity, PostListResponse.class);
+        postRepository.save(post);
+        clearWeeklyTopPostsCache();
     }
 
     // 게시글 전체 조회
@@ -58,33 +97,38 @@ public class PostServiceImpl implements PostService {
             throw new InvalidPageRequest();
         }
 
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
         Page<Post> posts = postRepository.findAll(pageable);
 
         if (posts.isEmpty()) {
             throw new NoContent();
         }
 
-        Page<PostListResponse> responsePage = posts.map(post -> modelMapper.map(post, PostListResponse.class));
-        return new PageResponse<>(responsePage);
+        List<PostListResponse> responseList = posts.stream()
+                .map(PostListResponse::new)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(new PageImpl<>(responseList, pageable, posts.getTotalElements()));
     }
 
+
+    // 게시글 상세 조회
     @Transactional
     @Override
-    public PostDetailResponse getPostById(Long postId, Authentication authentication) {
+    public PostDetailResponse getPostById(Long postId, boolean incrementView, Authentication authentication) {
+        User user = validateAuthenticationAndGetUser(authentication);
+
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
-        post.increaseViews();
 
-        boolean isOwner = false;
-        boolean isAdmin = false;
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            User user = userRepository.findByEmail(authentication.getName()).orElse(null);
-            if (user != null) {
-                isOwner = post.getUser().getId().equals(user.getId());
-                isAdmin = user.getRole().equals(User.Role.ADMIN);
-            }
+        if (incrementView) {
+            postRepository.incrementViews(postId);
+            post.setViews(post.getViews() + 1);
         }
+
+        boolean isOwner = post.getUser().getId().equals(user.getId());
+        boolean isAdmin = user.getRole().equals(User.Role.ADMIN);
 
         List<CommentResponse> comments = post.getComments().stream()
                 .map(comment -> new CommentResponse(
@@ -100,6 +144,8 @@ public class PostServiceImpl implements PostService {
         response.setOwner(isOwner);
         response.setAdmin(isAdmin);
         response.setComments(comments);
+        response.setTags(post.getTags());
+        response.setReplies(comments.size());
         return response;
     }
 
@@ -107,10 +153,17 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public PostDetailResponse updatePost(Long postId, @Valid UpdatePostRequest request) {
+        User user = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+                .orElseThrow(UnauthorizedException::new);
+
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
         if (ObjectUtils.isEmpty(request.getPassword()) || !post.getPassword().equals(request.getPassword())) {
             throw new InvalidPasswordException();
+        }
+
+        if (request.getTitle() == null && request.getContent() == null && request.getCategory() == null) {
+            throw new IllegalArgumentException("수정할 필드가 없습니다.");
         }
 
         String newTitle = request.getTitle() != null ? request.getTitle() : post.getTitle();
@@ -118,15 +171,22 @@ public class PostServiceImpl implements PostService {
         PostCategory newCategory = request.getCategory() != null ? request.getCategory() : post.getCategory();
 
         post.update(newTitle, newContent, newCategory);
-        return modelMapper.map(post, PostDetailResponse.class);
+        postRepository.saveAndFlush(post);
+
+        PostDetailResponse response = modelMapper.map(post, PostDetailResponse.class);
+        response.setOwner(post.getUser().getId().equals(user.getId()));
+        response.setAdmin(user.getRole().equals(User.Role.ADMIN));
+
+        clearWeeklyTopPostsCache();
+        return response;
     }
 
     // 게시글 삭제
     @Transactional
     @Override
     public void deletePost(Long postId, String password, Authentication authentication) {
-        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
+        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
         if (post.getUser().equals(user)) {
             if (!post.getPassword().equals(password)) {
@@ -137,16 +197,50 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.delete(post);
+        clearWeeklyTopPostsCache();
+    }
+
+    // 주간 인기 게시글
+    @Cacheable(value = "posts:weeklyTopPosts", unless = "#result == null || #result.isEmpty()")
+    @Transactional(readOnly = true)
+    public List<PostListResponse> getCachedWeeklyTopPosts() {
+        try {
+            LocalDateTime lastWeek = LocalDateTime.now().minusDays(7);
+            List<Post> posts = postRepository.findTopPostsOfWeek(lastWeek);
+
+            return posts.stream()
+                    .map(post -> {
+                        Hibernate.initialize(post.getTags());
+                        return new PostListResponse(post);
+                    })
+                    .limit(5)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("주간 인기 게시물 조회 중 오류 발생", e);
+            return Collections.emptyList();
+        }
+    }
+
+    @CacheEvict(value = "posts:weeklyTopPosts")
+    public void clearWeeklyTopPostsCache() {
+        // 캐시 초기화
+    }
+
+    // 게시글 검색
+    @Override
+    public List<PostListResponse> searchPosts(String keyword) {
+        return postRepository.searchPostsByKeyword(keyword)
+                .stream()
+                .map(PostListResponse::new)
+                .collect(Collectors.toList());
     }
 
     // 댓글 등록
     @Transactional
     @Override
     public CommentResponse createComment(Long postId, @Valid CommentRequest request, Authentication authentication) {
-        validateAuthentication(authentication);
-
+        User user = validateAuthenticationAndGetUser(authentication);
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
 
         Integer maxSequence = commentRepository.findMaxSequenceByPost(post);
         Integer nextSequence = (maxSequence == null) ? 1 : maxSequence + 1;
@@ -166,10 +260,11 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public CommentResponse updateComment(Long postId, Integer sequence, @Valid UpdateCommentRequest request, Authentication authentication) {
-        validateAuthentication(authentication);
+        User user = validateAuthenticationAndGetUser(authentication);
+
+        if (!postRepository.existsById(postId)) { throw new PostNotFound(); }
 
         Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence).orElseThrow(CommentNotFound::new);
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
 
         if (!comment.getNickname().equals(user.getNickname())) {
             throw new CommentUpdateAuthorizationException();
@@ -181,23 +276,48 @@ public class PostServiceImpl implements PostService {
         return modelMapper.map(comment, CommentResponse.class);
     }
 
-    private static void validateAuthentication(Authentication authentication) {
+    private User validateAuthenticationAndGetUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedException();
         }
+        return userRepository.findByEmail(authentication.getName())
+                .orElseThrow(UnauthorizedException::new);
     }
 
     // 댓글 삭제
     @Transactional
     @Override
     public void deleteComment(Long postId, Integer sequence, Authentication authentication) {
+        User user = validateAuthenticationAndGetUser(authentication);
+
+        if (!postRepository.existsById(postId)) { throw new PostNotFound();}
+
         Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence).orElseThrow(CommentNotFound::new);
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
 
         if (!comment.getNickname().equals(user.getNickname()) && !user.getRole().equals(User.Role.ADMIN)) {
             throw new CommentDeleteAuthorizationException();
         }
 
         commentRepository.delete(comment);
+    }
+
+    // 좋아요
+    @Transactional
+    @Override
+    public void toggleLike(Long postId, Authentication authentication) {
+        User user = validateAuthenticationAndGetUser(authentication);
+        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
+
+        if (post.getLikedByUsers().contains(user)) {
+            // 이미 좋아요를 눌렀으면 좋아요 취소
+            post.getLikedByUsers().remove(user);
+            post.setLikes(post.getLikes() - 1);
+        } else {
+            // 좋아요 추가
+            post.getLikedByUsers().add(user);
+            post.setLikes(post.getLikes() + 1);
+        }
+
+        postRepository.save(post);
     }
 }
