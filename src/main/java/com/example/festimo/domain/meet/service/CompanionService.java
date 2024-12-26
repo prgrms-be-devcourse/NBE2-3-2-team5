@@ -1,5 +1,6 @@
 package com.example.festimo.domain.meet.service;
 
+
 import com.example.festimo.domain.meet.dto.CompanionResponse;
 import com.example.festimo.domain.meet.entity.Companion;
 import com.example.festimo.domain.meet.entity.CompanionMemberId;
@@ -10,6 +11,8 @@ import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
+
+
 import com.example.festimo.exception.CustomException;
 import jakarta.transaction.Transactional;
 
@@ -26,6 +29,7 @@ import static com.example.festimo.exception.ErrorCode.*;
 
 @Service
 public class CompanionService {
+
 
     private final CompanionMemberRepository companionMemberRepository;
     private final PostRepository postRepository;
@@ -65,6 +69,7 @@ public class CompanionService {
 
         //companion_member 추가
         addLeaderToCompanionMember(companion.getCompanionId(), userId);
+
     }
 
     private void addLeaderToCompanionMember(Long companionId, Long userId) {
@@ -84,21 +89,21 @@ public class CompanionService {
     /**
      * 동행 취소
      *
-     * @param companionId  취소하고 싶은 동행ID
+     * @param companyId  취소하고 싶은 동행ID
      * @param userId     취소하고 싶은 듀저 ID
      */
     @Transactional
-    public void deleteCompaion(Long companionId, Long userId) {
+    public void deleteCompaion(Long companyId, Long userId) {
 
-        CompanionMemberId companionMemberId = new CompanionMemberId(companionId, userId);
+        CompanionId companionId = new CompanionId(companyId, userId);
 
         //동행에 참가 여부 확인
-        if(!companionMemberRepository.existsById(companionMemberId)){
+        if(!companionRepository.existsById(companionId)){
             throw new CustomException(COMPANION_NOT_FOUND);
         }
 
         //동행원에서 삭제
-        companionMemberRepository.deleteById(companionMemberId);
+        companionRepository.deleteById(companionId);
     }
 
     /**

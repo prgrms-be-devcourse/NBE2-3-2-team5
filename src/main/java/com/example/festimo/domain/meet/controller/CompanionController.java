@@ -46,12 +46,13 @@ public class CompanionController {
     //* @param userId    취소할 유저의 ID --> 로그인 하고 바꾸기!!!
      */
     @DeleteMapping("/{companionId}/users/{userId}")
+
     @Operation(summary = "동행 취소")
     public ResponseEntity<Void>  deleteCompaion(
-            @PathVariable Long companionId,
+            @PathVariable Long companyId,
             @PathVariable Long userId
     ){
-        companionService.deleteCompaion(companionId, userId);
+        companionService.deleteCompaion(companyId, userId);
         return ResponseEntity.noContent().build();
     }
 

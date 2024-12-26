@@ -23,9 +23,13 @@ public class PostDetailResponse {
     private String content;
     private PostCategory category;
     private int views;
+    private int replies;
     private String createdAt;
     private String updatedAt;
     private boolean isOwner;
     private boolean isAdmin;
+    private List<String> tags;
+    private String imageUrl;
+    private int likes;
     private List<CommentResponse> comments = new ArrayList<>();
 }
