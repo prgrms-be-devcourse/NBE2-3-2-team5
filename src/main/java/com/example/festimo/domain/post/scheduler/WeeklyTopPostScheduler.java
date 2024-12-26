@@ -15,7 +15,7 @@ public class WeeklyTopPostScheduler {
 
     private final PostService postService;
 
-    @Scheduled(fixedRate = 3600000) // 한 시마다 실행
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void updateWeeklyTopPosts() {
         try {
             postService.clearWeeklyTopPostsCache();

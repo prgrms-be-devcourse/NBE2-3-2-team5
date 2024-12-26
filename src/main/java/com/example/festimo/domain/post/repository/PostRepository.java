@@ -31,4 +31,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     // 게시글 검색
     @Query("SELECT p FROM Post p WHERE p.title LIKE %:keyword% OR p.content LIKE %:keyword%")
     List<Post> searchPostsByKeyword(@Param("keyword") String keyword);
+
+    // 태그로 검색
+    @Query("SELECT DISTINCT p FROM Post p JOIN p.tags t WHERE t LIKE %:tag%")
+    List<Post> findByTag(@Param("tag") String tag);
 }

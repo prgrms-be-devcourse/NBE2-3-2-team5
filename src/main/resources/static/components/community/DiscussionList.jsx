@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
 import Pagination from '../common/Pagination';
 
 const DiscussionList = () => {
@@ -11,6 +11,7 @@ const DiscussionList = () => {
     const [isShowingResults, setIsShowingResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const getCategoryStyle = (category) => {
         switch (category) {
@@ -41,7 +42,7 @@ const DiscussionList = () => {
     const fetchPosts = async (url) => {
         try {
             const response = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
             if (!response.ok) throw new Error('Failed to fetch posts');
             const data = await response.json();
@@ -56,16 +57,36 @@ const DiscussionList = () => {
     // 목록 데이터 로드
     useEffect(() => {
         const loadPosts = async () => {
-            const url = `/api/companions?page=${currentPage}&size=${pageSize}`;
-            const data = await fetchPosts(url);
-            if (data) {
-                setPosts(data.content || []);
-                setTotalPages(data.totalPages || 1);
+            try {
+                const tagParam = searchParams.get('tag');
+                let url;
+
+                if (tagParam) {
+                    // 태그로 검색하는 경우
+                    url = `/api/tags/posts?tag=${encodeURIComponent(tagParam)}`;
+                    setIsShowingResults(true);
+                    setIsSearching(true);
+                    setSearchTerm(`#${tagParam}`);
+                } else if (searchTerm) {
+                    // 키워드로 검색하는 경우
+                    url = `/api/companions/search?keyword=${encodeURIComponent(searchTerm)}`;
+                } else {
+                    // 일반 목록 조회
+                    url = `/api/companions?page=${currentPage}&size=${pageSize}`;
+                }
+
+                const data = await fetchPosts(url);
+                if (data) {
+                    setPosts(data.content || data || []);
+                    setTotalPages(data.totalPages || Math.ceil((data.length || 0) / pageSize));
+                }
+            } catch (error) {
+                console.error('Error:', error);
             }
         };
 
         loadPosts();
-    }, [currentPage, pageSize, isSearching]);
+    }, [currentPage, pageSize, searchTerm, searchParams]);
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -85,16 +106,18 @@ const DiscussionList = () => {
         }
     };
 
+
     const handleResetSearch = () => {
         setSearchTerm('');
         setIsSearching(false);
         setIsShowingResults(false);
         setCurrentPage(1);
+        setSearchParams({});
     };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({top: 0, behavior: 'smooth'});
     };
 
     const handleWriteClick = () => {
@@ -192,7 +215,8 @@ const DiscussionList = () => {
                                         </span>
                                         <span className="text-gray-400">•</span>
                                         <span className="text-gray-500">{post.time || "Unknown time"}</span>
-                                        <span className={`px-3 py-1 rounded-full text-sm ${getCategoryStyle(post.category)}`}>
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-sm ${getCategoryStyle(post.category)}`}>
                                             {getCategoryLabel(post.category)}
                                         </span>
                                     </div>
@@ -218,7 +242,11 @@ const DiscussionList = () => {
                                 {(post.tags || []).map((tag) => (
                                     <span
                                         key={tag}
-                                        className="px-3 py-1 bg-[#4D4B88] text-white rounded-full text-sm font-medium"
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Link 컴포넌트의 기본 동작 방지
+                                            setSearchParams({tag: tag});
+                                        }}
+                                        className="px-3 py-1 bg-[#4D4B88] text-white rounded-full text-sm font-medium cursor-pointer hover:opacity-90"
                                     >
                                         #{tag}
                                     </span>
