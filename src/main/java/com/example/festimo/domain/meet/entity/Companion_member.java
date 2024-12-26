@@ -21,11 +21,14 @@ public class Companion_member {
     @EmbeddedId
     private CompanionMemberId id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "companion_id", insertable = false, updatable = false)
+    private Companion companion; // 동행 정보와의 관계
+
     @ManyToOne
     @MapsId("userId") // EmbeddedId의 userId와 매핑
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private User user;
-
 
 
     @Column(nullable = false)

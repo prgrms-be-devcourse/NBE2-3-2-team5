@@ -21,6 +21,8 @@ public enum ErrorCode {
 
     INVALID_APPLICATION_STATUS(HttpStatus.BAD_REQUEST, "신청 상태가 유효하지 않습니다."),
 
+    COMPANION_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "해당 게시글의 동행이 존재합니다."),
+
     /*
      * 401 UNAUTHORIZED
      */
