@@ -1,5 +1,6 @@
 package com.example.festimo.post;
 
+import com.example.festimo.domain.post.dto.PostDetailResponse;
 import com.example.festimo.domain.post.dto.UpdatePostRequest;
 import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.entity.PostCategory;
@@ -29,14 +30,10 @@ public class UpdateAdminpostTest {
     @Autowired
     private PostServiceImpl postService;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     private Post existingPost;
 
     @BeforeEach
     void setUp() {
-        // Given
         existingPost = Post.builder()
                 .title("Original Title")
                 .content("Original Content")
@@ -52,40 +49,39 @@ public class UpdateAdminpostTest {
     @DisplayName("수정 요청에서 null 값이 들어오면 기존 필드가 유지된다")
     void testUpdatePost_NullFieldsRemainUnchanged() {
         // Given
-        UpdatePostRequest request = new UpdatePostRequest(
-                null, // Title is null
-                null, // Content is null
-                null, // Category is null
-                "password123" // Valid password
-        );
+        UpdatePostRequest request = UpdatePostRequest.builder()
+                .title(null) // 제목은 수정하지 않음
+                .content("새로운 내용") // 내용만 수정
+                .password("password123")
+                .build();
 
         // When
-        var response = postService.updatePost(existingPost.getId(), request);
+        PostDetailResponse response = postService.updatePost(existingPost.getId(), request);
 
         // Then
-        assertEquals("Original Title", response.getTitle(), "Title should remain unchanged");
-        assertEquals("Original Content", response.getContent(), "Content should remain unchanged");
-        assertEquals(PostCategory.NOTICE, response.getCategory(), "Category should remain unchanged");
+        assertEquals("Original Title", response.getTitle(), "제목은 기존 값 유지");
+        assertEquals("새로운 내용", response.getContent(), "내용은 업데이트됨");
+        assertEquals(PostCategory.NOTICE, response.getCategory(), "카테고리는 기존 값 유지");
     }
 
     @Test
     @DisplayName("수정 요청에서 일부 필드만 수정된다")
     void testUpdatePost_PartialUpdate() {
         // Given
-        UpdatePostRequest request = new UpdatePostRequest(
-                "Updated Title", // New title
-                null,            // Content is null
-                null,            // Category is null
-                "password123"    // Valid password
-        );
+        UpdatePostRequest request = UpdatePostRequest.builder()
+                .title("Updated Title") // 제목 수정
+                .content(null)         // 내용은 유지
+                .category(null)        // 카테고리는 유지
+                .password("password123") // 비밀번호
+                .build();
 
         // When
-        var response = postService.updatePost(existingPost.getId(), request);
+        PostDetailResponse response = postService.updatePost(existingPost.getId(), request);
 
         // Then
-        assertEquals("Updated Title", response.getTitle(), "Title should be updated");
-        assertEquals("Original Content", response.getContent(), "Content should remain unchanged");
-        assertEquals(PostCategory.NOTICE, response.getCategory(), "Category should remain unchanged");
+        assertEquals("Updated Title", response.getTitle(), "제목은 업데이트됨");
+        assertEquals("Original Content", response.getContent(), "내용은 기존 값 유지");
+        assertEquals(PostCategory.NOTICE, response.getCategory(), "카테고리는 기존 값 유지");
     }
 
     @Test

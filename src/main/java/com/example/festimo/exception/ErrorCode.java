@@ -24,7 +24,7 @@ public enum ErrorCode {
     /*
      * 401 UNAUTHORIZED
      */
-    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인된 사용자가 아닙니다."),
+    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요."),
 
     /*
      * 403 FORBIDDEN: 권한 없음
@@ -60,6 +60,11 @@ public enum ErrorCode {
      * 409 CONFLICT: 사용자의 요청이 서버의 상태와 충돌
      */
     DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 신청된 사용자입니다."),
+
+    /*
+     * 500 INTERNAL_SERVER_ERROR
+     */
+    IMAGE_UPLOAD_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패했습니다.")
     ;
 
 

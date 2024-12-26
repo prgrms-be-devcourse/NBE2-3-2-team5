@@ -6,6 +6,7 @@ import com.example.festimo.domain.festival.dto.FestivalTO;
 import com.example.festimo.domain.festival.repository.FestivalRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
@@ -37,14 +40,15 @@ public class FestivalService {
     @Autowired
     private FestivalRepository festivalRepository;
 
-    @Autowired
-    private EntityManagerFactory entityManagerFactory;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleRefreshEvents() {
         refreshEvents();
     }
 
+    @Transactional
     public void refreshEvents() {
         // 기존 데이터를 삭제하여 데이터 갱신
         festivalRepository.deleteAll();
@@ -195,32 +199,17 @@ public class FestivalService {
         return details;
     }
 
-    private void resetAutoIncrement() {
-        // SQL 쿼리를 실행해 시퀀스 초기화
-        String resetQuery = "ALTER TABLE festival AUTO_INCREMENT = 1";
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        entityManager.getTransaction().begin();
-        entityManager.createNativeQuery(resetQuery).executeUpdate();
-        entityManager.getTransaction().commit();
-        entityManager.close();
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void resetAutoIncrement() {
+        entityManager.createNativeQuery("ALTER TABLE festival AUTO_INCREMENT = 1").executeUpdate();
     }
 
+    @Transactional
     public void insert(FestivalTO to){
         ModelMapper modelMapper = new ModelMapper();
         Festival festival = modelMapper.map(to, Festival.class);
 
         festivalRepository.save(festival);
-    }
-
-    public List<FestivalTO> findAll(){
-        List<Festival> festivalList = festivalRepository.findAll();
-
-        ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivalList.stream()
-                .map(p -> modelMapper.map(p, FestivalTO.class))
-                .collect(Collectors.toList());
-
-        return list;
     }
 
     public Page<FestivalTO> findPaginated(Pageable pageable) {
@@ -230,6 +219,7 @@ public class FestivalService {
         return page;
     }
 
+    @Transactional(readOnly = true)
     public FestivalTO findById(int id){
         Festival festival = festivalRepository.findById(String.valueOf(id)).orElse(null);
         if (festival == null) {
@@ -264,13 +254,6 @@ public class FestivalService {
         Page<FestivalTO> page = festivals.map(festival -> new ModelMapper().map(festival, FestivalTO.class));
 
         return page;
-    }
-
-    private boolean isFestivalInMonth(Festival festival, LocalDate firstDayOfMonth, LocalDate lastDayOfMonth) {
-        LocalDate startDate = festival.getStartDate();
-        LocalDate endDate = festival.getEndDate();
-
-        return !startDate.isAfter(lastDayOfMonth) && !endDate.isBefore(firstDayOfMonth);
     }
 
     public Page<FestivalTO> filterByRegion(String region, Pageable pageable) {
