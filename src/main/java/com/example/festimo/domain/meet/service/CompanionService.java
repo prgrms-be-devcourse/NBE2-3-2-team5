@@ -1,5 +1,6 @@
 package com.example.festimo.domain.meet.service;
 
+import com.example.festimo.domain.meet.dto.CompanionResponse;
 import com.example.festimo.domain.meet.entity.Companion;
 import com.example.festimo.domain.meet.entity.CompanionMemberId;
 import com.example.festimo.domain.meet.entity.Companion_member;
@@ -7,12 +8,19 @@ import com.example.festimo.domain.meet.repository.CompanionMemberRepository;
 import com.example.festimo.domain.meet.repository.CompanionRepository;
 import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.repository.PostRepository;
+import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+
+import java.util.List;
+
+import java.util.stream.Collectors;
 
 import static com.example.festimo.exception.ErrorCode.*;
 
@@ -31,6 +39,12 @@ public class CompanionService {
         this.userRepository = userRepository;
     }
 
+
+    /**
+     * 동행 생성
+     *
+     *
+     */
     @Transactional
     public void createCompanion(Long postId, Long userId) {
 
@@ -67,9 +81,6 @@ public class CompanionService {
     }
 
 
-
-
-
     /**
      * 동행 취소
      *
@@ -89,5 +100,81 @@ public class CompanionService {
         //동행원에서 삭제
         companionMemberRepository.deleteById(companionMemberId);
     }
+
+    /**
+     * 리더로 참여한 동행 조회
+     *
+     * @param leaderId   조회할 리더 id
+     * @return CompanionResponse 리더로 참여한 동행들
+     */
+    public List<CompanionResponse> getCompanionAsLeader(Long leaderId){
+
+        //리더로 참여한 동행
+        List<Companion> companions = companionRepository.findByLeaderId(leaderId);
+
+        //데이터 변환
+        if (companions == null || companions.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return companions.stream()
+                .map(this::mapToCompanionResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 동행원으로 참여한 동행 조회
+     *
+     * @param userId  조회할 user id
+     * @return CompanionResponse 동행원으로 참여한 동행들
+     */
+    public List<CompanionResponse> getCompanionAsMember(Long userId){
+
+        //사용자가 멤버로 포함된 동행
+        List<Companion_member> companionMembers = companionMemberRepository.findByUserId(userId).stream()
+                .filter(member -> member.getCompanion() != null && !member.getCompanion().getLeaderId().equals(userId)) // 리더로 속한 동행 제외
+                .collect(Collectors.toList());
+
+        if (companionMembers.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        //데이터 변환
+        return companionMembers.stream()
+                .map(companionMember -> mapToCompanionResponse(companionMember.getCompanion()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Companion_member에서 CompanionResponse로 변환
+     *
+     *
+     */
+    private CompanionResponse mapToCompanionResponse(Companion companion) {
+
+        //동행에 포함된 멤버 가져오기
+        List<Companion_member> companionMembers = companionMemberRepository.findAllByCompanionId(companion.getCompanionId());
+
+        //변환
+        List<CompanionResponse.MemberResponse> members = companionMembers.stream()
+                .filter(member -> member.getUser() != null && !member.getUser().getId().equals(companion.getLeaderId())) // 리더 제외
+                .map(member -> new CompanionResponse.MemberResponse(
+                        member.getUser().getId(),
+                        member.getUser().getUserName()
+                ))
+                .collect(Collectors.toList());
+
+
+        //리더 정보 가져오기
+        User leader = userRepository.findById(companion.getLeaderId())
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        return new CompanionResponse(
+                companion.getCompanionId(),
+                companion.getLeaderId(),
+                leader !=null ? leader.getUserName() : null,
+                members
+        );
+    }
+
 
 }
