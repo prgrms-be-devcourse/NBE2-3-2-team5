@@ -47,7 +47,7 @@ public class ApplicationService {
      * 신청 생성
      *
      * @param userId    신청을 생성하는 유저의 ID
-     * @param companionId 신청 대상 회사의 ID
+     * @param companionId 신청 동행 ID
      * @return 생성된 신청 정보
      */
     public ApplicationResponse createApplication(Long userId, Long companionId) {
@@ -79,7 +79,7 @@ public class ApplicationService {
     /**
      * 신청 리스트 확인
      *
-     * @param companyId 확인하려는 회사의 ID
+     * @param companyId 확인하려는 동행의 ID
    //  * @param userId    신청 리스트를 확인하려는 리더의 ID
      * @return 신청 리스트 정보
      */
@@ -151,7 +151,7 @@ public class ApplicationService {
      * 리더의 신청 거절
      *
      * @param applicationId 거절하고 싶은 신청 ID
-     //* @param userId        신청을 거절하려는 리더의 ID
+     //* @param userId        신청을 거절ㅌ`하려는 리더의 ID
      */
     public void rejectApplication(Long applicationId) {
 
@@ -160,7 +160,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new CustomException(APPLICATION_NOT_FOUND));
 
         /*
-        // 리더인지 확인
+        // 리더인지 확인 -> jwt
         Long companyId = application.getCompanionId();
         Long company = companionRepository.findLeaderIdByCompanyId(companyId)
                 .orElseThrow(() -> new CustomException(COMPANY_NOT_FOUND));

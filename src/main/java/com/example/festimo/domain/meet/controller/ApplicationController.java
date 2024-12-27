@@ -42,18 +42,18 @@ public class ApplicationController {
     /**
      * 리더의 동행 신청 리스트 조회 API
      *
-     * @param companyId 조회할 동행의 ID
+     * @param companionId 조회할 동행의 ID
      //* @param userId    조회를 시도한 유저의 ID --> 로그인 하고 바꾸기!!!
      * @return 해당 동행을 신청한 유저의 정보
      */
-    @GetMapping("/company/{companyId}")
+    @GetMapping("/companion/{companionId}")
     @Operation(summary = "리더의 동행 신청 리스트")
     public ResponseEntity<List<LeaderApplicationResponse>> getAllApplications(
-            @PathVariable Long companyId
+            @PathVariable Long companionId
             //@RequestParam Long userId
     ) {
        // List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companyId, userId);
-        List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companyId);
+        List<LeaderApplicationResponse> responses = applicationService.getAllApplications(companionId);
         return ResponseEntity.status(HttpStatus.OK).body(responses);
     }
 
