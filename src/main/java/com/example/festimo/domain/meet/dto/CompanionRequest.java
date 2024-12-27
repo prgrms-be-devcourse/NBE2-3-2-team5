@@ -8,6 +8,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class CompanionRequest {
+    private Long postId;
     private Long userId;
-    private Long compaionId;
 }

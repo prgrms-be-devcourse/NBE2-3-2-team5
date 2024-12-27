@@ -65,7 +65,7 @@ dependencies {
     implementation 'com.github.ben-manes.caffeine:caffeine'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.slf4j:slf4j-api'
-
+}
 tasks.named('test') {
     useJUnitPlatform()
 }
