@@ -32,6 +32,16 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/")
                 .setCacheControl(CacheControl.noCache())
                 .resourceChain(false);
+
+        // HTML 파일 접근을 위한 설정 추가
+        registry.addResourceHandler("/html/**")
+                .addResourceLocations("classpath:/static/html/")
+                .setCacheControl(CacheControl.noCache());
+
+        // JavaScript 파일의 MIME 타입 문제 해결
+        registry.addResourceHandler("/js/**")
+                .addResourceLocations("classpath:/static/js/")
+                .setCacheControl(CacheControl.noCache());
     }
 
 

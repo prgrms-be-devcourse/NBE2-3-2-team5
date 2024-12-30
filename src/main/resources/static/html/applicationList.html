@@ -1,22 +1,38 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>신청 리스트</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../css/applicationList.css">
-</head>
-<body>
-
-<main class="admin-container">
-    <h1>신청 리스트</h1>
-    <section id="application-management">
-        <div id="application-table" class="application-list">
-            <!-- 신청 리스트가 여기에 동적으로 추가됩니다 -->
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>내 동행</title>
+        <link rel="stylesheet" href="../css/applicationList.css">
+    </head>
+    <body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="list">신청 리스트</div>
+            <div class="tab" data-tab="mine">내 동행</div>
         </div>
-    </section>
-</main>
-<script src="../js/applicationList.js"></script>
-</body>
-</html>
+
+        <div id="listTab" class="tab-content active">
+            <h2 style="text-align: center; margin-bottom: 20px;">리더로 참여</h2>
+            <div id="leaderContent"></div>
+        </div>
+
+        <div id="mineTab" class="tab-content">
+            <h2 style="text-align: center; margin-bottom: 20px;">동행원으로 참여</h2>
+            <div id="memberContent"></div>
+        </div>
+
+        <!-- 모달 추가 -->
+        <div id="applicationModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2>신청 리스트</h2>
+                <div id="application-table" class="application-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/applicationList.js"></script>
+    </body>
+    </html>
