@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
@@ -60,8 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
-                        .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")// 권한 기반 접근 제어 관리자만 사용 가능
+                        .anyRequest().permitAll()    // 나머지는 로그인한 사용자만
                 );
 //                .oauth2Login()
 //                .defaultSuccessUrl("/api/oauth2/success");
@@ -76,6 +77,7 @@ public class SecurityConfig {
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
                                 .userService(naverOauth2UserService))
                         .successHandler(naverLoginSuccessHandler));
+
 
         return http.build();
     }
