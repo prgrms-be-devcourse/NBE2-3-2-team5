@@ -3,6 +3,7 @@ package com.example.festimo.domain.meet.controller;
 import com.example.festimo.domain.meet.dto.CompanionRequest;
 import com.example.festimo.domain.meet.dto.CompanionResponse;
 import com.example.festimo.domain.meet.service.CompanionService;
+import com.example.festimo.domain.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,9 @@ public class CompanionController {
     public ResponseEntity<Map<String,Object>> getMyCompanions(
             @PathVariable Long userId
     ){
+        // 검증: 유저가 존재하지 않으면 예외 발생
+        User user = companionService.validateAndGetUser(userId);
+
 
         //리더로 참여한 동행
         List<CompanionResponse> asLeader = companionService.getCompanionAsLeader(userId);

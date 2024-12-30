@@ -102,6 +102,17 @@ public class CompanionService {
     }
 
     /**
+     * 유저 존재하는지 조회
+     *
+     * @param userId   조회할 유저 id
+     *
+     */
+    public User validateAndGetUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND)); // USER_NOT_FOUND 예외 반환
+    }
+
+    /**
      * 리더로 참여한 동행 조회
      *
      * @param leaderId   조회할 리더 id

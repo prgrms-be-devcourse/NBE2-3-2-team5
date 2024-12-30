@@ -1,3 +1,7 @@
+const userId = 14; // 로그인 기능 구현 전 임시로 설정된 사용자 ID
+
+
+
 // API로부터 데이터를 가져오는 함수
 async function fetchCompanions() {
     try {
@@ -6,7 +10,7 @@ async function fetchCompanions() {
         document.getElementById('memberContent').innerHTML = '<div class="loading">로딩 중...</div>';
 
         // API 호출
-        const response = await fetch('http://localhost:8080/api/meet/companions/mine/12');
+        const response = await fetch(`http://localhost:8080/api/meet/companions/mine/${userId}`);
 
         if (!response.ok) {
             throw new Error('서버 응답 오류');
@@ -22,6 +26,7 @@ async function fetchCompanions() {
         return { asLeader: [], asMember: [] };
     }
 }
+
 
 // 리더로 참여한 동행 카드 생성
 function renderLeaderCompanion(companion) {
@@ -48,7 +53,7 @@ function renderMemberCompanion(companion) {
         <div class="companion-card">
             <div class="card-header">
                 <div class="member-title">리더</div>
-                <button class="btn" onclick="handleWithdraw(${companion.companionId})">
+                <button class="btn" onclick="handleWithdraw(${companion.companionId}, ${userId})">
                     탈퇴
                 </button>
             </div>
@@ -60,6 +65,8 @@ function renderMemberCompanion(companion) {
         </div>
     `;
 }
+
+
 
 // 모달 관련 함수들
 function openModal() {
@@ -153,11 +160,28 @@ function rejectApplication(applicationId, companionId) {
 
 // 탈퇴 버튼 클릭 핸들러
 function handleWithdraw(companionId) {
-    if (confirm('정말로 탈퇴하시겠습니까?')) {
-        console.log(`탈퇴 처리: ${companionId}`);
-        // 여기에 탈퇴 API 연동 추가
+    if (confirm('정말로 이 동행에서 탈퇴하시겠습니까?')) {
+        fetch(`/api/meet/${companionId}/users/${userId}`, {
+            method: "DELETE"
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("동행에서 성공적으로 탈퇴했습니다.");
+                    initializeContent(); // 탈퇴 후 동행 리스트 갱신
+                } else {
+                    alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
+                }
+            })
+            .catch(error => {
+                console.error("동행 취소 중 오류 발생:", error);
+                alert("탈퇴 처리 중 문제가 발생했습니다.");
+            });
     }
 }
+
+
+
+
 
 // 탭 전환 로직
 document.querySelectorAll('.tab').forEach(tab => {
