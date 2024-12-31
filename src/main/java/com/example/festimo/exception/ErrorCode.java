@@ -21,10 +21,13 @@ public enum ErrorCode {
 
     INVALID_APPLICATION_STATUS(HttpStatus.BAD_REQUEST, "신청 상태가 유효하지 않습니다."),
 
+    COMPANION_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "해당 게시글의 동행이 존재합니다."),
+
+
     /*
      * 401 UNAUTHORIZED
      */
-    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인된 사용자가 아닙니다."),
+    UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요."),
 
     /*
      * 403 FORBIDDEN: 권한 없음
@@ -50,6 +53,7 @@ public enum ErrorCode {
 
     COMPANION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 동행의 동행원이 아닙니다."),
 
+
     /*
      * 405 METHOD_NOT_ALLOWED: 허용되지 않은 Request Method 호출
      */
@@ -60,6 +64,11 @@ public enum ErrorCode {
      * 409 CONFLICT: 사용자의 요청이 서버의 상태와 충돌
      */
     DUPLICATE_APPLICATION(HttpStatus.CONFLICT, "이미 신청된 사용자입니다."),
+
+    /*
+     * 500 INTERNAL_SERVER_ERROR
+     */
+    IMAGE_UPLOAD_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드에 실패했습니다.")
     ;
 
 

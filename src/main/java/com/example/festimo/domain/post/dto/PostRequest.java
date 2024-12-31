@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -32,4 +34,6 @@ public class PostRequest {
     private String content;
 
     private PostCategory category;
+
+    private List<String> tags;
 }
