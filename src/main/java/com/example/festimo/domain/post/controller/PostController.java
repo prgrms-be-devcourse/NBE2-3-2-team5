@@ -9,12 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.beans.PropertyEditorSupport;
 import java.util.List;
@@ -38,13 +36,12 @@ public class PostController {
     }
 
     @Operation(summary = "게시글 등록")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<Void> createPost(
-            @ModelAttribute PostRequest request,
-            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestBody PostRequest request,
             Authentication authentication
     ) {
-        postService.createPostWithImage(request, image, authentication);
+        postService.createPost(request, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -69,10 +66,11 @@ public class PostController {
     }
 
     @Operation(summary = "게시글 수정")
-    @PutMapping("/{postId}")
+    @PutMapping(value = "/{postId}")
     public ResponseEntity<PostDetailResponse> updatePost(
             @PathVariable Long postId,
-            @Valid @RequestBody UpdatePostRequest request) {
+            @RequestBody UpdatePostRequest request
+    ) {
         PostDetailResponse updatePost = postService.updatePost(postId, request);
         return ResponseEntity.status(HttpStatus.OK).body(updatePost);
     }

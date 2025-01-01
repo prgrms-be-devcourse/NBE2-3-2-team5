@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PostPageController {
 
-    @GetMapping("/community/**")
-    public String community() {
-        return "index";
+    @GetMapping(value = {"/", "/community/**", "/login", "/register"})
+    public String forward() {
+        return "forward:/index.html";
     }
 }

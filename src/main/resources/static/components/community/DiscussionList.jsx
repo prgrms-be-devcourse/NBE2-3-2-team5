@@ -124,7 +124,7 @@ const DiscussionList = () => {
         const token = localStorage.getItem('token');
         if (!token) {
             alert('로그인이 필요합니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요.');
-            navigate('/login');
+            navigate('/api/login');
             return;
         }
         navigate('/post/write');
@@ -205,7 +205,7 @@ const DiscussionList = () => {
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-4">
                                     <img
-                                        src={post.avatar || "/assets/images/default-avatar.png"}
+                                        src={post.avatar || "/imgs/default-avatar.png"}
                                         alt=""
                                         className="w-10 h-10 rounded-full border-2 border-gray-100"
                                     />
@@ -223,11 +223,19 @@ const DiscussionList = () => {
                                 </div>
                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                     <span className="flex items-center gap-1">
-                                        <span>💬</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                        </svg>
                                         {(post.replies || 0)} replies
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <span>👁️</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3     0 016 0z"/>
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
                                         {post.views} views
                                     </span>
                                 </div>

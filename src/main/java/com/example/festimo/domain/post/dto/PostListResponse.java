@@ -31,8 +31,8 @@ public class PostListResponse {
         this.id = post.getId();
         this.writer = post.getUser().getNickname();
         this.avatar = (post.getUser().getAvatar() != null && !post.getUser().getAvatar().isEmpty())
-                ? "/assets/images/" + post.getUser().getAvatar()
-                : "/assets/images/default-avatar.png";
+                ? "/imgs/" + post.getUser().getAvatar()
+                : "/imgs/default-avatar.png";
         this.time = post.getCreatedAt() != null ? calculateTime(post.getCreatedAt()) : "Unknown time";
         this.title = post.getTitle();
         this.content = post.getContent();

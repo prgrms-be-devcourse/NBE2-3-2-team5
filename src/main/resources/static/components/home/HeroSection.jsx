@@ -5,22 +5,22 @@ import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
     const features = [
-        '회원가입 없이도 사용 가능',
-        '즉시 연결 가능',
-        '완전히 무료',
-        '24시간 언제나 이용 가능',
+        '즉시 시작 가능!',
+        '당신에게 딱 맞는 동행자와 손쉽게 연결!',
+        '간단한 클릭으로 원하는 정보와 연결!',
+        '언제 어디서든 편리하게 축제를 준비하세요!',
     ];
 
     return (
         <div className="container mx-auto px-6 py-12 flex flex-col lg:flex-row items-center">
             {/* Left Content */}
             <div className="lg:w-1/2 lg:pr-12">
-                <h1 className="text-5xl font-bold mb-6">
-                    완벽한 축제 동행자를<br/>
-                    <span className="text-[#4D4B88]">찾아보세요</span>
+                <h1 className="text-4xl font-bold mb-6">
+                    축제를 함께할 완벽한 동행자를<br/>
+                    <span className="text-[#4D4B88]">만나보세요!</span>
                 </h1>
                 <p className="text-gray-600 text-lg mb-8">
-                    축제를 더욱 특별하게 만들기 위해 같은 관심사를 가진 사람들과 연결되는 공간입니다. 게시글을 확인하고 동행자를 찾아 함께 추억을 만들어보세요.
+                    같은 관심사를 가진 사람들과 쉽게 연결되고, 축제를 더욱 특별하게 만들어보세요. 지금 바로 게시글을 확인하고 동행자를 찾아 함께 추억을 만들어보세요.
                 </p>
                 <div className="space-y-4 mb-8">
                     {features.map((feature, index) => (
@@ -37,7 +37,7 @@ const HeroSection = () => {
                 <div className="relative">
                     <div className="absolute -top-8 -left-8 w-32 h-32 bg-blue-100 rounded-full opacity-50"/>
                     <img
-                        src="/assets/images/스크린샷 2024-12-22 00.41.02.png"
+                        src="/imgs/friend.png"
                         alt="Companion travel"
                         className="rounded-lg shadow-lg relative z-10"
                     />

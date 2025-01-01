@@ -1,5 +1,5 @@
 package com.example.festimo.domain.post.scheduler;
-/*
+
 import com.example.festimo.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,5 +26,3 @@ public class WeeklyTopPostScheduler {
         }
     }
 }
-
- */
