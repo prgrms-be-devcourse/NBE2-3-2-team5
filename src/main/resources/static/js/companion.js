@@ -1,4 +1,4 @@
-const userId = 14; // 로그인 기능 구현 전 임시로 설정된 사용자 ID
+const userId = 8; // 로그인 기능 구현 전 임시로 설정된 사용자 ID
 
 
 

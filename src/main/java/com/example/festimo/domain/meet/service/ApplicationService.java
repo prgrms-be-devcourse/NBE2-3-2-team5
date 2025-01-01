@@ -14,12 +14,15 @@ import com.example.festimo.domain.meet.repository.CompanionRepository;
 import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
+import com.example.festimo.domain.user.dto.UserNicknameProjection;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.example.festimo.exception.ErrorCode.*;
 
@@ -79,14 +82,14 @@ public class ApplicationService {
     /**
      * 신청 리스트 확인
      *
-     * @param companyId 확인하려는 동행의 ID
+     * @param companionId 확인하려는 동행의 ID
    //  * @param userId    신청 리스트를 확인하려는 리더의 ID
      * @return 신청 리스트 정보
      */
-    public List<LeaderApplicationResponse> getAllApplications(Long companyId) {
+    public List<LeaderApplicationResponse> getAllApplications(Long companionId) {
 
         /*
-        // 리더인지 확인
+        // 리더인지 확인->jwt
         Long company = companionRepository.findLeaderIdByCompanyId(companyId)
                 .orElseThrow(() -> new CustomException(COMPANY_NOT_FOUND));
 
@@ -95,9 +98,26 @@ public class ApplicationService {
         }*/
 
 
-        // 상태가 PENDING인 신청 리스트 확인
-        List<Applications> applications = applicationRepository.findByCompanionIdAndStatus(companyId, Applications.Status.PENDING);
-        return LeaderApplicationMapper.INSTANCE.toDtoList(applications);
+        // 1. 신청 리스트 조회
+        List<Applications> applications = applicationRepository.findByCompanionIdAndStatus(companionId, Applications.Status.PENDING);
+
+        // 2. 신청한 유저 ID 목록 추출
+        List<Long> userIds = applications.stream()
+                .map(Applications::getUserId)
+                .collect(Collectors.toList());
+
+        // 3. UserRepository에서 유저 ID로 닉네임 조회
+        Map<Long, String> userNicknames = userRepository.findNicknamesByUserIds(userIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        UserNicknameProjection::getUserId,
+                        UserNicknameProjection::getNickname
+                ));
+
+        // 4. Mapper를 활용하여 Applications와 닉네임을 변환
+        return applications.stream()
+                .map(app -> LeaderApplicationMapper.INSTANCE.toDto(app, userNicknames.get(app.getUserId())))
+                .collect(Collectors.toList());
     }
 
     /**
