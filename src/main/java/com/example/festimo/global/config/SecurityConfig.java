@@ -37,7 +37,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers(
+                                "/",
+                                "/imgs/**",
+                                "/index.html",
+                                "/community",
+                                "/community/**",
+                                "/login",
+                                "/register",
                                 "/static/**",
+                                "/assets/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
@@ -55,6 +63,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
+                        .requestMatchers("/api/tags/popular").permitAll()
+                        .requestMatchers("/api/companions/top-weekly").permitAll()
                         .requestMatchers(
                                 "/api/companions/{postId}/comments/**",  // 댓글 관련 모든 요청
                                 "/api/companions/{postId}/**"            // 게시글 상세 관련 모든 요청
