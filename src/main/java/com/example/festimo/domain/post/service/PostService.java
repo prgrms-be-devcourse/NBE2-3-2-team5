@@ -4,14 +4,13 @@ import com.example.festimo.domain.post.dto.*;
 import com.example.festimo.global.dto.PageResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface PostService {
 
     // 게시글 등록
-    void createPostWithImage(@Valid PostRequest request,MultipartFile image, Authentication authentication);
+    void createPost(@Valid PostRequest request, Authentication authentication);
 
     // 전체 게시글 조회
     PageResponse<PostListResponse> getAllPosts(int page, int size);

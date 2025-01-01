@@ -28,6 +28,7 @@ public class User {
     private String nickname;
 
     @Column
+    @Builder.Default
     private String avatar = "default-avatar.png";
 
     @Column(name = "email", nullable = false, unique = true, length = 255)
@@ -79,4 +80,3 @@ public class User {
         KAKAO, NAVER, LOCAL
     }
 }
-

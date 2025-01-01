@@ -6,9 +6,8 @@ export default defineConfig({
     plugins: [react()],
     root: './src/main/resources/static',
     server: {
-        port: 5173,
         proxy: {
-            '/api': 'http://localhost:8080'  // 백엔드 서버 주소
+            '/api': 'http://localhost:8080'
         }
     },
     resolve: {
@@ -19,10 +18,16 @@ export default defineConfig({
     build: {
         outDir: '../static/assets',
         emptyOutDir: true,
+        assetsDir: '',
         rollupOptions: {
             input: {
-                main: path.resolve(__dirname, 'src/main/resources/static/main.jsx')
-            }
-        }
+                main: path.resolve(__dirname, 'src/main/resources/static/main.jsx'),
+            },
+            output: {
+                entryFileNames: '[name].js',
+                chunkFileNames: '[name].js',
+                assetFileNames: '[name][extname]',
+            },
+        },
     }
 })

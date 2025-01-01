@@ -10,32 +10,26 @@ import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.*;
 import com.example.festimo.global.dto.PageResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.data.domain.*;
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.Hibernate;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,26 +47,10 @@ public class PostServiceImpl implements PostService {
     // 게시글 등록
     @Transactional
     @Override
-    public void createPostWithImage(
+    public void createPost(
             @Valid PostRequest request,
-            MultipartFile image,
             Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
-
-        // 파일 업로드 처리
-        String imagePath = null;
-        if (image != null && !image.isEmpty()) {
-            try {
-                String uploadDir = "uploads/";
-                String filename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-                Path path = Paths.get(uploadDir, filename);
-                Files.createDirectories(path.getParent()); // 디렉토리가 없으면 생성
-                Files.write(path, image.getBytes());
-                imagePath = "/uploads/" + filename;
-            } catch (IOException e) {
-                throw new RuntimeException("이미지 업로드에 실패하였습니다", e);
-            }
-        }
 
         Post post = Post.builder()
                 .title(request.getTitle())
@@ -81,8 +59,7 @@ public class PostServiceImpl implements PostService {
                 .password(request.getPassword())
                 .content(request.getContent())
                 .category(request.getCategory())
-                .tags(request.getTags() != null ? new ArrayList<>(request.getTags()) : new ArrayList<>())
-                .imagePath(imagePath)
+                .tags(request.getTags() != null ? new HashSet<>(request.getTags()) : new HashSet<>())
                 .user(user)
                 .build();
 
@@ -113,18 +90,16 @@ public class PostServiceImpl implements PostService {
         return new PageResponse<>(new PageImpl<>(responseList, pageable, posts.getTotalElements()));
     }
 
-
     // 게시글 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
     public PostDetailResponse getPostById(Long postId, boolean incrementView, Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
 
-        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
+        Post post = postRepository.findByIdWithDetails(postId).orElseThrow(PostNotFound::new);
 
         if (incrementView) {
             postRepository.incrementViews(postId);
-            post.setViews(post.getViews() + 1);
         }
 
         boolean isOwner = post.getUser().getId().equals(user.getId());
@@ -201,7 +176,9 @@ public class PostServiceImpl implements PostService {
     }
 
     // 주간 인기 게시글
-    @Cacheable(value = "posts:weeklyTopPosts", unless = "#result == null || #result.isEmpty()")
+    @Cacheable(value = "posts:weeklyTopPosts",
+            key = "#root.method.name + '_' + T(java.time.LocalDate).now().toString()",
+            unless = "#result == null || #result.isEmpty()")
     @Transactional(readOnly = true)
     public List<PostListResponse> getCachedWeeklyTopPosts() {
         try {
@@ -262,7 +239,9 @@ public class PostServiceImpl implements PostService {
     public CommentResponse updateComment(Long postId, Integer sequence, @Valid UpdateCommentRequest request, Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
 
-        if (!postRepository.existsById(postId)) { throw new PostNotFound(); }
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFound();
+        }
 
         Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence).orElseThrow(CommentNotFound::new);
 
@@ -290,7 +269,9 @@ public class PostServiceImpl implements PostService {
     public void deleteComment(Long postId, Integer sequence, Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
 
-        if (!postRepository.existsById(postId)) { throw new PostNotFound();}
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFound();
+        }
 
         Comment comment = commentRepository.findByPostIdAndSequence(postId, sequence).orElseThrow(CommentNotFound::new);
 
@@ -308,16 +289,7 @@ public class PostServiceImpl implements PostService {
         User user = validateAuthenticationAndGetUser(authentication);
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
-        if (post.getLikedByUsers().contains(user)) {
-            // 이미 좋아요를 눌렀으면 좋아요 취소
-            post.getLikedByUsers().remove(user);
-            post.setLikes(post.getLikes() - 1);
-        } else {
-            // 좋아요 추가
-            post.getLikedByUsers().add(user);
-            post.setLikes(post.getLikes() + 1);
-        }
-
+        post.toggleLike(user);
         postRepository.save(post);
     }
 }

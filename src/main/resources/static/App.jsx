@@ -1,11 +1,10 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import Header from './components/layout/Header';
 import HeroSection from './components/home/HeroSection';
 import CommunityPage from './components/community/CommunityPage';
 import PostDetail from './components/community/PostDetail';
-import WritePost from "@/main/resources/static/components/community/PostWrite";
-import PostWrite from "@/main/resources/static/components/community/PostWrite";  // 추가
+import PostWrite from "@/main/resources/static/components/community/PostWrite";
 
 const Home = () => (
     <main>
