@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class TagService {
     private final PostRepository postRepository;
 
-    //이번 주 인기 태그 목록 조회
+    // 이번 주 인기 태그 목록 조회
     @Cacheable(cacheNames = "popularTags")
     public List<TagResponse> getTopWeeklyTags() {
         try {
@@ -41,11 +41,12 @@ public class TagService {
                 }
             }
 
-            // 태그 사용 횟수를 기준 내림차순 정렬, 상위 5개 선택
+            // 태그 사용 횟수 기준 내림차순 정렬, 상위 5개 선택(사용 횟수는 5 이상)
             return tagCount.entrySet().stream()
+                    .filter(entry -> entry.getValue() >= 5)
                     .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                     .limit(5)
-                    .map(entry -> new TagResponse(entry.getKey(), entry.getValue()))
+                    .map(entry -> new TagResponse(entry.getKey(), entry.getValue().intValue()))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             log.error("인기 태그 조회 중 오류 발생", e);
@@ -53,7 +54,7 @@ public class TagService {
         }
     }
 
-    //1시간마다 인기 태그 캐시 갱신
+    // 1시간마다 인기 태그 캐시 갱신
     @Scheduled(fixedRate = 3600000)
     @CacheEvict(cacheNames = "popularTags")
     public void refreshPopularTagsCache() {

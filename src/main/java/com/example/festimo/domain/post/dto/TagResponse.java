@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TagResponse {
     private String name;
-    private Long count;
+    private int count;
 }
