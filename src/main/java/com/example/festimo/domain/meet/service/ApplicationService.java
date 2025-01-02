@@ -49,17 +49,23 @@ public class ApplicationService {
     /**
      * 신청 생성
      *
-     * @param userId    신청을 생성하는 유저의 ID
+     * @param email    신청을 생성하는 유저의 email
      * @param companionId 신청 동행 ID
      * @return 생성된 신청 정보
      */
-    public ApplicationResponse createApplication(Long userId, Long companionId) {
+    public ApplicationResponse createApplication(String email, Long companionId) {
+
 
         // userId 확인
-        boolean userExists = userRepository.existsById(userId);
-        if (!userExists) {
-            throw new CustomException(USER_NOT_FOUND);
-        }
+        //boolean userExists = userRepository.existsById(userId);
+        //if (!userExists) {
+         //   throw new CustomException(USER_NOT_FOUND);
+        //}
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        Long userId = user.getId();
+
 
         // companionId 존재 확인
         boolean companyExists = companionRepository.existsById(companionId);
@@ -86,16 +92,20 @@ public class ApplicationService {
    //  * @param userId    신청 리스트를 확인하려는 리더의 ID
      * @return 신청 리스트 정보
      */
-    public List<LeaderApplicationResponse> getAllApplications(Long companionId) {
+    public List<LeaderApplicationResponse> getAllApplications(Long companionId, String email) {
 
-        /*
-        // 리더인지 확인->jwt
-        Long company = companionRepository.findLeaderIdByCompanyId(companyId)
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        Long userId = user.getId();
+
+        // 리더인지 확인
+        Long companyLeader = companionRepository.findLeaderIdByCompanyId(companionId)
                 .orElseThrow(() -> new CustomException(COMPANY_NOT_FOUND));
 
-        if (!userId.equals(company)) {
+        if (!userId.equals(companyLeader)) {
             throw new CustomException(ACCESS_DENIED);
-        }*/
+        }
 
 
         // 1. 신청 리스트 조회
@@ -127,15 +137,21 @@ public class ApplicationService {
      //* @param userId        신청을 승인하려는 리더의 ID
      */
     @Transactional
-    public void acceptApplication(Long applicationId) {
+    public void acceptApplication(Long applicationId,String email) {
 
 
         // 신청 ID로 조회
         Applications application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new CustomException(APPLICATION_NOT_FOUND));
-/*
 
-        // 리더인지 확인
+
+        User leader = userRepository.findByEmail(email)
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        Long userId = leader.getId();
+
+
+         //리더인지 확인
         Long companionId = application.getCompanionId();
         Long company = companionRepository.findLeaderIdByCompanyId(companionId)
                 .orElseThrow(() -> new CustomException(COMPANY_NOT_FOUND));
@@ -143,7 +159,7 @@ public class ApplicationService {
         if (!userId.equals(company)) {
             throw new CustomException(ACCESS_DENIED);
         }
-*/
+
         // 상태 바꾸기
         if (!application.getStatus().equals(Applications.Status.PENDING)) {
             throw new CustomException(INVALID_APPLICATION_STATUS);
@@ -173,13 +189,17 @@ public class ApplicationService {
      * @param applicationId 거절하고 싶은 신청 ID
      //* @param userId        신청을 거절ㅌ`하려는 리더의 ID
      */
-    public void rejectApplication(Long applicationId) {
+    public void rejectApplication(Long applicationId,String email) {
 
         // 신청 ID로 조회
         Applications application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new CustomException(APPLICATION_NOT_FOUND));
 
-        /*
+        User leader = userRepository.findByEmail(email)
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        Long userId = leader.getId();
+
         // 리더인지 확인 -> jwt
         Long companyId = application.getCompanionId();
         Long company = companionRepository.findLeaderIdByCompanyId(companyId)
@@ -189,7 +209,7 @@ public class ApplicationService {
             throw new CustomException(ACCESS_DENIED);
         }
 
-         */
+
 
         // 상태 바꾸기
         if (!application.getStatus().equals(Applications.Status.PENDING)) {
