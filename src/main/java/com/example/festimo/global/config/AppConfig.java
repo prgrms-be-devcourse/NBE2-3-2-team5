@@ -1,5 +1,7 @@
 package com.example.festimo.global.config;
 
+import com.example.festimo.domain.post.dto.PostDetailResponse;
+import com.example.festimo.domain.post.entity.Post;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +16,14 @@ public class AppConfig {
                 .setSkipNullEnabled(true)
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
+
+        // Post -> PostDetailResponse
+        modelMapper.createTypeMap(Post.class, PostDetailResponse.class)
+                .addMapping(Post::getCreatedAt, PostDetailResponse::setCreatedAt)
+                .addMapping(Post::getCategory, PostDetailResponse::setCategory)
+                .addMapping(Post::getViews, PostDetailResponse::setViews)
+                .addMapping(src -> src.getUser().getNickname(), PostDetailResponse::setWriter);
+
         return modelMapper;
     }
 }

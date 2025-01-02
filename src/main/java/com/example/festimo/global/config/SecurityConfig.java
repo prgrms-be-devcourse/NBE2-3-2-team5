@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,7 +38,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers(
+                                "/",
+                                "/imgs/**",
+                                "/index.html",
+                                "/community",
+                                "/community/**",
+                                "/login",
+                                "/register",
                                 "/static/**",
+                                "/assets/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
@@ -51,16 +58,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
+                        .requestMatchers("/api/companions/search/**").permitAll()
+                        .requestMatchers("/api/tags/**").permitAll()
+                        .requestMatchers("/api/companions/top-weekly").permitAll()
                         .requestMatchers(
                                 "/api/companions/{postId}/comments/**",  // 댓글 관련 모든 요청
                                 "/api/companions/{postId}/**"            // 게시글 상세 관련 모든 요청
                         ).authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
+                        .requestMatchers(
+                                "/",
+                                "/community/**",
+                                "/static/**"
+                        ).permitAll()
+
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
                         .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
                 );

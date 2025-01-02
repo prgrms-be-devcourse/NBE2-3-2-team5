@@ -1,5 +1,5 @@
 package com.example.festimo.domain.post.scheduler;
-/*
+
 import com.example.festimo.domain.post.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,7 @@ public class WeeklyTopPostScheduler {
 
     private final PostService postService;
 
-    @Scheduled(fixedRate = 3600000) // 한 시마다 실행
+    @Scheduled(fixedRate = 3600000) // 1시간마다 실행
     public void updateWeeklyTopPosts() {
         try {
             postService.clearWeeklyTopPostsCache();
@@ -26,5 +26,3 @@ public class WeeklyTopPostScheduler {
         }
     }
 }
-
- */

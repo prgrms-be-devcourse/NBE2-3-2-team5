@@ -5,7 +5,6 @@ import com.example.festimo.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,10 +33,11 @@ public class Post extends BaseTimeEntity {
 
     private String avatar;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
     @Column(name = "tag")
-    private List<String> tags = new ArrayList<>();
+    @Builder.Default
+    private Set<String> tags = new HashSet<>();
 
     private String mail;
 
@@ -45,9 +45,6 @@ public class Post extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private PostCategory category;
-
-    @Column
-    private String imagePath;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
@@ -69,6 +66,7 @@ public class Post extends BaseTimeEntity {
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @Builder.Default
     private Set<User> likedByUsers = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,6 +76,16 @@ public class Post extends BaseTimeEntity {
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @OrderBy("sequence asc")
     private List<Comment> comments;
+
+    public void toggleLike(User user) {
+        if (likedByUsers.contains(user)) {
+            likedByUsers.remove(user);
+            this.likes--;
+        } else {
+            likedByUsers.add(user);
+            this.likes++;
+        }
+    }
 
     public void update(String title, String content, PostCategory category) {
         this.title = title;

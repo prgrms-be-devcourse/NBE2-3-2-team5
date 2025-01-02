@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Link, useNavigate, useSearchParams} from 'react-router-dom';
 import Pagination from '../common/Pagination';
 
 const DiscussionList = () => {
@@ -11,6 +11,7 @@ const DiscussionList = () => {
     const [isShowingResults, setIsShowingResults] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const getCategoryStyle = (category) => {
         switch (category) {
@@ -41,7 +42,7 @@ const DiscussionList = () => {
     const fetchPosts = async (url) => {
         try {
             const response = await fetch(url, {
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
             });
             if (!response.ok) throw new Error('Failed to fetch posts');
             const data = await response.json();
@@ -56,16 +57,36 @@ const DiscussionList = () => {
     // 목록 데이터 로드
     useEffect(() => {
         const loadPosts = async () => {
-            const url = `/api/companions?page=${currentPage}&size=${pageSize}`;
-            const data = await fetchPosts(url);
-            if (data) {
-                setPosts(data.content || []);
-                setTotalPages(data.totalPages || 1);
+            try {
+                const tagParam = searchParams.get('tag');
+                let url;
+
+                if (tagParam) {
+                    // 태그로 검색하는 경우
+                    url = `/api/tags/posts?tag=${encodeURIComponent(tagParam)}`;
+                    setIsShowingResults(true);
+                    setIsSearching(true);
+                    setSearchTerm(`#${tagParam}`);
+                } else if (searchTerm) {
+                    // 키워드로 검색하는 경우
+                    url = `/api/companions/search?keyword=${encodeURIComponent(searchTerm)}`;
+                } else {
+                    // 일반 목록 조회
+                    url = `/api/companions?page=${currentPage}&size=${pageSize}`;
+                }
+
+                const data = await fetchPosts(url);
+                if (data) {
+                    setPosts(data.content || data || []);
+                    setTotalPages(data.totalPages || Math.ceil((data.length || 0) / pageSize));
+                }
+            } catch (error) {
+                console.error('Error:', error);
             }
         };
 
         loadPosts();
-    }, [currentPage, pageSize, isSearching]);
+    }, [currentPage, pageSize, searchTerm, searchParams]);
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -85,23 +106,25 @@ const DiscussionList = () => {
         }
     };
 
+
     const handleResetSearch = () => {
         setSearchTerm('');
         setIsSearching(false);
         setIsShowingResults(false);
         setCurrentPage(1);
+        setSearchParams({});
     };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({top: 0, behavior: 'smooth'});
     };
 
     const handleWriteClick = () => {
         const token = localStorage.getItem('token');
         if (!token) {
             alert('로그인이 필요합니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요.');
-            navigate('/login');
+            navigate('/api/login');
             return;
         }
         navigate('/post/write');
@@ -182,7 +205,7 @@ const DiscussionList = () => {
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-4">
                                     <img
-                                        src={post.avatar || "/assets/images/default-avatar.png"}
+                                        src={post.avatar || "/imgs/default-avatar.png"}
                                         alt=""
                                         className="w-10 h-10 rounded-full border-2 border-gray-100"
                                     />
@@ -192,18 +215,27 @@ const DiscussionList = () => {
                                         </span>
                                         <span className="text-gray-400">•</span>
                                         <span className="text-gray-500">{post.time || "Unknown time"}</span>
-                                        <span className={`px-3 py-1 rounded-full text-sm ${getCategoryStyle(post.category)}`}>
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-sm ${getCategoryStyle(post.category)}`}>
                                             {getCategoryLabel(post.category)}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 text-sm text-gray-500">
                                     <span className="flex items-center gap-1">
-                                        <span>💬</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                        </svg>
                                         {(post.replies || 0)} replies
                                     </span>
                                     <span className="flex items-center gap-1">
-                                        <span>👁️</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3     0 016 0z"/>
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
                                         {post.views} views
                                     </span>
                                 </div>
@@ -218,7 +250,11 @@ const DiscussionList = () => {
                                 {(post.tags || []).map((tag) => (
                                     <span
                                         key={tag}
-                                        className="px-3 py-1 bg-[#4D4B88] text-white rounded-full text-sm font-medium"
+                                        onClick={(e) => {
+                                            e.preventDefault(); // Link 컴포넌트의 기본 동작 방지
+                                            setSearchParams({tag: tag});
+                                        }}
+                                        className="px-3 py-1 bg-[#4D4B88] text-white rounded-full text-sm font-medium cursor-pointer hover:opacity-90"
                                     >
                                         #{tag}
                                     </span>

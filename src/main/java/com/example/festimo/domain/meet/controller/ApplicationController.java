@@ -2,6 +2,7 @@ package com.example.festimo.domain.meet.controller;
 
 import java.util.List;
 
+import com.example.festimo.domain.meet.service.ApplicationService;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.example.festimo.domain.meet.dto.ApplicationRequest;
 import com.example.festimo.domain.meet.dto.ApplicationResponse;
 import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
-import com.example.festimo.domain.meet.service.ApplicationService;
 
 @RestController
 @RequestMapping("/api/meet")
