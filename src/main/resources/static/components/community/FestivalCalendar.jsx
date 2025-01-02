@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import "react-calendar/dist/Calendar.css";
+import { useNavigate } from 'react-router-dom';
 
 const FestivalCalendar = () => {
+    const navigate = useNavigate();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [festivals, setFestivals] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedDateFestivals, setSelectedDateFestivals] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleFestivalClick = (festivalId) => {
+        window.location.href = `/html/festival_detail.html?festival_id=${festivalId}`;
+    };
 
     const fetchFestivalsByMonth = async (year, month) => {
         setLoading(true);
-        console.log(`Fetching festivals for ${year}-${month}`);
         try {
             const response = await fetch(`/api/events/filter/month?year=${year}&month=${month}&page=0&size=100`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            console.log('Fetched festivals:', data);
             setFestivals(data.content || []);
         } catch (error) {
             console.error("Error fetching festivals:", error);
@@ -29,13 +34,11 @@ const FestivalCalendar = () => {
     const handleDateChange = (date) => {
         setSelectedDate(date);
         const formattedDate = date.toISOString().split('T')[0];
-
         const eventsOnDate = festivals.filter((festival) => {
             const startDate = new Date(festival.startDate).toISOString().split('T')[0];
             const endDate = new Date(festival.endDate).toISOString().split('T')[0];
             return startDate <= formattedDate && endDate >= formattedDate;
         });
-
         setSelectedDateFestivals(eventsOnDate);
     };
 
@@ -55,18 +58,94 @@ const FestivalCalendar = () => {
         ) : null;
     };
 
+    const renderFestivalModal = () => {
+        if (!isModalOpen) return null;
+
+        return (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg p-6 w-11/12 max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold text-custom-purple">
+                            {selectedDate.toLocaleDateString('ko-KR')}의 모든 축제
+                        </h3>
+                        <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div className="space-y-3">
+                        {selectedDateFestivals.map((festival) => (
+                            <div
+                                key={festival.festival_id}
+                                onClick={() => handleFestivalClick(festival.festival_id)}
+                                className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                            >
+                                <h4 className="font-medium text-custom-purple">{festival.title}</h4>
+                                <p className="text-sm text-gray-600 mt-1">{festival.address}</p>
+                                <div className="text-xs text-gray-500 mt-1">
+                                    {new Date(festival.startDate).toLocaleDateString()} ~
+                                    {new Date(festival.endDate).toLocaleDateString()}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderSelectedFestivals = () => {
+        if (loading) {
+            return <div className="text-center py-4 text-gray-500">로딩 중...</div>;
+        }
+
+        if (selectedDateFestivals.length === 0) {
+            return <div className="text-center py-4 text-gray-500">이 날짜에 예정된 축제가 없습니다.</div>;
+        }
+
+        const displayFestivals = selectedDateFestivals.slice(0, 5);
+        const remainingCount = selectedDateFestivals.length - 5;
+
+        return (
+            <div className="flex flex-wrap gap-2">
+                {displayFestivals.map((festival) => (
+                    <div
+                        key={festival.festival_id}
+                        onClick={() => handleFestivalClick(festival.festival_id)}
+                        className="inline-flex px-3 py-1.5 bg-gray-50 text-sm text-gray-700 rounded-full
+                                hover:bg-custom-purple hover:text-white transition-colors cursor-pointer"
+                    >
+                        {festival.title}
+                    </div>
+                ))}
+                {remainingCount > 0 && (
+                    <div
+                        onClick={() => setIsModalOpen(true)}
+                        className="inline-flex px-3 py-1.5 bg-gray-100 text-sm text-gray-600 rounded-full cursor-pointer hover:bg-gray-200"
+                    >
+                        +{remainingCount}개 더보기
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     useEffect(() => {
         const year = selectedDate.getFullYear();
         const month = selectedDate.getMonth() + 1;
         fetchFestivalsByMonth(year, month);
     }, [selectedDate]);
 
+    useEffect(() => {
+        // 초기 로딩 시 현재 날짜의 축제 데이터 설정
+        handleDateChange(selectedDate);
+    }, [festivals]);
+
     return (
         <div className="max-w-7xl mx-auto bg-white rounded-lg shadow-lg">
             <div className="p-8">
                 <h2 className="text-2xl font-bold mb-6 text-custom-purple text-center">축제 달력</h2>
-
-                {/* 캘린더 섹션 */}
                 <div className="mb-8">
                     <Calendar
                         onChange={handleDateChange}
@@ -75,8 +154,6 @@ const FestivalCalendar = () => {
                         className="w-full shadow-md rounded-lg"
                     />
                 </div>
-
-                {/* 축제 목록 섹션 */}
                 <div className="mt-8">
                     <h3 className="text-xl font-semibold text-custom-purple mb-4 flex items-center">
                         <span className="bg-custom-purple w-2 h-6 mr-2 rounded"></span>
@@ -86,42 +163,10 @@ const FestivalCalendar = () => {
                             day: 'numeric'
                         })}의 축제
                     </h3>
-
-                    {loading ? (
-                        <div className="text-center py-8">
-                            <div className="animate-pulse text-gray-500">로딩 중...</div>
-                        </div>
-                    ) : selectedDateFestivals.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {selectedDateFestivals.map((festival) => (
-                                <div
-                                    key={festival.festival_id}
-                                    className="p-4 bg-white border border-gray-100 rounded-lg hover:border-custom-purple
-                                             transition-all duration-200 hover:shadow-md"
-                                >
-                                    <h4 className="font-medium text-custom-purple text-lg mb-2">
-                                        {festival.title}
-                                    </h4>
-                                    <p className="text-gray-600 mb-2">{festival.address}</p>
-                                    <div className="text-sm text-gray-500 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none"
-                                             viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                        {new Date(festival.startDate).toLocaleDateString()} ~{' '}
-                                        {new Date(festival.endDate).toLocaleDateString()}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8 bg-gray-50 rounded-lg">
-                            <p className="text-gray-500">이 날짜에 예정된 축제가 없습니다.</p>
-                        </div>
-                    )}
+                    {renderSelectedFestivals()}
                 </div>
             </div>
+            {renderFestivalModal()}
         </div>
     );
 };

@@ -36,21 +36,27 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
+                        // 정적 리소스
                         .requestMatchers(
                                 "/",
                                 "/imgs/**",
                                 "/index.html",
+                                "/static/**",
+                                "/assets/**",
+                                "/css/**",
+                                "/js/**"
+                        ).permitAll()
+
+                        // 프론트엔드 라우팅 경로
+                        .requestMatchers(
                                 "/community",
                                 "/community/**",
                                 "/login",
                                 "/register",
-                                "/static/**",
-                                "/assets/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/html/festival.html",
+                                "/**"     // 화면 확인을 위한 임시 허용
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
@@ -58,20 +64,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
+
+                        // 커뮤니티 관련 공개/인증 API
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
-                        .requestMatchers("/api/companions/search/**").permitAll()
-                        .requestMatchers("/api/tags/**").permitAll()
-                        .requestMatchers("/api/companions/top-weekly").permitAll()
-                        .requestMatchers(
-                                "/api/companions/{postId}/comments/**",  // 댓글 관련 모든 요청
-                                "/api/companions/{postId}/**"            // 게시글 상세 관련 모든 요청
-                        ).authenticated()
+                        .requestMatchers("/api/companions/search/**",
+                                "/api/tags/**",
+                                "/api/companions/top-weekly").permitAll()
+                        .requestMatchers("/api/companions/{postId}/**").authenticated()
 
+                        // Swagger UI
                         .requestMatchers(
-                                "/",
-                                "/community/**",
-                                "/static/**"
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
