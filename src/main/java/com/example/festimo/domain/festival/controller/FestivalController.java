@@ -77,7 +77,7 @@ public class FestivalController {
         } else if (keyword != null && !keyword.isEmpty()) {
             paginatedEvent = festivalService.search(keyword, pageable);
         } else {
-            paginatedEvent = festivalService.findPaginated(pageable);
+            paginatedEvent = festivalService.findPaginatedWithCache(pageable);
 
         }
 
