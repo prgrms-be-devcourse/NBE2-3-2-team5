@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Link, useNavigate, useSearchParams} from 'react-router-dom';
 import Pagination from '../common/Pagination';
+import { PenLine } from 'lucide-react';
 
 const DiscussionList = () => {
     const [posts, setPosts] = useState([]);
@@ -141,9 +142,9 @@ const DiscussionList = () => {
                     </div>
                     <button
                         onClick={handleWriteClick}
-                        className="bg-[#4D4B88] text-white px-5 py-2.5 rounded-lg hover:opacity-90 transition-all flex items-center gap-2 shadow-sm"
+                        className="bg-[#5c5d8d] text-white px-5 py-2.5 rounded hover:shadow-md hover:shadow-black/20 transition-all flex items-center gap-2 group"
                     >
-                        <span className="text-lg">✏️</span>
+                        <PenLine size={18} className="group-hover:scale-110 transition-transform"/>
                         <span className="font-medium">새 글 작성</span>
                     </button>
                 </div>

@@ -3,72 +3,54 @@ import { Link } from 'react-router-dom';
 
 const Navigation = () => {
     const navItems = [
-        { title: 'Home', path: '/', hasDropdown: true },
-        { title: 'Festival', path: '/festival', hasDropdown: true },
-        { title: 'Community', path: '/community', hasDropdown: true },
-        { title: 'MyPage', path: '/mypage', hasDropdown: true },
+        { title: 'Home', path: '/' },
+        { title: 'Mypage', path: '/mypage' },
+        { title: 'Festival', path: '/html/festival.html' },
+        { title: 'Community', path: '/community' },
     ];
 
     return (
-        <nav className="hidden md:flex items-center space-x-6">
+        <div className="hidden md:flex items-center gap-8 text-[14.5px] translate-y-[2px]">
             {navItems.map((item, index) => (
-                <div key={index} className="relative group">
+                <div key={index}>
                     <Link
                         to={item.path}
-                        className="flex items-center space-x-1 text-[#5D5A88] hover:text-[#4D4B88] font-medium"
+                        className="text-[#4a4a4a] hover:text-[#4a4a4a]/80 leading-[1.2]"
                     >
                         <span>{item.title}</span>
-                        {item.hasDropdown && (
-                            <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 9l-7 7-7-7"
-                                />
-                            </svg>
-                        )}
                     </Link>
                 </div>
             ))}
-        </nav>
+            <Link
+                to="/api/login"
+                className="text-[#4a4a4a] hover:text-[#4a4a4a]/80 leading-[1.2]"
+            >
+                Login
+            </Link>
+            <Link
+                to="/api/register"
+                className="px-4 py-[0.5rem] bg-[#5c5d8d] text-white rounded-[3px] hover:shadow-md hover:shadow-black/30 transition-all leading-[1.2]"
+            >
+                Get started
+            </Link>
+        </div>
     );
 };
 
 const Header = () => {
     return (
-        <header className="py-4 px-6 flex items-center justify-between bg-white shadow-sm">
+        <header style={{ padding: '1rem 2rem' }} className="flex items-center justify-between bg-white text-[14.5px] font-[Verdana,Geneva,Tahoma,sans-serif]">
             <div className="flex items-center">
-                <Link to="/" className="flex items-center space-x-2">
+                <Link to="/" className="flex items-center">
                     <img
                         src="/imgs/festimoLogo.svg"
                         alt="Festimo Logo"
-                        className="h-8 w-auto"
+                        className="w-[140px] h-auto"
                     />
                 </Link>
             </div>
 
             <Navigation />
-
-            <div className="flex items-center space-x-4">
-                <Link
-                    to="/api/login"
-                    className="px-4 py-2 text-[#5D5A88] hover:bg-gray-50 font-medium rounded-lg transition-colors"
-                >
-                    Login
-                </Link>
-                <Link
-                    to="/api/register"
-                    className="px-4 py-2 bg-[#5D5A88] text-white rounded-lg hover:bg-[#4D4B88] font-medium transition-colors"
-                >
-                    Sign Up
-                </Link>
-            </div>
         </header>
     );
 };

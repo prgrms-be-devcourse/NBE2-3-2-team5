@@ -33,8 +33,7 @@ const RecommendedTopics = () => {
     return (
         <div className="bg-white rounded-lg p-6 shadow-lg">
             <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-lg font-bold">이번 주 인기 태그</h2>
-                <span className="text-xl">🔥</span>
+                <h2 className="text-2xl font-bold mb-4">이번 주 인기 태그 🔥</h2>
             </div>
             <div className="flex flex-wrap gap-2">
                 {popularTags.map((tag, index) => (
