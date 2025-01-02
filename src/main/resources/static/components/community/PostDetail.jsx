@@ -15,6 +15,19 @@ const CATEGORY_LABELS = {
     DEFAULT: '기타'
 };
 
+// 날짜 포맷팅
+const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
 const PostDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -58,13 +71,18 @@ const PostDetail = () => {
 
             if (response.status === 401) {
                 localStorage.removeItem('token');
-                navigate('/login');
+                navigate('/api/login');
                 return;
             }
 
-            if (!response.ok) throw new Error('Failed to fetch post');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Server error response:', errorText);
+                throw new Error('게시글을 불러오는데 실패했습니다.');
+            }
 
             const data = await response.json();
+            console.log('Fetched post data:', data);
             setPost(data);
             setLikes(data.likes);
             setIsLiked(data.likedByUsers?.includes(data.currentUserId) || false);
@@ -94,7 +112,7 @@ const PostDetail = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to toggle like');
+                throw new Error('좋아요 처리에 실패했습니다.');
             }
 
             const wasLiked = isLiked;
@@ -122,7 +140,7 @@ const PostDetail = () => {
                 credentials: 'include',
             });
 
-            if (!response.ok) throw new Error('Failed to delete post');
+            if (!response.ok) throw new Error('게시글 삭제에 실패했습니다.');
             navigate('/community');
         } catch (error) {
             console.error('Error:', error);
@@ -153,7 +171,7 @@ const PostDetail = () => {
                 body: JSON.stringify({ comment: commentInput }),
             });
 
-            if (!response.ok) throw new Error('Failed to submit comment');
+            if (!response.ok) throw new Error('댓글 등록에 실패했습니다.');
 
             const newComment = await response.json();
             setPost(prev => ({
@@ -178,17 +196,17 @@ const PostDetail = () => {
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
             {/* 상단 섹션 */}
-            <div className="border-b pb-4 mb-4">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-4">
+            <div className="border-b border-gray-200 pb-3">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
                         <img
-                            src={post.avatar || "/assets/images/default-avatar.png"}
+                            src={post.avatar || "/imgs/default-avatar.png"}
                             alt="Avatar"
-                            className="w-12 h-12 rounded-full border border-gray-300"
+                            className="w-10 h-10 rounded-full border border-gray-200"
                         />
                         <div>
-                            <p className="font-medium text-lg">{post.writer}</p>
-                            <p className="text-gray-500 text-sm">{post.time}</p>
+                            <p className="font-medium text-lg leading-tight">{post.writer}</p>
+                            <p className="text-gray-500 text-sm">{formatDate(post.createdAt)}</p>
                         </div>
                     </div>
 
@@ -198,13 +216,13 @@ const PostDetail = () => {
                             <>
                                 <button
                                     onClick={handleEdit}
-                                    className="px-4 py-2 bg-[#4D4B88] text-white rounded-lg hover:opacity-90"
+                                    className="px-3 py-1.5 bg-[#4D4B88] text-white rounded-lg hover:opacity-90 text-sm"
                                 >
                                     수정
                                 </button>
                                 <button
                                     onClick={handleDelete}
-                                    className="px-4 py-2 bg-red-500 text-white rounded-lg hover:opacity-90"
+                                    className="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:opacity-90 text-sm"
                                 >
                                     삭제
                                 </button>
@@ -212,7 +230,7 @@ const PostDetail = () => {
                         ) : (
                             <button
                                 onClick={handleCompanionRequest}
-                                className="px-4 py-2 bg-[#4D4B88] text-white rounded-lg hover:opacity-90"
+                                className="px-3 py-1.5 bg-[#4D4B88] text-white rounded-lg hover:opacity-90 text-sm"
                             >
                                 동행 신청
                             </button>
@@ -220,16 +238,31 @@ const PostDetail = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 mb-2">
-                    <span className={`px-3 py-1 rounded-full ${getCategoryStyle(post.category)}`}>
-                        {getCategoryLabel(post.category)}
-                    </span>
-                    <h1 className="text-2xl font-bold">{post.title}</h1>
-                </div>
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-full text-sm ${getCategoryStyle(post.category)}`}>
+                            {getCategoryLabel(post.category)}
+                        </span>
+                        <h1 className="text-xl font-bold">{post.title}</h1>
+                    </div>
 
-                <div className="flex items-center text-gray-500 text-sm gap-4">
-                    <span>{post.views} views</span>
-                    <span>{post.replies} replies</span>
+                    <div className="flex items-center text-gray-500 text-sm">
+                        <div className="flex items-center gap-3">
+                            <span className="flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span>{post.views}</span>
+                            </span>
+                            <span className="flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <span>{post.replies}</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -280,7 +313,7 @@ const PostDetail = () => {
                                 className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:border-[#4D4B88] transition-colors"
                             >
                                 <img
-                                    src={comment.avatar || "/assets/images/default-avatar.png"}
+                                    src={comment.avatar || "/imgs/default-avatar.png"}
                                     alt="Avatar"
                                     className="w-10 h-10 rounded-full border border-gray-300"
                                 />

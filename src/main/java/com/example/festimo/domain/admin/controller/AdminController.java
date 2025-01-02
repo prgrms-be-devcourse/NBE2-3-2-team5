@@ -58,7 +58,7 @@ public class AdminController {
      * 회원 삭제
      * @param userId 삭제할 회원의 ID
      */
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/users/{userId}")
     @Operation(summary = "관리자의 회원 삭제", description = "회원 정보 삭제")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
         adminService.deleteUser(userId);

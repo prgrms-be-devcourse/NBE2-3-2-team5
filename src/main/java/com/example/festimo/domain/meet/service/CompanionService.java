@@ -46,7 +46,14 @@ public class CompanionService {
      *
      */
     @Transactional
-    public void createCompanion(Long postId, Long userId) {
+   // public void createCompanion(Long postId, Long userId) {
+    public void createCompanion(Long postId, String email) {
+
+        //userId 추출
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        Long userId = user.getId();
 
         //post_id 검사
         Post post = postRepository.findById(postId)
@@ -85,10 +92,16 @@ public class CompanionService {
      * 동행 취소
      *
      * @param companionId  취소하고 싶은 동행ID
-     * @param userId     취소하고 싶은 듀저 ID
+     * @param email     취소하고 싶은 듀저
      */
     @Transactional
-    public void deleteCompaion(Long companionId, Long userId) {
+    public void deleteCompaion(Long companionId, String email) {
+
+        //userId 추출
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()->new CustomException(USER_NOT_FOUND));
+
+        Long userId = user.getId();
 
         CompanionMemberId companionMemberId = new CompanionMemberId(companionId, userId);
 
@@ -99,6 +112,17 @@ public class CompanionService {
 
         //동행원에서 삭제
         companionMemberRepository.deleteById(companionMemberId);
+    }
+
+    /**
+     * 유저 존재하는지 조회
+     *
+     * @param userId   조회할 유저 id
+     *
+     */
+    public User validateAndGetUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(USER_NOT_FOUND)); // USER_NOT_FOUND 예외 반환
     }
 
     /**

@@ -11,7 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ApplicationRequest {
 
-    private Long userId;
     private Long companionId;
 
 }

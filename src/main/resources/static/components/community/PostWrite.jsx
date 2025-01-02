@@ -3,8 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const PostWrite = () => {
     const navigate = useNavigate();
-    const { postId } = useParams(); // URL에서 postId를 가져옴
-    const isEditMode = !!postId; // postId가 있으면 수정 모드
+    const { postId } = useParams();
+    const isEditMode = !!postId;
 
     const [formData, setFormData] = useState({
         title: "",
@@ -12,12 +12,10 @@ const PostWrite = () => {
         mail: "",
         password: "",
         content: "",
-        category: "GENERAL",
+        category: "COMPANION",
         tags: "",
     });
-    const [image, setImage] = useState(null);
 
-    // 수정 모드일 때 기존 데이터 불러오기
     useEffect(() => {
         if (isEditMode) {
             fetch(`/api/companions/${postId}`)
@@ -27,10 +25,10 @@ const PostWrite = () => {
                         title: data.title || "",
                         writer: data.writer || "",
                         mail: data.mail || "",
-                        password: "", // 비밀번호는 빈 값으로 초기화
+                        password: "",
                         content: data.content || "",
-                        category: data.category || "GENERAL",
-                        tags: (data.tags || []).join(","),
+                        category: data.category || "COMPANION",
+                        tags: (data.tags || []).join(",")
                     });
                 })
                 .catch(error => console.error("Error:", error));
@@ -45,32 +43,18 @@ const PostWrite = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const formDataToSend = new FormData();
-        formDataToSend.append("title", formData.title);
-        formDataToSend.append("writer", formData.writer);
-        formDataToSend.append("mail", formData.mail);
-        formDataToSend.append("password", formData.password);
-        formDataToSend.append("content", formData.content);
-        formDataToSend.append("category", formData.category);
-        formDataToSend.append("tags", formData.tags);
-        if (image) {
-            formDataToSend.append("image", image);
-        }
-
-        // 수정 모드와 등록 모드에 따라 다른 API 호출
         const url = isEditMode ? `/api/companions/${postId}` : "/api/companions";
-        const method = isEditMode ? "PUT" : "POST";
 
         fetch(url, {
-            method: method,
-            body: isEditMode ? JSON.stringify(formData) : formDataToSend,
-            headers: isEditMode ? {
+            method: isEditMode ? "PUT" : "POST",
+            headers: {
                 'Content-Type': 'application/json',
-            } : undefined,
+            },
+            body: JSON.stringify(formData)
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(isEditMode ? "Failed to update post" : "Failed to create post");
+                    throw new Error(isEditMode ? "게시글 수정에 실패했습니다." : "게시글 작성에 실패했습니다.");
                 }
                 return response.json();
             })
@@ -110,7 +94,7 @@ const PostWrite = () => {
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                         required
-                        disabled={isEditMode} // 수정 모드에서는 작성자 변경 불가
+                        disabled={isEditMode}
                     />
                 </div>
                 <div className="mb-4">
@@ -122,7 +106,7 @@ const PostWrite = () => {
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                         required
-                        disabled={isEditMode} // 수정 모드에서는 이메일 변경 불가
+                        disabled={isEditMode}
                     />
                 </div>
                 <div className="mb-4">
@@ -155,10 +139,10 @@ const PostWrite = () => {
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                     >
-                        <option value="GENERAL">동행자 모집</option>
-                        <option value="QUESTION">후기</option>
-                        <option value="DISCUSSION">Q&A</option>
-                        <option value="DISCUSSION">기타</option>
+                        <option value="COMPANION">동행자 모집</option>
+                        <option value="REVIEW">후기</option>
+                        <option value="QNA">Q&A</option>
+                        <option value="OTHER">기타</option>
                     </select>
                 </div>
                 <div className="mb-4">
@@ -172,17 +156,6 @@ const PostWrite = () => {
                         placeholder="Comma-separated tags"
                     />
                 </div>
-                {!isEditMode && ( // 수정 모드에서는 이미지 업로드 숨김
-                    <div className="mb-4">
-                        <label className="block font-semibold mb-2">Upload Image</label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => setImage(e.target.files[0])}
-                            className="w-full p-2 border rounded-lg"
-                        />
-                    </div>
-                )}
                 <div className="text-right">
                     <button
                         type="button"

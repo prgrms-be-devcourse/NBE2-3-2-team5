@@ -15,11 +15,13 @@ public interface LeaderApplicationMapper {
 
     LeaderApplicationMapper INSTANCE = Mappers.getMapper(LeaderApplicationMapper.class);
 
-    @Mapping(source = "applicationId", target = "applicationId")
-    @Mapping(source = "userId", target = "userId")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "appliedDate", target = "appliedDate")
-    LeaderApplicationResponse toDto(Applications application);
+    @Mapping(source = "application.applicationId", target = "applicationId")
+    @Mapping(source = "application.userId", target = "userId")
+    @Mapping(source = "application.companionId", target = "companionId")
+    @Mapping(source = "nickname", target = "nickname")
+    @Mapping(source = "application.status", target = "status")
+    @Mapping(source = "application.appliedDate", target = "appliedDate")
+    LeaderApplicationResponse toDto(Applications application, String nickname);
 
     List<LeaderApplicationResponse> toDtoList(List<Applications> applications);
 }
