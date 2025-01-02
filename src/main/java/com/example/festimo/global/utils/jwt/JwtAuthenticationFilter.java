@@ -21,10 +21,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws java.io.IOException, ServletException {
+            throws java.io.IOException, ServletException {
 
 
-        //인증 제외 경로 처리  - SecurityConfig로 잘 작동 안할 시
+         //인증 제외 경로 처리  - SecurityConfig로 잘 작동 안할 시
         String requestPath = request.getRequestURI();
         logger.debug("Incoming request path: {}", requestPath);
         if (requestPath.startsWith("/swagger-ui") || requestPath.startsWith("/v3/api-docs")) {

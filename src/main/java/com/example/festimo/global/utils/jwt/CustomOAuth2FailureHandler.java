@@ -15,16 +15,17 @@ import java.nio.charset.StandardCharsets;
 @Component
 public class CustomOAuth2FailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
-	@Override
-	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    @Override
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
 
-		// 예외 메시지 로그 출력
-		System.err.println("Authentication failed: " + exception.getMessage());
-		exception.printStackTrace();
+        // 예외 메시지 로그 출력
+        System.err.println("Authentication failed: " + exception.getMessage());
+        exception.printStackTrace();
 
-		// 오류 페이지로 리다이렉트
-		String errorMessage = "Authentication failed: " + exception.getMessage();
-		response.sendRedirect("/login?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8));
-	}
+        // 오류 페이지로 리다이렉트
+        String errorMessage = "Authentication failed: " + exception.getMessage();
+        response.sendRedirect("/login?error=" + URLEncoder.encode(errorMessage, StandardCharsets.UTF_8));
+    }
 
 }
+

@@ -28,17 +28,17 @@ public class CustomUserDetailsService implements UserDetailsService {
         logger.debug("Attempting to load user by username: {}", username);
 
         User user = userRepository.findByEmail(username)
-            .orElseThrow(() -> {
-                logger.error("User not found: {}", username);
-                return new UsernameNotFoundException("User not found: " + username);
-            });
+                .orElseThrow(() -> {
+                    logger.error("User not found: {}", username);
+                    return new UsernameNotFoundException("User not found: " + username);
+                });
 
         logger.info("User loaded successfully: {}", username);
 
         return new CustomUserDetails(
-            user.getEmail(),
-            user.getPassword(),
-            Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                user.getEmail(),
+                user.getPassword(),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
         );
     }
 }

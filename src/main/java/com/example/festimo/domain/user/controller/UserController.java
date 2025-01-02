@@ -78,11 +78,11 @@ public class UserController {
 
 
     //    //현재 인증된 유저 정보 반환
-    //    @GetMapping("/user")
-    //    public ResponseEntity<UserResponseDTO> getAuthenticatedUser(@RequestHeader("Authorization") String accessToken) {
-    //        String email = jwtTokenProvider.getEmailFromToken(accessToken.replace("Bearer ", ""));
-    //        return ResponseEntity.ok(userService.getUserByEmail(email));
-    //    }
+//    @GetMapping("/user")
+//    public ResponseEntity<UserResponseDTO> getAuthenticatedUser(@RequestHeader("Authorization") String accessToken) {
+//        String email = jwtTokenProvider.getEmailFromToken(accessToken.replace("Bearer ", ""));
+//        return ResponseEntity.ok(userService.getUserByEmail(email));
+//    }
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponseDTO> refreshTokens(@RequestBody Map<String, String> request) {

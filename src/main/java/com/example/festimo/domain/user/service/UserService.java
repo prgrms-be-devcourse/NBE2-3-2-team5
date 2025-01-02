@@ -85,10 +85,10 @@ public class UserService {
         logger.info("Attempting login for email: {}", email);
 
         User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> {
-                logger.warn("Login failed. User not found for email: {}", email);
-                return new CustomException(ErrorCode.USER_NOT_FOUND);
-            });
+                .orElseThrow(() -> {
+                    logger.warn("Login failed. User not found for email: {}", email);
+                    return new CustomException(ErrorCode.USER_NOT_FOUND);
+                });
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
             logger.warn("Login failed. Invalid credentials for email: {}", email);
@@ -104,10 +104,10 @@ public class UserService {
     public void logout(String refreshToken) {
         logger.info("Attempting logout for refresh token.");
         User user = userRepository.findByRefreshToken(refreshToken)
-            .orElseThrow(() -> {
-                logger.warn("Logout failed. Invalid refresh token.");
-                return new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
-            });
+                .orElseThrow(() -> {
+                    logger.warn("Logout failed. Invalid refresh token.");
+                    return new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
+                });
 
         user.setRefreshToken(null);
         userRepository.save(user);
@@ -119,7 +119,7 @@ public class UserService {
     public String changePassword(ChangePasswordDTO dto) {
         // 이메일 정규화 및 사용자 조회
         User user = userRepository.findByEmail(normalizeEmail(dto.getEmail()))
-            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 기존 비밀번호 검증
         if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
@@ -141,7 +141,7 @@ public class UserService {
     // 사용자 정보 반환, 성별 넣을지 말지
     public UserResponseDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(normalizeEmail(email))
-            .orElseThrow(() ->  new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() ->  new CustomException(ErrorCode.USER_NOT_FOUND));
 
         UserResponseDTO responseDTO = modelMapper.map(user, UserResponseDTO.class);
 
