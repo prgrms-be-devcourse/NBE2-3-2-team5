@@ -56,14 +56,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/companions").authenticated()
-                        .requestMatchers("/api/tags/popular").permitAll()
+                        .requestMatchers("/api/companions/search/**").permitAll()
+                        .requestMatchers("/api/tags/**").permitAll()
                         .requestMatchers("/api/companions/top-weekly").permitAll()
                         .requestMatchers(
                                 "/api/companions/{postId}/comments/**",  // 댓글 관련 모든 요청
