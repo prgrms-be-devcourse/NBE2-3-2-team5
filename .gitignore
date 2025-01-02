@@ -37,5 +37,6 @@ out/
 .vscode/
 
 /src/main/resources/properties/env.properties
-
-.DS_Store
+/src/main/resources/static/assets/main.css
+/src/main/resources/static/assets/main.js
+node_modules/

@@ -1,0 +1,86 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+body {
+    background-color: #f8f9fa;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: white;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo img {
+    max-width: 140px;
+    height: auto;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #4a4a4a;
+}
+
+.mypage-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.mypage-container h1 {
+    color: #505199;
+    margin-bottom: 2rem;
+}
+
+.profile-section {
+    display: flex; /* flex 방향을 가로로 변경 */
+    justify-content: space-between; /* 좌우로 정렬 */
+    gap: 2rem; /* 좌우 요소 간 간격 추가 */
+    align-items: center; /* 세로 정렬 중앙 */
+}
+
+
+.profile-info {
+    text-align: left; /* 닉네임과 이메일을 왼쪽 정렬 */
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column; /* 버튼을 세로로 정렬 */
+    gap: 1rem;
+    align-items: flex-start; /* 오른쪽에 정렬 */
+}
+
+
+.action-btn {
+    width: 200px;
+    padding: 0.8rem;
+    background-color: #505199;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background-color: #404080;
+}
