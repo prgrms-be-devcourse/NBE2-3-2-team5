@@ -20,7 +20,7 @@ import java.util.Map;
 import static com.example.festimo.exception.ErrorCode.USER_NOT_FOUND;
 
 @RestController
-@RequestMapping("api/meet")
+@RequestMapping("/api/meet")
 @Tag(name = "동행 API", description = "동행 관련 API")
 public class CompanionController {
 
@@ -81,12 +81,15 @@ public class CompanionController {
      * 내 동행 찾기
      *
      */
-   // @GetMapping("/companions/mine/{userId}")
+
     @GetMapping("/companions/mine")
     @Operation(summary = "내 동행 찾기")
     public ResponseEntity<Map<String,Object>> getMyCompanions(
            @RequestHeader("Authorization") String authorizationHeader
     ){
+        //
+        try {
+        //
 
         //jwt에서 이메일 추출
         String token = authorizationHeader.replace("Bearer ", "");
@@ -113,5 +116,12 @@ public class CompanionController {
         response.put("asMember", asMember);
 
         return ResponseEntity.ok(response);
+
+        //
+        } catch (Exception e) {
+            e.printStackTrace(); // 상세 에러 확인
+            return ResponseEntity.status(500).body(null);
+        }
+        //
     }
 }
