@@ -49,7 +49,6 @@ public class CompanionController {
         String token = authorizationHeader.replace("Bearer ", "");
         String email = jwtTokenProvider.getEmailFromToken(token);
 
-       //companionService.createCompanion(request.getPostId(), request.getUserId());
         companionService.createCompanion(request.getPostId(),email);
        return ResponseEntity.status(HttpStatus.CREATED).build();
 
@@ -62,7 +61,6 @@ public class CompanionController {
      * @param companionId 취소할 동행의 ID
     //* @param userId    취소할 유저의 ID --> 로그인 하고 바꾸기!!!
      */
-   // @DeleteMapping("/{companionId}/users/{userId}")
     @DeleteMapping("/{companionId}")
     @Operation(summary = "동행 취소")
     public ResponseEntity<Void>  deleteCompaion(
@@ -87,7 +85,6 @@ public class CompanionController {
     @GetMapping("/companions/mine")
     @Operation(summary = "내 동행 찾기")
     public ResponseEntity<Map<String,Object>> getMyCompanions(
-           // @PathVariable Long userId
            @RequestHeader("Authorization") String authorizationHeader
     ){
 
