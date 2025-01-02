@@ -5,9 +5,16 @@ import com.example.festimo.domain.user.dto.*;
 import com.example.festimo.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.antlr.v4.runtime.Token;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -23,8 +30,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDTO> login(@RequestBody @Valid UserLoginRequestDTO dto) {
-        return ResponseEntity.ok(userService.login(dto));
+    public ResponseEntity<?> login(@RequestBody @Valid UserLoginRequestDTO dto) {
+        TokenResponseDTO tokenResponseDTO = userService.login(dto);
+
+        String accessToken = tokenResponseDTO.getAccessToken();
+        String refreshToken = tokenResponseDTO.getRefreshToken();
+
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(Duration.ofDays(30))
+                .sameSite("Strict").build();
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(Collections.singletonMap("accessToken", accessToken));
     }
 
     @PostMapping("/logout")
@@ -61,5 +80,6 @@ public class UserController {
         String refreshToken = request.get("refreshToken");
         return ResponseEntity.ok(userService.refreshTokens(refreshToken));
     }
+
 
 }

@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
@@ -66,6 +67,7 @@ public class SecurityConfig {
                                 "/api/companions/{postId}/comments/**",  // 댓글 관련 모든 요청
                                 "/api/companions/{postId}/**"            // 게시글 상세 관련 모든 요청
                         ).authenticated()
+
                         .requestMatchers(
                                 "/",
                                 "/community/**",
@@ -74,6 +76,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
                         .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
+
                 );
 //                .oauth2Login()
 //                .defaultSuccessUrl("/api/oauth2/success");
@@ -99,6 +102,7 @@ public class SecurityConfig {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                 }) // 권한 부족 시 403 반환
         );
+
 
 
         return http.build();
