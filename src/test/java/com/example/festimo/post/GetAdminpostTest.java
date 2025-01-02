@@ -107,3 +107,4 @@ public class GetAdminpostTest {
                 .hasMessageContaining("조회된 데이터가 없습니다.");
     }
 }
+
