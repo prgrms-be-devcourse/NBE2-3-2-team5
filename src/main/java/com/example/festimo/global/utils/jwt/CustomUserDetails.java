@@ -32,6 +32,7 @@ public class CustomUserDetails implements UserDetails {
         return email;
     }
 
+    // 계정 상태 확인 - 계정 항상 활성화 상태로 간주
     @Override
     public boolean isAccountNonExpired() {
         return true;

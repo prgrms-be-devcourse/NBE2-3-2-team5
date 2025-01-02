@@ -1,11 +1,11 @@
-package com.example.festimo.domain.user.dto;
+package com.example.festimo.domain.oauth.dto;
 
 import java.util.Map;
 
-public class NaverOauth2Response {
+public class NaverOAuth2Response {
 
     public final Map<String, Object> attribute;
-    public NaverOauth2Response(Map<String, Object> attribute) {
+    public NaverOAuth2Response(Map<String, Object> attribute) {
         this.attribute = (Map<String, Object>) attribute.get("response");
     }
     public String getProvider(){
