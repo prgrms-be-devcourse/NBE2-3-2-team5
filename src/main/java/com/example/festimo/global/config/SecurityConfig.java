@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
+                        .requestMatchers(HttpMethod.GET, "/manuallyGetAllEvents").permitAll() // 수동으로 축제 api 불러오기 허용
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용

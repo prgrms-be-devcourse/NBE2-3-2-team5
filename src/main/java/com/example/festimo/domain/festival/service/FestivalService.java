@@ -60,17 +60,21 @@ public class FestivalService {
 
     @Transactional
     public void refreshEvents() {
-        // 기존 데이터를 삭제하여 데이터 갱신
-        festivalRepository.deleteAll();
+        try {
+            // 기존 데이터를 삭제하여 데이터 갱신
+            festivalRepository.deleteAll();
 
-        resetAutoIncrement();
+            resetAutoIncrement();
 
-        // API 호출로 데이터 가져오기
-        List<FestivalTO> events = getAllEvents();
+            // API 호출로 데이터 가져오기
+            List<FestivalTO> events = getAllEvents();
 
-        // 가져온 데이터를 데이터베이스에 저장
-        for (FestivalTO event : events) {
-            insert(event);
+            // 가져온 데이터를 데이터베이스에 저장
+            for (FestivalTO event : events) {
+                insert(event);
+            }
+        } catch (Exception e) {
+            System.out.println("refreshEvents 도중 에러 발생: " + e.getMessage());
         }
     }
 
