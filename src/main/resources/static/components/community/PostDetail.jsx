@@ -148,10 +148,37 @@ const PostDetail = () => {
         }
     };
 
-    const handleCompanionRequest = () => {
-        if (window.confirm('동행 신청을 하시겠습니까?')) {
+    const handleCompanionRequest = async () => {
+        if (!window.confirm('동행 신청을 하시겠습니까?')) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/applications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    companionId: id // 현재 게시글의 ID를 사용
+                })
+            });
+
+            if (response.status === 409) {
+                alert('이미 신청한 동행입니다.');
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('동행 신청에 실패했습니다.');
+            }
+
+            const data = await response.json();
             alert('동행 신청이 완료되었습니다.');
-            // TODO: 동행 신청 API 연동
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('동행 신청 중 오류가 발생했습니다.');
         }
     };
 
@@ -230,9 +257,22 @@ const PostDetail = () => {
                         ) : (
                             <button
                                 onClick={handleCompanionRequest}
-                                className="px-3 py-1.5 bg-[#4D4B88] text-white rounded-lg hover:opacity-90 text-sm"
+                                className="px-4 py-2 bg-[#5c5d8d] text-white rounded-lg hover:shadow-md hover:shadow-black/20 transition-all flex items-center gap-2 group text-sm font-medium"
                             >
-                                동행 신청
+                                <span>동행 신청</span>
+                                <svg
+                                    className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                    />
+                                </svg>
                             </button>
                         )}
                     </div>
@@ -247,7 +287,7 @@ const PostDetail = () => {
                     </div>
 
                     <div className="flex items-center text-gray-500 text-sm">
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                             <span className="flex items-center gap-1">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />

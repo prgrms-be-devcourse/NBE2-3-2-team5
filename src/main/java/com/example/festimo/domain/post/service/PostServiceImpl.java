@@ -1,5 +1,6 @@
 package com.example.festimo.domain.post.service;
 
+import com.example.festimo.domain.meet.service.CompanionService;
 import com.example.festimo.domain.post.dto.*;
 import com.example.festimo.domain.post.entity.Comment;
 import com.example.festimo.domain.post.entity.Post;
@@ -43,6 +44,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final CommentRepository commentRepository;
+    private final CompanionService companionService;
 
     // 게시글 등록
     @Transactional
@@ -63,7 +65,13 @@ public class PostServiceImpl implements PostService {
                 .user(user)
                 .build();
 
-        postRepository.save(post);
+        Post savedPost = postRepository.save(post);
+
+        // 카테고리가 COMPANION인 경우 동행 생성
+        if (savedPost.getCategory() == PostCategory.COMPANION) {
+            companionService.createCompanion(savedPost.getId(), user.getEmail());
+        }
+
         clearWeeklyTopPostsCache();
     }
 
