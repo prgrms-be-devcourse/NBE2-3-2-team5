@@ -20,7 +20,7 @@ import java.util.Map;
 import static com.example.festimo.exception.ErrorCode.USER_NOT_FOUND;
 
 @RestController
-@RequestMapping("api/meet")
+@RequestMapping("/api/meet")
 @Tag(name = "동행 API", description = "동행 관련 API")
 public class CompanionController {
 
@@ -49,7 +49,6 @@ public class CompanionController {
         String token = authorizationHeader.replace("Bearer ", "");
         String email = jwtTokenProvider.getEmailFromToken(token);
 
-       //companionService.createCompanion(request.getPostId(), request.getUserId());
         companionService.createCompanion(request.getPostId(),email);
        return ResponseEntity.status(HttpStatus.CREATED).build();
 
@@ -62,7 +61,6 @@ public class CompanionController {
      * @param companionId 취소할 동행의 ID
     //* @param userId    취소할 유저의 ID --> 로그인 하고 바꾸기!!!
      */
-   // @DeleteMapping("/{companionId}/users/{userId}")
     @DeleteMapping("/{companionId}")
     @Operation(summary = "동행 취소")
     public ResponseEntity<Void>  deleteCompaion(
@@ -83,13 +81,15 @@ public class CompanionController {
      * 내 동행 찾기
      *
      */
-   // @GetMapping("/companions/mine/{userId}")
+
     @GetMapping("/companions/mine")
     @Operation(summary = "내 동행 찾기")
     public ResponseEntity<Map<String,Object>> getMyCompanions(
-           // @PathVariable Long userId
            @RequestHeader("Authorization") String authorizationHeader
     ){
+        //
+        try {
+        //
 
         //jwt에서 이메일 추출
         String token = authorizationHeader.replace("Bearer ", "");
@@ -116,5 +116,12 @@ public class CompanionController {
         response.put("asMember", asMember);
 
         return ResponseEntity.ok(response);
+
+        //
+        } catch (Exception e) {
+            e.printStackTrace(); // 상세 에러 확인
+            return ResponseEntity.status(500).body(null);
+        }
+        //
     }
 }

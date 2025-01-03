@@ -19,7 +19,7 @@ public class AdminCommunityPostService {
     //게시글 삭제
     public void deletePost(Long postId) {
 
-        boolean exists = postRepository.existsById(1L);
+        boolean exists = postRepository.existsById(postId);
         System.out.println("게시글 존재 여부: " + exists);
 
         if (!postRepository.existsById(postId)) {

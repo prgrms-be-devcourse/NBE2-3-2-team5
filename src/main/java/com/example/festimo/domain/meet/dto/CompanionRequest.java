@@ -11,5 +11,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CompanionRequest {
     private Long postId;
-    private Long userId;
+
 }

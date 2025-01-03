@@ -37,14 +37,7 @@ public class ApplicationController {
      * @param request 사용자의 userId와 companyId를 포함하는 ApplicationRequest 객체
      * @return 생성된 신청 정보를 반환, HTTP 상태 코드는 CREATED(201)
      */
-    /*
-    @PostMapping("/applications")
-    @Operation(summary = "동행 신청")
-    public ResponseEntity<ApplicationResponse> apply(
-            @RequestBody ApplicationRequest request) {
-        ApplicationResponse response = applicationService.createApplication(request.getUserId(), request.getCompanionId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }*/
+
     @PostMapping("/applications")
     @Operation(summary = "동행 신청")
     public ResponseEntity<ApplicationResponse> apply(
