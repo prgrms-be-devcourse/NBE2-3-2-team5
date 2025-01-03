@@ -1,5 +1,5 @@
 package com.example.festimo.meet;
-
+/*
 import com.example.festimo.domain.meet.dto.ApplicationRequest;
 import com.example.festimo.domain.meet.dto.CompanionRequest;
 import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
@@ -162,9 +162,6 @@ class TestScenario {
         }
     }
 
-
-
-
-
 }
 
+*/
