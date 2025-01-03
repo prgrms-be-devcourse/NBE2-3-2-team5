@@ -16,10 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -43,17 +43,12 @@ public class FestivalController {
     @Autowired
     private PagedResourcesAssembler<FestivalTO> pagedResourcesAssembler;
 
-    /*
-    @GetMapping("/")
-    public String getMain() {
-        return "festival.html";
-    }
-     */
-
     // 수동으로 축제 api를 불러올 수 있는 방법
-    @GetMapping("/api/mauallyGetAllEvents")
-    public void mauallyGetAllEvents() {
+    @GetMapping("/manuallyGetAllEvents")
+    @ResponseBody
+    public ResponseEntity<String> manuallyGetAllEvents() {
         festivalService.refreshEvents();
+        return ResponseEntity.ok("모든 축제 api를 성공적으로 불러왔습니다");
     }
 
     @ResponseBody
