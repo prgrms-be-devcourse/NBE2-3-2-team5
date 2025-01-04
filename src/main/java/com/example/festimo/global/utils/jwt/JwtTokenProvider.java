@@ -17,6 +17,9 @@ import java.security.Key;
 import java.util.Date;
 import java.util.List;
 
+import com.example.festimo.exception.CustomException;
+import com.example.festimo.exception.ErrorCode;
+
 @Component
 public class JwtTokenProvider {
 
@@ -37,10 +40,10 @@ public class JwtTokenProvider {
     // Access Token 생성
     public String generateAccessToken(String email, String role) {
         return Jwts.builder()
-                .setSubject(email)
-                .claim("role", role)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .setSubject(email)    // 사용자 이메일
+                .claim("role", role)    // 사용자 권한
+                .setIssuedAt(new Date())    // 발행 시간
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))    // 만료시간
                 .signWith(key)
                 .compact();
     }
@@ -57,12 +60,18 @@ public class JwtTokenProvider {
 
     // 토큰에서 이메일 추출
     public String getEmailFromToken(String token) {
-        return Jwts.parserBuilder()
+        try {
+            return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject();
+                .getSubject();  // Subject 필드값 반환
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
     }
 
     // 토큰 검증
@@ -102,7 +111,7 @@ public class JwtTokenProvider {
         return null;
     }
 
-    // 요청에서 인증 객체 생성
+//    // 클라이언트가 요청한 API에 대해 유효한 토큰을 제공했는지 확인하고, 인증 상태를 설정
 //    public Authentication getAuthenticationFromRequest(HttpServletRequest request) {
 //        String token = resolveToken(request);
 //        if (token != null && validateToken(token)) {
