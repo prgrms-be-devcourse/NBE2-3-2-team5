@@ -8,7 +8,13 @@ const CommunityPage = () => {
     const [posts, setPosts] = useState([]);
 
     useEffect(() => {
-        fetch('/api/companions')
+        const token = localStorage.getItem('accessToken');
+        fetch('/api/companions', {
+            headers: {
+                'Authorization': token ? `Bearer ${token}` : '',
+                'Content-Type': 'application/json'
+            }
+        })
             .then(response => response.json())
             .then(data => setPosts(data))
             .catch(error => console.error('Error:', error));
