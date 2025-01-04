@@ -121,10 +121,10 @@ public class UserService {
     }
 
     @Transactional
-    public String changePassword(ChangePasswordDTO dto) {
-        // 이메일 정규화 및 사용자 조회
-        User user = userRepository.findByEmail(normalizeEmail(dto.getEmail()))
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public String changePassword(String email, ChangePasswordDTO dto) {
+        // 이메일로 사용자 조회
+        User user = userRepository.findByEmail(normalizeEmail(email))
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 기존 비밀번호 검증
         if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
@@ -140,6 +140,7 @@ public class UserService {
 
         return "Password changed successfully.";
     }
+
 
 
 
@@ -164,11 +165,13 @@ public class UserService {
 
         // 닉네임 업데이트
         if (dto.getNickname() != null) {
-            if (userRepository.existsByNickname(dto.getNickname())) {
+            // 자신이 사용 중인 닉네임인지 확인
+            if (!user.getNickname().equals(dto.getNickname()) && userRepository.existsByNickname(dto.getNickname())) {
                 throw new CustomException(ErrorCode.DUPLICATE_NICKNAME);
             }
             user.setNickname(dto.getNickname());
         }
+
 
         // 사용자 이름 업데이트
         if (dto.getUserName() != null) {

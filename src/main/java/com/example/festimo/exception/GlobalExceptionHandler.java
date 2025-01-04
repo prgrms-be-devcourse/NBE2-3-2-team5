@@ -28,6 +28,7 @@ public class GlobalExceptionHandler {
         errorResponse.put("timestamp", LocalDateTime.now());
         errorResponse.put("status", errorCode.getStatus().value());
         errorResponse.put("error", errorCode.getMessage());
+        errorResponse.put("errorCode", errorCode.name()); // errorCode 추가
 
         return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
     }

@@ -87,7 +87,7 @@
                 localStorage.setItem('accessToken', accessToken);
 
                 // 2. 로그인 성공 시 홈 경로로 리다이렉트
-                window.location.href = '/static/html/festival.html';
+                window.location.href = '/html/festival.html';
             } else {
                 // 실패 처리
                 const errorMessage = await response.text();

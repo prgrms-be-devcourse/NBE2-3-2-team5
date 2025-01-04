@@ -61,12 +61,20 @@ public class UserController {
         }
         userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
         return ResponseEntity.ok("Logged out successfully.");
-    }
 
-    @Operation(summary = "비밀번호 변경")
-    @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordDTO dto) {
-        return ResponseEntity.ok(userService.changePassword(dto));
+        // // Refresh Token 쿠키 무효화
+        // ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
+        //     .httpOnly(true)
+        //     .secure(true)
+        //     .path("/")
+        //     .maxAge(0) // 쿠키 만료
+        //     .sameSite("Strict")
+        //     .build();
+        //
+        // return ResponseEntity.ok()
+        //     .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
+        //     .body("로그아웃이 완료되었습니다.");
+        //
     }
 
     @Operation(summary = "회원 정보 조회")
@@ -82,18 +90,46 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
+    @Operation(summary = "비밀번호 변경")
+    @PostMapping("/user/mypage/change-password")
+    public ResponseEntity<String> changePassword(Authentication authentication, @RequestBody @Valid ChangePasswordDTO dto) {
+        // 인증된 사용자의 이메일 추출
+        String email = authentication.getName();
+
+        // 서비스 로직 호출
+        return ResponseEntity.ok(userService.changePassword(email, dto));
+    }
+
+
 
     @Operation(summary = "회원 정보 갱신")
-    @PutMapping("/user/update/{email}")
-    public ResponseEntity<String> updateUser(@PathVariable String email, @RequestBody UserUpdateRequestDTO dto) {
+    @PutMapping("/user/mypage/update")
+    public ResponseEntity<String> updateUser(Authentication authentication, @RequestBody UserUpdateRequestDTO dto) {
+        String email = authentication.getName(); // 인증된 사용자의 이메일 추출
         return ResponseEntity.ok(userService.updateUser(email, dto));
     }
 
     @Operation(summary = "회원 탈퇴")
-    @DeleteMapping("/user/delete/{email}")
-    public ResponseEntity<String> deleteUser(@PathVariable String email) {
-        return ResponseEntity.ok(userService.deleteUser(email));
+    @DeleteMapping("/user/mypage/delete")
+    public ResponseEntity<String> deleteUser(Authentication authentication) {
+        String email = authentication.getName(); // 인증된 사용자의 이메일 추출
+        userService.deleteUser(email); // 계정 삭제
+
+        // Refresh Token 쿠키 무효화
+        ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0) // 쿠키 만료
+            .sameSite("Strict")
+            .build();
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
+            .body("회원 탈퇴가 완료되었습니다.");
+        // return ResponseEntity.ok(userService.deleteUser(email));
     }
+
 
 
     //    //현재 인증된 유저 정보 반환
