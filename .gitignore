@@ -41,3 +41,5 @@ out/
 /src/main/resources/static/assets/main.js
 node_modules/
 .env
+
+.DS_Store

@@ -1,9 +1,11 @@
 package com.example.festimo.global.config;
 
-import com.example.festimo.domain.user.service.NaverOauth2UserService;
+
+import com.example.festimo.domain.oauth.service.CustomOAuth2UserService;
+import com.example.festimo.global.utils.jwt.CustomOAuth2FailureHandler;
 import com.example.festimo.global.utils.jwt.JwtAuthenticationFilter;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
-import com.example.festimo.global.utils.jwt.NaverLoginSuccessHandler;
+import com.example.festimo.global.utils.jwt.OAuth2LoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,8 +23,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final NaverOauth2UserService naverOauth2UserService;
-    private final NaverLoginSuccessHandler naverLoginSuccessHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -58,7 +61,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
+                        .requestMatchers("/error").permitAll()// 누구나 가능
                         .requestMatchers(HttpMethod.GET, "/manuallyGetAllEvents").permitAll() // 수동으로 축제 api 불러오기 허용
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
@@ -76,28 +79,30 @@ public class SecurityConfig {
 
                         // Swagger UI
                         .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html"
                         ).permitAll()
 
+                        .requestMatchers("/api/reviews/**").permitAll()
+                        .requestMatchers("/oauth2/token").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
                         .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
 
                 );
-//                .oauth2Login()
-//                .defaultSuccessUrl("/api/oauth2/success");
 
         // Add JWT Authentication Filter
         http.addFilterBefore(
                 new JwtAuthenticationFilter(jwtTokenProvider),
                 UsernamePasswordAuthenticationFilter.class
         );
+
         http
                 .oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-                                .userService(naverOauth2UserService))
-                        .successHandler(naverLoginSuccessHandler));
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(customOAuth2FailureHandler));
 
 
         //에러처리
