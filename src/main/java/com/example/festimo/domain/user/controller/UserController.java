@@ -56,6 +56,43 @@ public class UserController {
                 .body(Collections.singletonMap("accessToken", accessToken));
     }
 
+    @Operation(summary = "로그인 유무")
+    @GetMapping("/status")
+    public ResponseEntity<Boolean> getLoginStatus(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("Authentication is null");
+        } else {
+            System.out.println("Authentication principal: " + authentication.getPrincipal());
+            System.out.println("Authentication authorities: " + authentication.getAuthorities());
+        }
+        boolean isLoggedIn = authentication != null && authentication.isAuthenticated();
+        return ResponseEntity.ok(isLoggedIn);
+    }
+
+    // @Operation(summary = "로그아웃")
+    // @PostMapping("/logout")
+    // public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
+    //     if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
+    //         throw new IllegalArgumentException("Invalid token format.");
+    //     }
+    //     userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
+    //     return ResponseEntity.ok("Logged out successfully.");
+    //
+    //     // // Refresh Token 쿠키 무효화
+    //     // ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
+    //     //     .httpOnly(true)
+    //     //     .secure(true)
+    //     //     .path("/")
+    //     //     .maxAge(0) // 쿠키 만료
+    //     //     .sameSite("Strict")
+    //     //     .build();
+    //     //
+    //     // return ResponseEntity.ok()
+    //     //     .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
+    //     //     .body("로그아웃이 완료되었습니다.");
+    //     //
+    // }
+
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {

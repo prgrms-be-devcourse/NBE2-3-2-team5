@@ -141,6 +141,12 @@ public class UserService {
         return "Password changed successfully.";
     }
 
+    // review에 쓰일 아이디 추출
+    public Long getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .map(User::getId) // User 엔티티에서 ID 추출
+            .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
 
 
 

@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../css/mypage.css">
     <script type="module" src="../js/mypage.js"></script>
     <script defer type="text/javascript" src="../js/header.js"></script>
+    <script type="module" src="../js/authStatus.js"></script>
 </head>
 <body>
 <div id="header-container"></div>
@@ -32,10 +33,18 @@
             <button class="tab-btn" data-tab="received-reviews">내가 받은 리뷰</button>
         </div>
         <div id="written-reviews" class="tab-content active">
-            <p>내가 쓴 리뷰가 없습니다.</p>
+            <!-- "내가 쓴 리뷰" 동적 콘텐츠 -->
+            <div id="written-reviews-container">
+                <p>내가 쓴 리뷰가 없습니다.</p>
+            </div>
+            <div id="written-pagination-container" class="pagination"></div> <!-- ✅ 페이지네이션 컨테이너 -->
         </div>
         <div id="received-reviews" class="tab-content">
-            <p>내가 받은 리뷰가 없습니다.</p>
+            <!-- "내가 받은 리뷰" 동적 콘텐츠 -->
+            <div id="received-reviews-container">
+                <p>내가 받은 리뷰가 없습니다.</p>
+            </div>
+            <div id="received-pagination-container" class="pagination"></div> <!-- ✅ 페이지네이션 컨테이너 -->
         </div>
     </section>
 </main>
