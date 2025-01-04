@@ -8,7 +8,7 @@ const PostWrite = () => {
 
     const [formData, setFormData] = useState({
         title: "",
-        writer: "",
+        nickname: "",
         mail: "",
         password: "",
         content: "",
@@ -18,28 +18,39 @@ const PostWrite = () => {
 
     useEffect(() => {
         if (isEditMode) {
+            // 수정 모드: 게시글 데이터 불러오기
             const token = localStorage.getItem('accessToken');
             fetch(`/api/companions/${postId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
             })
-                .then(response => response.json())
-                .then(data => {
+                .then((response) => response.json())
+                .then((data) => {
                     setFormData({
                         title: data.title || "",
-                        writer: data.writer || "",
+                        nickname: data.nickname || "",
                         mail: data.mail || "",
                         password: "",
                         content: data.content || "",
                         category: data.category || "COMPANION",
-                        tags: (data.tags || []).join(",")
+                        tags: (data.tags || []).join(","),
                     });
                 })
-                .catch(error => console.error("Error:", error));
+                .catch((error) => console.error("Error:", error));
+        } else {
+            // 등록 모드: 사용자 정보 불러오기
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (userInfo) {
+                setFormData((prev) => ({
+                    ...prev,
+                    nickname: userInfo.nickname || "",
+                    mail: userInfo.mail || "",
+                }));
+            }
         }
-    }, [postId, isEditMode]);
+    }, [isEditMode, postId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -48,12 +59,12 @@ const PostWrite = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem("accessToken");
 
         // 태그 문자열 -> 배열
         const processedFormData = {
             ...formData,
-            tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : []
+            tags: formData.tags ? formData.tags.split(",").map((tag) => tag.trim()).filter((tag) => tag !== "") : [],
         };
 
         const url = isEditMode ? `/api/companions/${postId}` : "/api/companions";
@@ -61,10 +72,10 @@ const PostWrite = () => {
         fetch(url, {
             method: isEditMode ? "PUT" : "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(processedFormData)
+            body: JSON.stringify(processedFormData),
         })
             .then((response) => {
                 if (!response.ok) {
@@ -81,9 +92,7 @@ const PostWrite = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-            <h1 className="text-2xl font-bold mb-4">
-                {isEditMode ? "게시글 수정" : "새 게시글 작성"}
-            </h1>
+            <h1 className="text-2xl font-bold mb-4">{isEditMode ? "게시글 수정" : "새 게시글 작성"}</h1>
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                     <label className="block font-semibold mb-2">제목</label>
@@ -100,12 +109,12 @@ const PostWrite = () => {
                     <label className="block font-semibold mb-2">작성자</label>
                     <input
                         type="text"
-                        name="writer"
-                        value={formData.writer}
+                        name="nickname"
+                        value={formData.nickname}
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                         required
-                        disabled={isEditMode}
+                        disabled
                     />
                 </div>
                 <div className="mb-4">
@@ -117,7 +126,7 @@ const PostWrite = () => {
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                         required
-                        disabled={isEditMode}
+                        disabled
                     />
                 </div>
                 <div className="mb-4">

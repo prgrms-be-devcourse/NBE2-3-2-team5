@@ -3,22 +3,17 @@ package com.example.festimo.domain.user.controller;
 
 import com.example.festimo.domain.user.dto.*;
 import com.example.festimo.domain.user.service.UserService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.antlr.v4.runtime.Token;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.Collections;
 import java.util.Map;
 
 @Tag(name = "회원 관리 API", description = "회원 정보 관리하는 API")
@@ -49,8 +44,14 @@ public class UserController {
                 .path("/")
                 .maxAge(Duration.ofDays(30))
                 .sameSite("Strict").build();
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(Collections.singletonMap("accessToken", accessToken));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(Map.of(
+                        "accessToken", accessToken,
+                        "nickname", tokenResponseDTO.getNickname(),
+                        "email", tokenResponseDTO.getEmail()
+                ));
     }
 
     @Operation(summary = "로그아웃")

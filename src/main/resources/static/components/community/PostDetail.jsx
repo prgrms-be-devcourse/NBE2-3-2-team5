@@ -192,26 +192,39 @@ const PostDetail = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+
+            if (!userInfo || !userInfo.nickname) {
+                throw new Error('닉네임 정보가 없습니다. 로그인을 다시 시도해주세요.');
+            }
+
             const response = await fetch(`/api/companions/${postId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ comment: commentInput }),
+                body: JSON.stringify({
+                    comment: commentInput,
+                    nickname: userInfo.nickname,
+                }),
             });
 
-            if (!response.ok) throw new Error('댓글 등록에 실패했습니다.');
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error response from server:', errorText);
+                throw new Error('댓글 등록에 실패했습니다.');
+            }
 
             const newComment = await response.json();
-            setPost(prev => ({
+            setPost((prev) => ({
                 ...prev,
                 comments: [...prev.comments, newComment],
             }));
             setCommentInput('');
         } catch (error) {
-            console.error('Error:', error);
-            alert('댓글 등록 중 오류가 발생했습니다.');
+            console.error('Error during comment submission:', error);
+            alert(error.message || '댓글 등록 중 오류가 발생했습니다.');
         }
     };
 

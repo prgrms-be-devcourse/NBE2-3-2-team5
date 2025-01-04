@@ -232,7 +232,7 @@ public class PostServiceImpl implements PostService {
 
         Comment comment = Comment.builder()
                 .comment(request.getComment())
-                .nickname(user.getNickname())
+                .nickname(request.getNickname())
                 .post(post)
                 .sequence(nextSequence)
                 .build();
