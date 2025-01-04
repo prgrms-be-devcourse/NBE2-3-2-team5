@@ -6,6 +6,7 @@ import CommunityPage from './components/community/CommunityPage';
 import PostDetail from './components/community/PostDetail';
 import PostWrite from "@/main/resources/static/components/community/PostWrite";
 
+
 const Home = () => (
     <main>
         <HeroSection />

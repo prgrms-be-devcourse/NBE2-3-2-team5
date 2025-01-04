@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.festimo.domain.admin.mapper.AdminMapper;
 import com.example.festimo.domain.admin.dto.AdminDTO;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminService {
@@ -33,6 +34,7 @@ public class AdminService {
     }
 
     //회원 정보 수정
+    @Transactional
     public AdminDTO updateUser(Long userId, AdminUpdateUserDTO dto) {
 
         //유저가 존재하는지 확인

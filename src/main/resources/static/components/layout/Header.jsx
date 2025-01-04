@@ -7,6 +7,7 @@ const Navigation = () => {
         { title: 'Mypage', path: '/mypage' },
         { title: 'Festival', path: '/html/festival.html' },
         { title: 'Community', path: '/community' },
+        { title: 'Companion', path: '/html/companion.html' },
     ];
 
     return (
