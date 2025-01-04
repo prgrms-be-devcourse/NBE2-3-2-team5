@@ -3,6 +3,9 @@ package com.example.festimo.domain.festival.controller;
 import com.example.festimo.domain.festival.dto.FestivalTO;
 import com.example.festimo.domain.festival.repository.FestivalRepository;
 import com.example.festimo.domain.festival.service.FestivalService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +16,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
+@Tag(name = "축제 API", description = "축제 관련 API")
 public class FestivalController {
 
     @Value("${KAKAO_MAP_API_KEY}")
@@ -28,6 +32,7 @@ public class FestivalController {
 
     @ResponseBody
     @GetMapping("/api/map-key")
+    @Hidden
     public String getApiKey() {
         return KAKAO_MAP_API_KEY;
     }
@@ -38,15 +43,22 @@ public class FestivalController {
     @Autowired
     private PagedResourcesAssembler<FestivalTO> pagedResourcesAssembler;
 
-    /*
-    @GetMapping("/")
-    public String getMain() {
-        return "festival.html";
+    // 수동으로 축제 api를 불러올 수 있는 방법
+    @GetMapping("/manuallyGetAllEvents")
+    @ResponseBody
+    public ResponseEntity<String> manuallyGetAllEvents() {
+        festivalService.refreshEvents();
+        return ResponseEntity.ok("모든 축제 api를 성공적으로 불러왔습니다");
     }
-     */
+
+    @GetMapping("/api/mauallyGetAllEvents")
+    public void mauallyGetAllEvents() {
+        festivalService.refreshEvents();
+    }
 
     @ResponseBody
     @GetMapping("/api/events")
+    @Operation(summary = "전체 축제 조회")
     public PagedModel<FestivalTO> getAllEvents(@RequestParam(defaultValue = "0") int page,
                                                @RequestParam(defaultValue = "28") int size,
                                                @RequestParam(required = false) Integer year,
@@ -65,7 +77,7 @@ public class FestivalController {
         } else if (keyword != null && !keyword.isEmpty()) {
             paginatedEvent = festivalService.search(keyword, pageable);
         } else {
-            paginatedEvent = festivalService.findPaginated(pageable);
+            paginatedEvent = festivalService.findPaginatedWithCache(pageable);
 
         }
 
@@ -78,6 +90,7 @@ public class FestivalController {
 
     @ResponseBody
     @GetMapping("/api/events/{eventId}")
+    @Operation(summary = "축제 상세 조회")
     public FestivalTO getEvent(@PathVariable Integer eventId) {
         FestivalTO to = festivalService.findById(eventId);
         return to;
@@ -85,6 +98,7 @@ public class FestivalController {
 
     @ResponseBody
     @GetMapping("/api/events/search")
+    @Operation(summary = "축제 검색")
     public Page<FestivalTO> search(
             @RequestParam String keyword,
             @RequestParam int page,
@@ -95,6 +109,7 @@ public class FestivalController {
 
     @ResponseBody
     @GetMapping("/api/events/filter/month")
+    @Operation(summary = "축제 날짜별 필터링")
     public Page<FestivalTO> filterByMonth(
             @RequestParam int year,
             @RequestParam int month,
@@ -106,6 +121,7 @@ public class FestivalController {
 
     @ResponseBody
     @GetMapping("/api/events/filter/region")
+    @Operation(summary = "축제 지역별 필터링")
     public Page<FestivalTO> filterByRegion(
             @RequestParam String region,
             @RequestParam int page,

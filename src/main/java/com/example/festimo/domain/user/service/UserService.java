@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +88,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> {
                     logger.warn("Login failed. User not found for email: {}", email);
-                    return new CustomException(ErrorCode.USER_NOT_FOUND);
+                    return new BadCredentialsException("아이디 또는 비밀번호가 일치하지 않습니다..");
                 });
 
         if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
@@ -96,6 +97,10 @@ public class UserService {
         }
 
         TokenResponseDTO tokens = regenerateTokens(user);
+        user.setRefreshToken(tokens.getRefreshToken());
+        System.out.println("리프레쉬 토큰 : " + tokens.getRefreshToken());
+        userRepository.save(user);
+        System.out.println(user);
         logger.info("Login successful for email: {}", email);
         return tokens;
     }

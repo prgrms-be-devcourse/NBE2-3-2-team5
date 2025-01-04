@@ -52,9 +52,26 @@ dependencies {
     // HATEOAS
     implementation 'org.springframework.hateoas:spring-hateoas:2.4.1'
     // 매핑 관련
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // HATEOAS
+    implementation 'org.springframework.hateoas:spring-hateoas:2.4.1'
+    implementation 'org.springframework.hateoas:spring-hateoas:2.4.1'
+    // 매핑 관련
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     implementation 'org.modelmapper:modelmapper:3.2.2'
+    // API 문서화
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+    // 로깅
+    implementation 'org.slf4j:slf4j-api'
+    // Jackson 직렬화
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.2'
+}
     // API 문서화
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
     // 로깅

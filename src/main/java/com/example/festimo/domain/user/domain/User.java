@@ -27,7 +27,11 @@ public class User {
     @Column(name = "nickname", nullable = false, unique = true, length = 255)
     private String nickname;
 
-    @Column(name = "email", nullable = false ,unique = true, length = 255)
+    @Column
+    @Builder.Default
+    private String avatar = "default-avatar.png";
+
+    @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -75,4 +79,6 @@ public class User {
     public enum Provider {
         KAKAO, NAVER, LOCAL
     }
+
 }
+

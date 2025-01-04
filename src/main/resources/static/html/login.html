@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventory - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/login.css">
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo">
+        <img src="../imgs/festimoLogo.svg" alt="Festimo Logo">
+    </a>
+    <nav class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">Mypage</a>
+        <a href="#">Festival</a>
+        <a href="#">Community</a>
+        <a href="#" id="login-logout-link">Login</a>
+        <a href="#" id="getStarted-link" class="get-started">Get started</a>
+    </nav>
+
+</header>
+
+<main>
+    <div class="login-container">
+        <h1 class="login-title">로그인</h1>
+        <form id="login-form" type="submit">
+            <input id="username" type="text" class="input-field" placeholder="아이디" required>
+            <input id="password" type="password" class="input-field" placeholder="비밀번호" required>
+
+<!--            <div class="login-options">-->
+<!--                <label class="remember-me">-->
+<!--                    <input type="checkbox">-->
+<!--                    <span>로그인 상태 유지</span>-->
+<!--                </label>-->
+<!--                <a href="#" class="forgot-password">비밀번호 찾기</a>-->
+<!--            </div>-->
+
+            <button type="submit" class="login-button">로그인</button>
+        </form>
+
+        <div class="social-login">
+            <p class="social-login-title">간편 로그인</p>
+            <div class="social-buttons">
+                <a href="http://localhost:8080/oauth2/authorization/naver" class="social-button naver-login">
+                    <i class="fas fa-n"></i>
+                    네이버 로그인
+                </a>
+                <a href="#" class="social-button kakao-login">
+                    <i class="fas fa-comment"></i>
+                    카카오 로그인
+                </a>
+            </div>
+        </div>
+
+        <p class="signup-text">
+            아직 계정이 없으신가요?<a href="#" class="signup-link">회원가입</a>
+        </p>
+    </div>
+</main>
+<script>
+    document.getElementById('login-form').addEventListener('submit', async function (event) {
+        event.preventDefault(); // 폼 기본 동작 방지
+
+        // 입력값 가져오기
+        const email = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        console.log(email, password);
+
+        try {
+            // API 요청 보내기
+            const response = await fetch('http://localhost:8080/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const accessToken = data.accessToken;
+
+                // 1. JavaScript 메모리에 access token 저장 (localStorage 또는 sessionStorage 사용)
+                localStorage.setItem('accessToken', accessToken);
+
+                // 2. 로그인 성공 시 홈 경로로 리다이렉트
+                window.location.href = '/static/html/festival.html';
+            } else {
+                // 실패 처리
+                const errorMessage = await response.text();
+                alert(errorMessage);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('서버와 통신 중 문제가 발생했습니다.');
+        }
+    });
+    window.onload = function() {
+        const accessToken = localStorage.getItem('accessToken');  // localStorage에서 accessToken 가져오기
+        const loginLogoutLink = document.getElementById('login-logout-link');
+        const getStartedLink = document.getElementById('getStarted-link')
+
+        if (accessToken) {
+            // 로그인 상태일 경우
+            loginLogoutLink.textContent = 'Logout';  // 로그인 -> 'Logout'으로 변경
+            loginLogoutLink.href = 'http://localhost:8080/api/logout';  // 필요에 따라 실제 로그아웃 기능을 구현할 수 있음
+            loginLogoutLink.addEventListener('click', function() {
+                localStorage.removeItem('accessToken');  // 로그아웃 시 localStorage에서 accessToken 제거
+                window.location.reload();  // 페이지 새로고침하여 헤더 업데이트
+            });
+            getStartedLink.style.display = 'none';
+        } else {
+            // 로그인하지 않은 상태일 경우
+            loginLogoutLink.textContent = 'Login';  // 로그인하지 않으면 'Login' 상태 유지
+            loginLogoutLink.href = '#';  // 로그인 페이지로 이동하도록 수정 가능
+
+            getStartedLink.style.display = 'inline-block';
+        }
+    };
+</script>
+</body>
+</html>
