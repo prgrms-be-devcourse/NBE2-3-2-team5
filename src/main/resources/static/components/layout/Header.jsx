@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const Navigation = () => {
     const navItems = [
         { title: 'Home', path: '/' },
-        { title: 'Mypage', path: '/mypage' },
+        { title: 'Mypage', path: '/html/mypage.html' },
         { title: 'Festival', path: '/html/festival.html' },
         { title: 'Community', path: '/community' },
         { title: 'Companion', path: '/html/companion.html' },
@@ -14,26 +14,26 @@ const Navigation = () => {
         <div className="hidden md:flex items-center gap-8 text-[14.5px] translate-y-[2px]">
             {navItems.map((item, index) => (
                 <div key={index}>
-                    <Link
-                        to={item.path}
+                    <a
+                        href={item.path}
                         className="text-[#4a4a4a] hover:text-[#4a4a4a]/80 leading-[1.2]"
                     >
                         <span>{item.title}</span>
-                    </Link>
+                    </a>
                 </div>
             ))}
-            <Link
-                to="/api/login"
+            <a
+                href="/html/login.html"
                 className="text-[#4a4a4a] hover:text-[#4a4a4a]/80 leading-[1.2]"
             >
                 Login
-            </Link>
-            <Link
-                to="/api/register"
+            </a>
+            <a
+                href="/html/registration_form.html"
                 className="px-4 py-[0.5rem] bg-[#5c5d8d] text-white rounded-[3px] hover:shadow-md hover:shadow-black/30 transition-all leading-[1.2]"
             >
                 Get started
-            </Link>
+            </a>
         </div>
     );
 };
