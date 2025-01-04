@@ -1,11 +1,7 @@
-// API 호출 시 공통으로 사용할 headers
 
-
+/*
 //테스트용!!
 function getHeaders() {
-    //const token = localStorage.getItem('token');
-
-    //const token = "BearereyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzM1ODMzMDU1LCJleHAiOjE3MzU4MzY2NTV9.Kwf3f7hbeTrzUfuLOOj2QNTFWJvpaHpMIC_6BGri5X8TYvPI48VBoYQWxmx4y_sj";
 
     return {
         'Authorization': 'Bearer ' + "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzM1ODQyNTk0LCJleHAiOjE3MzU4NDYxOTR9.QsjvKLOuai4LQXn760H0P58suc9JXSz6KpunAIHKa01XZLlnsCXwqBoqlmHPYIYy"
@@ -13,9 +9,9 @@ function getHeaders() {
         'Content-Type': 'application/json'
     };
 }
+*/
 
 
-/*
 function getHeaders() {
     const token = localStorage.getItem('token');
     return {
@@ -24,7 +20,7 @@ function getHeaders() {
     };
 }
 
-*/
+
 
 fetch('../html/header.html')
     .then(response => response.text())
