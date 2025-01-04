@@ -57,7 +57,7 @@ const utils = {
 
     createTableRow(data, columns, actions, type = 'member') {
         const row = document.createElement('tr');
-        // type에 따라 다른 ID 필드 사용
+
         const id = type === 'member' ? data.userId : data.id;  // companionId 대신 id 사용
         row.setAttribute('data-id', id);
 
