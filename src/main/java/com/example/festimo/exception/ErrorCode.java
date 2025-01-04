@@ -21,10 +21,26 @@ public enum ErrorCode {
 
     INVALID_APPLICATION_STATUS(HttpStatus.BAD_REQUEST, "신청 상태가 유효하지 않습니다."),
 
+    DUPLICATE_EMAIL(HttpStatus.BAD_REQUEST, "중복 이메일 입니다."),
+    DUPLICATE_NICKNAME(HttpStatus.BAD_REQUEST, "중복 닉네임 입니다."),
+    INVALID_GENDER(HttpStatus.BAD_REQUEST, "M OR F"),
+    INVALID_OLD_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 올바르지 않습니다."),
+    PASSWORD_CANNOT_BE_NULL(HttpStatus.BAD_REQUEST, "비밀번호를 입력해주세요."),
+    PASSWORD_INVALID_LENGTH(HttpStatus.BAD_REQUEST, "비밀번호 길이를 확인해주세요."),
+    PASSWORD_MISSING_LETTER(HttpStatus.BAD_REQUEST, "비밀번호 글자를 확인해주세요."),
+    PASSWORD_MISSING_NUMBER(HttpStatus.BAD_REQUEST, "비밀번호 숫자를 확인해주세요."),
+    PASSWORD_MISSING_SPECIAL_CHARACTER(HttpStatus.BAD_REQUEST, "비밀번호 특수문자를 확인해주세요."),
+
     /*
      * 401 UNAUTHORIZED
      */
     UNAUTHORIZED_EXCEPTION(HttpStatus.UNAUTHORIZED, "로그인된 사용자가 아닙니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효한 토큰이 아닙니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효한 토큰이 아닙니다."),
+    INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "올바른 비밀번호가 아닙니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "만료된 토큰 입니다."),
+
+
 
     /*
      * 403 FORBIDDEN: 권한 없음
