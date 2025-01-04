@@ -63,7 +63,6 @@ public class Post extends BaseTimeEntity {
 
     @ManyToMany
     @JoinTable(
-
         name = "post_likes",
         joinColumns = @JoinColumn(name = "post_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")

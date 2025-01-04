@@ -2,14 +2,14 @@
 const API_ENDPOINTS = {
     USERS: '/api/admin/users',
     POSTS: '/api/admin/posts',
-    COMPANIONS: '/api/companions'
+    COMPANIONS: '/api/companions',
+    REVIEWS: '/api/admin/reviews'
 };
 
 const PAGINATION = {
     DEFAULT_PAGE: 1,
     PAGE_SIZE: 10
 };
-
 
 //헤더
 fetch('../html/header.html')
@@ -18,8 +18,6 @@ fetch('../html/header.html')
         document.getElementById('header-container').innerHTML = data;
     });
 
-
-
 // 상태 관리
 const state = {
     members: {
@@ -27,6 +25,9 @@ const state = {
         editingUserId: null
     },
     posts: {
+        currentPage: PAGINATION.DEFAULT_PAGE
+    },
+    reviews: {
         currentPage: PAGINATION.DEFAULT_PAGE
     }
 };
@@ -51,7 +52,6 @@ const utils = {
                 throw new Error(errorData?.message || `요청 실패 (${response.status})`);
             }
 
-            // 응답이 있는 경우만 JSON 파싱
             return response.status !== 204 ? await response.json() : null;
         } catch (error) {
             console.error('API 요청 실패:', error);
@@ -59,26 +59,33 @@ const utils = {
         }
     },
 
-    createTableRow(data, columns, actions) {
+    createTableRow(data, columns, actions, type = 'member') {
         const row = document.createElement('tr');
-        row.setAttribute('data-id', data.userId);
+
+        // ID 설정 로직 수정
+        let id;
+        if (type === 'member') {
+            id = data.userId;
+        } else if (type === 'review') {
+            id = data.reviewId;
+        } else {
+            id = data.id;  // post 케이스
+        }
+        row.setAttribute('data-id', id);
 
         const cells = columns.map(column =>
             `<td class="${column.class || ''}">${column.render(data)}</td>`
         );
 
-        /*
+        // 액션 버튼 생성 로직 수정
         const actionButtons = actions.map(action => {
-            const button = document.createElement('button');
-            button.textContent = action.text;
-            button.addEventListener('click', () => action.handler(data.userId));
-            return button.outerHTML;
-        }).join('');
-
-         */
-
-        const actionButtons = actions.map(action => {
-            return `<button onclick="memberManager.${action.text === '수정' ? 'editMember' : 'deleteMember'}(${data.userId})">${action.text}</button>`;
+            if (type === 'member') {
+                return `<button onclick="memberManager.${action.text === '수정' ? 'editMember' : 'deleteMember'}(${id})">${action.text}</button>`;
+            } else if (type === 'review') {
+                return `<button onclick="reviewManager.deleteReview(${id})">${action.text}</button>`;
+            } else {
+                return `<button onclick="postManager.deletePost(${id})">${action.text}</button>`;
+            }
         }).join('');
 
         row.innerHTML = [...cells, `<td>${actionButtons}</td>`].join('');
@@ -92,17 +99,13 @@ const memberManager = {
         try {
             const data = await utils.fetchWithErrorHandling(
                 `${API_ENDPOINTS.USERS}?page=${state.members.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`);
-            console.log('API Response:', data);
 
             const memberTable = document.getElementById('member-table');
             memberTable.innerHTML = '';
 
             const columns = [
                 { class: 'no', render: (member, index) => (state.members.currentPage - 1) * PAGINATION.PAGE_SIZE + index + 1 },
-                { class: 'user-id', render: member => {
-                        console.log('회원 ID 렌더링:', member);
-                        return member.userId;
-                    }},
+                { class: 'user-id', render: member => member.userId },
                 { class: 'user-name', render: member => member.userName },
                 { class: 'user-nickname', render: member => member.nickname },
                 { class: 'user-email', render: member => member.email },
@@ -121,26 +124,15 @@ const memberManager = {
             ];
 
             const actions = [
-                {
-                    text: '수정',
-                    handler: function(userId) {
-                        memberManager.editMember(userId);
-                    }
-                },
-                {
-                    text: '삭제',
-                    handler: function(userId) {
-                        memberManager.deleteMember(userId);
-                    }
-                }
+                { text: '수정' },
+                { text: '삭제' }
             ];
 
             data.content.forEach((member, index) => {
-                //console.log('Member data:', JSON.stringify(member, null, 2));
                 memberTable.appendChild(utils.createTableRow(member, columns.map(col => ({
                     ...col,
                     render: (data) => col.render(data, index)
-                })), actions));
+                })), actions, 'member'));
             });
 
             this.updatePagination(data);
@@ -165,7 +157,6 @@ const memberManager = {
         state.members.editingUserId = userId;
         const editSection = document.getElementById('edit-section');
 
-        // 폼 필드 업데이트
         ['name', 'nickname', 'email', 'role'].forEach(field => {
             const value = row.querySelector(`.user-${field}`).textContent;
             document.getElementById(`edit-${field}`).value = value;
@@ -185,7 +176,6 @@ const memberManager = {
             nickname: document.getElementById('edit-nickname').value,
             email: document.getElementById('edit-email').value,
             gender: document.getElementById('edit-gender').value,
-            //role: document.getElementById('edit-role').value,
             ratingAvg: 5
         };
 
@@ -242,25 +232,29 @@ const postManager = {
     async loadPosts() {
         try {
             const data = await utils.fetchWithErrorHandling(
-                `${API_ENDPOINTS.COMPANIONS}?page=${state.posts.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`
+                `${API_ENDPOINTS.COMPANIONS}?page=${state.posts.currentPage}&size=${PAGINATION.PAGE_SIZE}`
             );
+
+            console.log('Posts data:', data);
 
             const postTable = document.getElementById('post-table');
             postTable.innerHTML = '';
 
             const columns = [
-                { render: post => post.id },
+                { render: post => post.id },  // companionId 대신 id 사용
                 { render: post => post.title },
                 { render: post => post.writer },
                 { render: post => post.views }
             ];
 
             const actions = [
-                { text: '삭제', handler: 'postManager.deletePost' }
+                { text: '삭제' }
             ];
 
             data.content.forEach(post => {
-                postTable.appendChild(utils.createTableRow(post, columns, actions));
+                console.log('Processing post:', post);
+
+                postTable.appendChild(utils.createTableRow(post, columns, actions, 'post'));
             });
 
             this.updatePagination(data);
@@ -276,6 +270,13 @@ const postManager = {
     },
 
     async deletePost(postId) {
+        console.log('Deleting post with ID:', postId);
+
+        if (!postId) {
+            alert('게시글 ID가 유효하지 않습니다.');
+            return;
+        }
+
         if (!confirm('정말로 삭제하시겠습니까?')) return;
 
         try {
@@ -301,6 +302,87 @@ const postManager = {
     }
 };
 
+
+
+// 리뷰 관리 모듈
+const reviewManager = {
+    async loadReviews() {
+        try {
+            const data = await utils.fetchWithErrorHandling(
+                `${API_ENDPOINTS.REVIEWS}?page=${state.reviews.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`
+            );
+
+            const reviewTable = document.getElementById('review-table');
+            reviewTable.innerHTML = '';
+
+            const columns = [
+                { render: review => review.reviewId },
+                { render: review => review.reviewerId },
+                { render: review => review.revieweeId },
+                { render: review => `${review.rating}점` },
+                { render: review => review.content },
+                { render: review => {
+                        const date = new Date(review.createdAt);
+                        return date.toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }}
+            ];
+
+            const actions = [
+                { text: '삭제' }
+            ];
+
+            data.content.forEach(review => {
+                reviewTable.appendChild(utils.createTableRow(review, columns, actions, 'review'));
+            });
+
+            this.updatePagination(data);
+        } catch (error) {
+            alert(`리뷰 목록 로드 실패: ${error.message}`);
+        }
+    },
+
+    async updatePagination(data) {
+        const totalPages = data.totalPages;
+        const currentPage = state.reviews.currentPage;
+
+        document.getElementById('review-current-page').textContent = currentPage;
+        document.getElementById('review-prev-page').disabled = currentPage === 1;
+        document.getElementById('review-next-page').disabled = currentPage >= totalPages;
+    },
+
+    async deleteReview(reviewId) {
+        if (!confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
+
+        try {
+            await utils.fetchWithErrorHandling(
+                `${API_ENDPOINTS.REVIEWS}/${reviewId}`,
+                { method: 'DELETE' }
+            );
+
+            alert('리뷰가 삭제되었습니다.');
+            this.loadReviews();
+        } catch (error) {
+            alert(`삭제 실패: ${error.message}`);
+        }
+    },
+
+    handlePagination(direction) {
+        if (direction === 'prev' && state.reviews.currentPage > 1) {
+            state.reviews.currentPage--;
+        } else if (direction === 'next') {
+            state.reviews.currentPage++;
+        }
+        this.loadReviews();
+    }
+};
+
+
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', () => {
     // 탭 전환 이벤트 설정
@@ -320,6 +402,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 memberManager.loadMembers();
             } else if (tab.id === 'post') {
                 postManager.loadPosts();
+            }else if (tab.id === 'review') {
+                reviewManager.loadReviews();
             }
         });
     });
@@ -341,6 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
         memberManager.updateMember(event));
     document.querySelector('#edit-section button[type="button"]').addEventListener('click', () =>
         memberManager.cancelEdit());
+
+    //리뷰 관리 페이지네이션 이벤트
+    document.getElementById('review-prev-page').addEventListener('click', () =>
+        reviewManager.handlePagination('prev'));
+    document.getElementById('review-next-page').addEventListener('click', () =>
+        reviewManager.handlePagination('next'));
 
     // 초기 데이터 로드
     memberManager.loadMembers();
