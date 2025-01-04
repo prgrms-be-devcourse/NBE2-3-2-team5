@@ -54,6 +54,13 @@ window.onload = function () {
     loadEvents(currentPage);
 };
 
+//헤더
+fetch('../html/header.html')
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('header-container').innerHTML = data;
+    });
+
 function loadEvents(page) {
     currentPage = page;
     let url = `/api/events?page=${page}&size=${pageSize}`;
