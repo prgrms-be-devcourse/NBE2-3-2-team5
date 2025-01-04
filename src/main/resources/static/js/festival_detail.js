@@ -46,7 +46,11 @@ function displayEventDetails(event) {
 
 
     const imageElement = document.querySelector('.event-image img');
-    imageElement.src = event.image;
+    if(!event.image){
+        imageElement.src = "/imgs/alt_img.jpg"
+    } else {
+        imageElement.src = event.image;
+    }
     imageElement.alt = event.title;
 
     document.querySelectorAll('.info-row .info-value')[0].innerHTML = `${event.startDate} ~ ${event.endDate}`;

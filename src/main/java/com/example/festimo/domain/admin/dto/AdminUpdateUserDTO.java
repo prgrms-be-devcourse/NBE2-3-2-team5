@@ -3,11 +3,13 @@ package com.example.festimo.domain.admin.dto;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @AllArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 public class AdminUpdateUserDTO {
 
     @NotNull(message = "이름은 필수 입력 값입니다.")

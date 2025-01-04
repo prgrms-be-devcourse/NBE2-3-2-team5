@@ -4,20 +4,30 @@ import com.example.festimo.domain.festival.domain.Festival;
 import com.example.festimo.domain.festival.dto.FestivalDetailsTO;
 import com.example.festimo.domain.festival.dto.FestivalTO;
 import com.example.festimo.domain.festival.repository.FestivalRepository;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.PersistenceContext;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 import java.net.URI;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -37,26 +47,34 @@ public class FestivalService {
     @Autowired
     private FestivalRepository festivalRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     @Autowired
-    private EntityManagerFactory entityManagerFactory;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleRefreshEvents() {
         refreshEvents();
     }
 
+    @Transactional
     public void refreshEvents() {
-        // 기존 데이터를 삭제하여 데이터 갱신
-        festivalRepository.deleteAll();
+        try {
+            // 기존 데이터를 삭제하여 데이터 갱신
+            festivalRepository.deleteAll();
 
-        resetAutoIncrement();
+            resetAutoIncrement();
 
-        // API 호출로 데이터 가져오기
-        List<FestivalTO> events = getAllEvents();
+            // API 호출로 데이터 가져오기
+            List<FestivalTO> events = getAllEvents();
 
-        // 가져온 데이터를 데이터베이스에 저장
-        for (FestivalTO event : events) {
-            insert(event);
+            // 가져온 데이터를 데이터베이스에 저장
+            for (FestivalTO event : events) {
+                insert(event);
+            }
+        } catch (Exception e) {
+            System.out.println("refreshEvents 도중 에러 발생: " + e.getMessage());
         }
     }
 
@@ -195,16 +213,12 @@ public class FestivalService {
         return details;
     }
 
-    private void resetAutoIncrement() {
-        // SQL 쿼리를 실행해 시퀀스 초기화
-        String resetQuery = "ALTER TABLE festival AUTO_INCREMENT = 1";
-        EntityManager entityManager = entityManagerFactory.createEntityManager();
-        entityManager.getTransaction().begin();
-        entityManager.createNativeQuery(resetQuery).executeUpdate();
-        entityManager.getTransaction().commit();
-        entityManager.close();
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void resetAutoIncrement() {
+        entityManager.createNativeQuery("ALTER TABLE festival AUTO_INCREMENT = 1").executeUpdate();
     }
 
+    @Transactional
     public void insert(FestivalTO to){
         ModelMapper modelMapper = new ModelMapper();
         Festival festival = modelMapper.map(to, Festival.class);
@@ -212,16 +226,6 @@ public class FestivalService {
         festivalRepository.save(festival);
     }
 
-    public List<FestivalTO> findAll(){
-        List<Festival> festivalList = festivalRepository.findAll();
-
-        ModelMapper modelMapper = new ModelMapper();
-        List<FestivalTO> list = festivalList.stream()
-                .map(p -> modelMapper.map(p, FestivalTO.class))
-                .collect(Collectors.toList());
-
-        return list;
-    }
 
     public Page<FestivalTO> findPaginated(Pageable pageable) {
         Page<Festival> festivals = festivalRepository.findAll(pageable);
@@ -230,6 +234,56 @@ public class FestivalService {
         return page;
     }
 
+public Page<FestivalTO> findPaginatedWithCache(Pageable pageable) {
+    String cacheKey = "festivals:page:" + pageable.getPageNumber() + ":" + pageable.getPageSize();
+    String totalElementsKey = "festivals:totalElements";
+
+    // 1. 캐시된 페이지 데이터 확인
+    Object cachedData = redisTemplate.opsForValue().get(cacheKey);
+    if (cachedData != null) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+            // List<FestivalTO>로 캐시 된 데이터 Deserialize
+            List<FestivalTO> cachedList = objectMapper.convertValue(cachedData, new TypeReference<List<FestivalTO>>() {});
+
+            // 2. 캐시된 totalElements 확인
+            String totalElementsStr = (String) redisTemplate.opsForValue().get(totalElementsKey);
+            long totalElements;
+            if (totalElementsStr != null) {
+                try {
+                    totalElements = Long.parseLong(totalElementsStr);
+                } catch (NumberFormatException e) {
+                    // 숫자 형식이 아니면 DB에서 조회
+                    totalElements = festivalRepository.count();
+                }
+            } else {
+                // 캐시에 값이 없으면 DB에서 조회
+                totalElements = festivalRepository.count();
+            }
+
+            return new PageImpl<>(cachedList, pageable, totalElements);
+        } catch (Exception e) {
+            System.err.println("Failed to deserialize cached data: " + e.getMessage());
+            redisTemplate.delete(cacheKey);
+        }
+    }
+
+    // 3. 캐시가 없는 경우 DB에서 조회
+    Page<FestivalTO> page = findPaginated(pageable);
+    System.out.println("Retrieved page: " + page.getContent());
+
+    // 4. 페이지 데이터와 전체 개수를 캐시에 저장
+    redisTemplate.opsForValue().set(cacheKey, page.getContent(), Duration.ofHours(24));
+    redisTemplate.opsForValue().set(totalElementsKey, String.valueOf(page.getTotalElements()), Duration.ofHours(24));
+
+
+    return page;
+}
+
+    @Transactional(readOnly = true)
     public FestivalTO findById(int id){
         Festival festival = festivalRepository.findById(String.valueOf(id)).orElse(null);
         if (festival == null) {
@@ -264,13 +318,6 @@ public class FestivalService {
         Page<FestivalTO> page = festivals.map(festival -> new ModelMapper().map(festival, FestivalTO.class));
 
         return page;
-    }
-
-    private boolean isFestivalInMonth(Festival festival, LocalDate firstDayOfMonth, LocalDate lastDayOfMonth) {
-        LocalDate startDate = festival.getStartDate();
-        LocalDate endDate = festival.getEndDate();
-
-        return !startDate.isAfter(lastDayOfMonth) && !endDate.isBefore(firstDayOfMonth);
     }
 
     public Page<FestivalTO> filterByRegion(String region, Pageable pageable) {

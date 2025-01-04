@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -23,9 +24,12 @@ public class PostDetailResponse {
     private String content;
     private PostCategory category;
     private int views;
+    private int replies;
     private String createdAt;
     private String updatedAt;
     private boolean isOwner;
     private boolean isAdmin;
+    private Set<String> tags;
+    private int likes;
     private List<CommentResponse> comments = new ArrayList<>();
 }

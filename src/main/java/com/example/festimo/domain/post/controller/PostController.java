@@ -1,16 +1,21 @@
 package com.example.festimo.domain.post.controller;
 
 import com.example.festimo.domain.post.dto.*;
+import com.example.festimo.domain.post.entity.PostCategory;
 import com.example.festimo.domain.post.service.PostService;
 import com.example.festimo.global.dto.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import java.beans.PropertyEditorSupport;
+import java.util.List;
 
 @Tag(name = "Post")
 @RestController
@@ -20,11 +25,24 @@ public class PostController {
 
     private final PostService postService;
 
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(PostCategory.class, new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                setValue(PostCategory.fromDisplayName(text));
+            }
+        });
+    }
+
     @Operation(summary = "게시글 등록")
     @PostMapping
-    public ResponseEntity<PostListResponse> createPost(@Valid @RequestBody PostRequest request, Authentication authentication) {
-        PostListResponse responseDto = postService.createPost(request, authentication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    public ResponseEntity<Void> createPost(
+            @RequestBody PostRequest request,
+            Authentication authentication
+    ) {
+        postService.createPost(request, authentication);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Operation(summary = "게시글 전체 조회")
@@ -39,16 +57,20 @@ public class PostController {
 
     @Operation(summary = "게시글 상세 조회")
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDetailResponse> getPostById(@PathVariable Long postId, Authentication authentication) {
-        PostDetailResponse postById = postService.getPostById(postId, authentication);
+    public ResponseEntity<PostDetailResponse> getPostById(
+            @PathVariable("postId") Long postId,
+            @RequestParam(name = "view", required = false, defaultValue = "false") boolean incrementView,
+            Authentication authentication) {
+        PostDetailResponse postById = postService.getPostById(postId, incrementView, authentication);
         return ResponseEntity.status(HttpStatus.OK).body(postById);
     }
 
     @Operation(summary = "게시글 수정")
-    @PutMapping("/{postId}")
+    @PutMapping(value = "/{postId}")
     public ResponseEntity<PostDetailResponse> updatePost(
             @PathVariable Long postId,
-            @Valid @RequestBody UpdatePostRequest request) {
+            @RequestBody UpdatePostRequest request
+    ) {
         PostDetailResponse updatePost = postService.updatePost(postId, request);
         return ResponseEntity.status(HttpStatus.OK).body(updatePost);
     }
@@ -61,6 +83,27 @@ public class PostController {
             Authentication authentication) {
         postService.deletePost(postId, request.getPassword(), authentication);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    @Operation(summary = "주간 인기 게시물 조회")
+    @GetMapping("/top-weekly")
+    public ResponseEntity<List<PostListResponse>> getWeeklyTopPosts() {
+        List<PostListResponse> topPosts = postService.getCachedWeeklyTopPosts();
+        return ResponseEntity.ok(topPosts);
+    }
+
+    @Operation(summary = "키워드로 게시글 검색")
+    @GetMapping("/search")
+    public ResponseEntity<List<PostListResponse>> searchPosts(@RequestParam String keyword) {
+        List<PostListResponse> posts = postService.searchPosts(keyword);
+        return ResponseEntity.ok(posts);
+    }
+
+    @Operation(summary = "게시글 좋아요")
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Void> toggleLike(@PathVariable("postId") Long postId, Authentication authentication) {
+        postService.toggleLike(postId, authentication);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "댓글 등록")
