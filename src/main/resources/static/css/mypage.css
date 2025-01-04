@@ -98,3 +98,39 @@ footer {
     padding: 1rem;
     background-color: #f8f9fa;
 }
+
+.review-item {
+    border-bottom: 1px solid #ddd;
+    padding: 1rem 0;
+}
+
+.review-item:last-child {
+    border-bottom: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.page-btn {
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background-color: #505199;
+    color: white;
+    border-color: #505199;
+}
+
+.page-btn:hover {
+    background-color: #e0e0e0;
+}
+
+

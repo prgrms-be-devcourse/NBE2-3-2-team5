@@ -7,20 +7,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="../css/mypage.css">
     <script type="module" src="../js/mypage.js"></script>
+    <script type="module" src="../js/authStatus.js"></script>
 </head>
 <body>
-<header class="header">
-    <a href="#" class="logo">
-        <img src="../imgs/festimoLogo.svg" alt="Festimo Logo">
-    </a>
-    <nav class="nav-links">
-        <a href="#">Home</a>
-        <a href="#">Mypage</a>
-        <a href="#">Festival</a>
-        <a href="#">Community</a>
-        <a href="#">Logout</a>
-    </nav>
-</header>
+<div id="header-container"></div>
 
 <main class="mypage-container">
     <section class="profile-section">
@@ -42,10 +32,18 @@
             <button class="tab-btn" data-tab="received-reviews">내가 받은 리뷰</button>
         </div>
         <div id="written-reviews" class="tab-content active">
-            <p>내가 쓴 리뷰가 없습니다.</p>
+            <!-- "내가 쓴 리뷰" 동적 콘텐츠 -->
+            <div id="written-reviews-container">
+                <p>내가 쓴 리뷰가 없습니다.</p>
+            </div>
+            <div id="written-pagination-container" class="pagination"></div> <!-- ✅ 페이지네이션 컨테이너 -->
         </div>
         <div id="received-reviews" class="tab-content">
-            <p>내가 받은 리뷰가 없습니다.</p>
+            <!-- "내가 받은 리뷰" 동적 콘텐츠 -->
+            <div id="received-reviews-container">
+                <p>내가 받은 리뷰가 없습니다.</p>
+            </div>
+            <div id="received-pagination-container" class="pagination"></div> <!-- ✅ 페이지네이션 컨테이너 -->
         </div>
     </section>
 </main>

@@ -1,4 +1,17 @@
-import { apiRequest } from './apiClient.js'; // 공통 모듈 가져오기
+import { apiRequest } from './apiClient.js'; // 공통 모듈 불러오기
+import { updateAuthLink } from './authStatus.js';
+
+
+// 헤더 로드 및 updateAuthLink 호출
+fetch('../html/header.html')
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('header-container').innerHTML = data;
+        updateAuthLink();
+    })
+    .catch(error => {
+        console.error('Error loading header:', error);
+    });
 
 // 사용자 정보를 가져와 폼에 채우는 함수
 async function fetchAndPopulateUserData() {

@@ -6,6 +6,9 @@ import com.example.festimo.domain.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.Token;
@@ -53,28 +56,71 @@ public class UserController {
                 .body(Collections.singletonMap("accessToken", accessToken));
     }
 
+    @Operation(summary = "로그인 유무")
+    @GetMapping("/status")
+    public ResponseEntity<Boolean> getLoginStatus(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("Authentication is null");
+        } else {
+            System.out.println("Authentication principal: " + authentication.getPrincipal());
+            System.out.println("Authentication authorities: " + authentication.getAuthorities());
+        }
+        boolean isLoggedIn = authentication != null && authentication.isAuthenticated();
+        return ResponseEntity.ok(isLoggedIn);
+    }
+
+    // @Operation(summary = "로그아웃")
+    // @PostMapping("/logout")
+    // public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
+    //     if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
+    //         throw new IllegalArgumentException("Invalid token format.");
+    //     }
+    //     userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
+    //     return ResponseEntity.ok("Logged out successfully.");
+    //
+    //     // // Refresh Token 쿠키 무효화
+    //     // ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
+    //     //     .httpOnly(true)
+    //     //     .secure(true)
+    //     //     .path("/")
+    //     //     .maxAge(0) // 쿠키 만료
+    //     //     .sameSite("Strict")
+    //     //     .build();
+    //     //
+    //     // return ResponseEntity.ok()
+    //     //     .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
+    //     //     .body("로그아웃이 완료되었습니다.");
+    //     //
+    // }
+
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
-        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
-            throw new IllegalArgumentException("Invalid token format.");
-        }
-        userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
-        return ResponseEntity.ok("Logged out successfully.");
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        // 쿠키에서 리프레시 토큰 추출
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("refreshToken".equals(cookie.getName())) {
+                    String refreshToken = cookie.getValue();
 
-        // // Refresh Token 쿠키 무효화
-        // ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
-        //     .httpOnly(true)
-        //     .secure(true)
-        //     .path("/")
-        //     .maxAge(0) // 쿠키 만료
-        //     .sameSite("Strict")
-        //     .build();
-        //
-        // return ResponseEntity.ok()
-        //     .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
-        //     .body("로그아웃이 완료되었습니다.");
-        //
+                    // 로그아웃 처리
+                    userService.logout(refreshToken);
+
+                    // 리프레시 토큰 쿠키 제거
+                    Cookie clearCookie = new Cookie("refreshToken", null);
+                    clearCookie.setHttpOnly(true);
+                    clearCookie.setSecure(true);
+                    clearCookie.setPath("/");
+                    clearCookie.setMaxAge(0); // 즉시 만료
+                    response.addCookie(clearCookie);
+
+                    return ResponseEntity.ok("Logged out successfully.");
+                }
+            }
+        }
+
+        // 리프레시 토큰이 쿠키에 없을 경우 예외 처리
+        throw new IllegalArgumentException("Refresh token not found in cookies.");
     }
 
     @Operation(summary = "회원 정보 조회")
