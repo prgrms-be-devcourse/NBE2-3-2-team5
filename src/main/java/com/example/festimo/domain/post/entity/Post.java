@@ -11,13 +11,9 @@ import java.util.Set;
 
 @Entity
 @Table(indexes = {
-<<<<<<< Updated upstream
-        @Index(name = "idx_post_created_at", columnList = "createdAt"),
-        @Index(name = "idx_post_likes", columnList = "likes")
-=======
+
     @Index(name = "idx_post_created_at", columnList = "createdAt"),
     @Index(name = "idx_post_likes", columnList = "likes")
->>>>>>> Stashed changes
 })
 @Getter
 @Setter
@@ -67,15 +63,9 @@ public class Post extends BaseTimeEntity {
 
     @ManyToMany
     @JoinTable(
-<<<<<<< Updated upstream
-            name = "post_likes",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-=======
         name = "post_likes",
         joinColumns = @JoinColumn(name = "post_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
->>>>>>> Stashed changes
     )
     @Builder.Default
     private Set<User> likedByUsers = new HashSet<>();
