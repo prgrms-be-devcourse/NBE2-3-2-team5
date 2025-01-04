@@ -47,7 +47,8 @@ public class SecurityConfig {
                                 "/static/**",
                                 "/assets/**",
                                 "/css/**",
-                                "/js/**"
+                                "/js/**",
+                                "/favicon.ico"
                         ).permitAll()
 
                         // 프론트엔드 라우팅 경로
@@ -85,6 +86,7 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers("/api/reviews/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/oauth2/token").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
                         .anyRequest().authenticated()    // 나머지는 로그인한 사용자만

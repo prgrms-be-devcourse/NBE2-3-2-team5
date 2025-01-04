@@ -8,9 +8,6 @@ import lombok.Setter;
 @Setter
 public class ChangePasswordDTO {
     @NotBlank
-    private String email;
-
-    @NotBlank
     private String oldPassword;
 
     @NotBlank
