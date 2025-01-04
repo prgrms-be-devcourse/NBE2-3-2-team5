@@ -27,8 +27,13 @@ async function fetchUserData() {
         document.getElementById('nickname').textContent = data.nickname;
         document.getElementById('email').textContent = data.email;
     } catch (error) {
-        console.error('Error fetching user data:', error);
-        alert('사용자 정보를 불러오지 못했습니다. 다시 시도해주세요.');
+        if(error.message==='Require Login'){
+            alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
+            window.location.href = '/html/login.html';
+        }else {
+            console.error('Error fetching user data:', error);
+            alert('사용자 정보를 불러오지 못했습니다. 다시 시도해주세요.');
+        }
     }
 }
 

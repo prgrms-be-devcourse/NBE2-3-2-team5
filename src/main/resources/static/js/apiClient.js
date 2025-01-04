@@ -41,7 +41,10 @@ async function refreshAccessToken() {
  * @returns {Promise<any>} - API 응답 데이터
  */
 async function apiRequest(url, options = {}) {
-    if (!accessToken || isTokenExpired(accessToken)) {
+    if(!accessToken){
+        throw new Error('Require Login');
+    }
+    else if (isTokenExpired(accessToken)) {
         try {
             await refreshAccessToken(); // Access Token 만료 시 갱신
         } catch (error) {
