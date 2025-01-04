@@ -238,7 +238,7 @@ const postManager = {
 
             data.content.forEach(post => {
                 console.log('Processing post:', post);
-                // id를 사용하도록 수정
+
                 postTable.appendChild(utils.createTableRow(post, columns, actions, 'post'));
             });
 
