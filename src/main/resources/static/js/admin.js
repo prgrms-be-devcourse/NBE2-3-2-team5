@@ -2,7 +2,8 @@
 const API_ENDPOINTS = {
     USERS: '/api/admin/users',
     POSTS: '/api/admin/posts',
-    COMPANIONS: '/api/companions'
+    COMPANIONS: '/api/companions',
+    REVIEWS: '/api/admin/reviews'
 };
 
 const PAGINATION = {
@@ -24,6 +25,9 @@ const state = {
         editingUserId: null
     },
     posts: {
+        currentPage: PAGINATION.DEFAULT_PAGE
+    },
+    reviews: {
         currentPage: PAGINATION.DEFAULT_PAGE
     }
 };
@@ -58,16 +62,27 @@ const utils = {
     createTableRow(data, columns, actions, type = 'member') {
         const row = document.createElement('tr');
 
-        const id = type === 'member' ? data.userId : data.id;  // companionId 대신 id 사용
+        // ID 설정 로직 수정
+        let id;
+        if (type === 'member') {
+            id = data.userId;
+        } else if (type === 'review') {
+            id = data.reviewId;
+        } else {
+            id = data.id;  // post 케이스
+        }
         row.setAttribute('data-id', id);
 
         const cells = columns.map(column =>
             `<td class="${column.class || ''}">${column.render(data)}</td>`
         );
 
+        // 액션 버튼 생성 로직 수정
         const actionButtons = actions.map(action => {
             if (type === 'member') {
                 return `<button onclick="memberManager.${action.text === '수정' ? 'editMember' : 'deleteMember'}(${id})">${action.text}</button>`;
+            } else if (type === 'review') {
+                return `<button onclick="reviewManager.deleteReview(${id})">${action.text}</button>`;
             } else {
                 return `<button onclick="postManager.deletePost(${id})">${action.text}</button>`;
             }
@@ -287,6 +302,87 @@ const postManager = {
     }
 };
 
+
+
+// 리뷰 관리 모듈
+const reviewManager = {
+    async loadReviews() {
+        try {
+            const data = await utils.fetchWithErrorHandling(
+                `${API_ENDPOINTS.REVIEWS}?page=${state.reviews.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`
+            );
+
+            const reviewTable = document.getElementById('review-table');
+            reviewTable.innerHTML = '';
+
+            const columns = [
+                { render: review => review.reviewId },
+                { render: review => review.reviewerId },
+                { render: review => review.revieweeId },
+                { render: review => `${review.rating}점` },
+                { render: review => review.content },
+                { render: review => {
+                        const date = new Date(review.createdAt);
+                        return date.toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }}
+            ];
+
+            const actions = [
+                { text: '삭제' }
+            ];
+
+            data.content.forEach(review => {
+                reviewTable.appendChild(utils.createTableRow(review, columns, actions, 'review'));
+            });
+
+            this.updatePagination(data);
+        } catch (error) {
+            alert(`리뷰 목록 로드 실패: ${error.message}`);
+        }
+    },
+
+    async updatePagination(data) {
+        const totalPages = data.totalPages;
+        const currentPage = state.reviews.currentPage;
+
+        document.getElementById('review-current-page').textContent = currentPage;
+        document.getElementById('review-prev-page').disabled = currentPage === 1;
+        document.getElementById('review-next-page').disabled = currentPage >= totalPages;
+    },
+
+    async deleteReview(reviewId) {
+        if (!confirm('정말로 이 리뷰를 삭제하시겠습니까?')) return;
+
+        try {
+            await utils.fetchWithErrorHandling(
+                `${API_ENDPOINTS.REVIEWS}/${reviewId}`,
+                { method: 'DELETE' }
+            );
+
+            alert('리뷰가 삭제되었습니다.');
+            this.loadReviews();
+        } catch (error) {
+            alert(`삭제 실패: ${error.message}`);
+        }
+    },
+
+    handlePagination(direction) {
+        if (direction === 'prev' && state.reviews.currentPage > 1) {
+            state.reviews.currentPage--;
+        } else if (direction === 'next') {
+            state.reviews.currentPage++;
+        }
+        this.loadReviews();
+    }
+};
+
+
 // 이벤트 리스너 설정
 document.addEventListener('DOMContentLoaded', () => {
     // 탭 전환 이벤트 설정
@@ -306,6 +402,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 memberManager.loadMembers();
             } else if (tab.id === 'post') {
                 postManager.loadPosts();
+            }else if (tab.id === 'review') {
+                reviewManager.loadReviews();
             }
         });
     });
@@ -327,6 +425,12 @@ document.addEventListener('DOMContentLoaded', () => {
         memberManager.updateMember(event));
     document.querySelector('#edit-section button[type="button"]').addEventListener('click', () =>
         memberManager.cancelEdit());
+
+    //리뷰 관리 페이지네이션 이벤트
+    document.getElementById('review-prev-page').addEventListener('click', () =>
+        reviewManager.handlePagination('prev'));
+    document.getElementById('review-next-page').addEventListener('click', () =>
+        reviewManager.handlePagination('next'));
 
     // 초기 데이터 로드
     memberManager.loadMembers();
