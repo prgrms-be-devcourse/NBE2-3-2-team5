@@ -3,11 +3,9 @@ package com.example.festimo.global.config;
 
 import com.example.festimo.domain.oauth.service.CustomOAuth2UserService;
 import com.example.festimo.global.utils.jwt.CustomOAuth2FailureHandler;
-import com.example.festimo.domain.user.service.NaverOauth2UserService;
 import com.example.festimo.global.utils.jwt.JwtAuthenticationFilter;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
 import com.example.festimo.global.utils.jwt.OAuth2LoginSuccessHandler;
-import com.example.festimo.global.utils.jwt.NaverLoginSuccessHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +26,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -62,7 +61,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers("/error").permitAll()// 누구나 가능 , "/oauth2/**"
+                        .requestMatchers("/error").permitAll()// 누구나 가능
                         .requestMatchers(HttpMethod.GET, "/manuallyGetAllEvents").permitAll() // 수동으로 축제 api 불러오기 허용
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
@@ -85,26 +84,8 @@ public class SecurityConfig {
                             "/swagger-ui.html"
                         ).permitAll()
 
-                        // 정적 리소스 허용
-                        .requestMatchers("/css/**", "/js/**", "/imgs/**","/favicon.ico", "/html/**").permitAll()
-                        // 추가 정보 입력 페이지 허용
-                        .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers("/api/reviews/**").permitAll()
                         .requestMatchers("/oauth2/token").permitAll()
-                        .requestMatchers("/error").permitAll()// 누구나 가능
-                        .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/companions").permitAll() // 게시글 전체 조회는 비회원 허용
-                        .requestMatchers(HttpMethod.GET, "/api/companions/{postId}").authenticated() // 게시글 상세 조회 인증 필요
-                        .requestMatchers(HttpMethod.POST, "/api/companions").authenticated() // 게시글 등록 인증 필요
-                        .requestMatchers(HttpMethod.PUT, "/api/companions/{postId}").authenticated() // 게시글 수정 인증 필요
-                        .requestMatchers(HttpMethod.DELETE, "/api/companions/{postId}").authenticated() // 게시글 삭제 인증 필요
-                        .requestMatchers(HttpMethod.POST, "/api/companions/{postId}/comments").authenticated() // 댓글 등록 인증 필요
-                        .requestMatchers(HttpMethod.PUT, "/api/companions/{postId}/comments/{sequence}").authenticated() // 댓글 수정 인증 필요
-                        .requestMatchers(HttpMethod.DELETE, "/api/companions/{postId}/comments/{sequence}").authenticated() // 댓글 삭제 인증 필요
                         .requestMatchers("/api/admin/**").hasRole("ADMIN") // 권한 기반 접근 제어 관리자만 사용 가능
                         .anyRequest().authenticated()    // 나머지는 로그인한 사용자만
 
