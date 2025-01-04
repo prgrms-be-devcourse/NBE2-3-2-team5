@@ -2,9 +2,13 @@ package com.example.festimo.domain.user.dto;
 
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
 @AllArgsConstructor
 public class TokenResponseDTO {
     private String accessToken;
