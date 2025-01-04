@@ -152,6 +152,8 @@ const FestivalCalendar = () => {
                         value={selectedDate}
                         tileContent={renderTileContent}
                         className="w-full shadow-md rounded-lg"
+                        minDate={new Date(new Date().getFullYear() - 3, 0, 1)}
+                        maxDate={new Date(new Date().getFullYear() + 3, 11, 31)}
                     />
                 </div>
                 <div className="mt-8">
