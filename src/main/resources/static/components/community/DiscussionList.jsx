@@ -212,7 +212,7 @@ const DiscussionList = () => {
                                     />
                                     <div className="flex items-center gap-2 text-sm">
                                         <span className="font-medium text-gray-900">
-                                            {post.writer || "Unknown"}
+                                            {post.nickname || "Unknown"}
                                         </span>
                                         <span className="text-gray-400">•</span>
                                         <span className="text-gray-500">{post.time || "Unknown time"}</span>

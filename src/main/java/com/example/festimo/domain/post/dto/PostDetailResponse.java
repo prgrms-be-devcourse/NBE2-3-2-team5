@@ -19,7 +19,7 @@ import java.util.Set;
 public class PostDetailResponse {
     private Long id;
     private String title;
-    private String writer;
+    private String nickname;
     private String mail;
     private String content;
     private PostCategory category;

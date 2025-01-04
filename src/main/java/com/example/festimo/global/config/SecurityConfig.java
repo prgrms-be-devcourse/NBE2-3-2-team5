@@ -57,17 +57,27 @@ public class SecurityConfig {
                                 "/login",
                                 "/register",
                                 "/html/festival.html",
-                                "/**"     // 화면 확인을 위한 임시 허용
+                                "/html/login.html"
+//                                "/**"     // 화면 확인을 위한 임시 허용
                         ).permitAll()
+
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/error").permitAll()// 누구나 가능
+                        .requestMatchers(HttpMethod.POST, "/api/logout").authenticated()
+
                         .requestMatchers(HttpMethod.GET, "/manuallyGetAllEvents").permitAll() // 수동으로 축제 api 불러오기 허용
                         .requestMatchers(HttpMethod.GET, "/api/events").permitAll() // 축제 전체 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/{eventId}").permitAll() // 각각의 축제 조회 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/search").permitAll() // 축제 검색 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/month").permitAll() // 축제 필터링 비회원 허용
                         .requestMatchers(HttpMethod.GET, "/api/events/filter/region").permitAll() // 축제 필터링 비회원 허용
+
+                        // 게시글 작성 및 수정 인증
+                        .requestMatchers(
+                                "/post/write",
+                                "/post/edit/**"
+                        ).authenticated()
 
                         // 커뮤니티 관련 공개/인증 API
                         .requestMatchers(HttpMethod.GET, "/api/companions").permitAll()
@@ -104,8 +114,7 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(customOAuth2FailureHandler));
 
-
-        //에러처리
+        // 에러처리
         http.exceptionHandling(exception -> exception
                 .authenticationEntryPoint((request, response, authException) -> {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -114,8 +123,6 @@ public class SecurityConfig {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
                 }) // 권한 부족 시 403 반환
         );
-
-
 
         return http.build();
     }

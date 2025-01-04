@@ -101,9 +101,9 @@ public class PostController {
 
     @Operation(summary = "게시글 좋아요")
     @PostMapping("/{postId}/like")
-    public ResponseEntity<Void> toggleLike(@PathVariable("postId") Long postId, Authentication authentication) {
-        postService.toggleLike(postId, authentication);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PostDetailResponse> toggleLike(@PathVariable("postId") Long postId, Authentication authentication) {
+        PostDetailResponse postDetailResponse = postService.toggleLike(postId, authentication);
+        return ResponseEntity.ok(postDetailResponse);
     }
 
     @Operation(summary = "댓글 등록")

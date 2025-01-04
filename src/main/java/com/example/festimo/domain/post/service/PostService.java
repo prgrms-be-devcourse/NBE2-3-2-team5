@@ -32,7 +32,7 @@ public interface PostService {
     List<PostListResponse> searchPosts(String keyword);
 
     // 좋아요
-    void toggleLike(Long postId, Authentication authentication);
+    PostDetailResponse toggleLike(Long postId, Authentication authentication);
 
     // 댓글 등록
     CommentResponse createComment(Long postId, @Valid CommentRequest commentDto, Authentication authentication);

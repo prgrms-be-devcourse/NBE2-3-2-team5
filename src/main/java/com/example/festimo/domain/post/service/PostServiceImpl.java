@@ -1,5 +1,8 @@
 package com.example.festimo.domain.post.service;
 
+import com.example.festimo.domain.meet.entity.Companion;
+import com.example.festimo.domain.meet.repository.CompanionMemberRepository;
+import com.example.festimo.domain.meet.repository.CompanionRepository;
 import com.example.festimo.domain.meet.service.CompanionService;
 import com.example.festimo.domain.post.dto.*;
 import com.example.festimo.domain.post.entity.Comment;
@@ -45,6 +48,8 @@ public class PostServiceImpl implements PostService {
     private final ModelMapper modelMapper;
     private final CommentRepository commentRepository;
     private final CompanionService companionService;
+    private final CompanionRepository companionRepository;
+    private final CompanionMemberRepository companionMemberRepository;
 
     // 게시글 등록
     @Transactional
@@ -56,7 +61,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = Post.builder()
                 .title(request.getTitle())
-                .writer(user.getNickname())
+                .nickname(user.getNickname())
                 .mail(user.getEmail())
                 .password(request.getPassword())
                 .content(request.getContent())
@@ -120,8 +125,11 @@ public class PostServiceImpl implements PostService {
                         comment.getNickname(),
                         post.getId(),
                         comment.getCreatedAt(),
-                        comment.getUpdatedAt()))
-                .toList();
+                        comment.getUpdatedAt(),
+                        comment.getNickname().equals(user.getNickname()),
+                        isAdmin
+                ))
+                .collect(Collectors.toList());
 
         PostDetailResponse response = modelMapper.map(post, PostDetailResponse.class);
         response.setOwner(isOwner);
@@ -164,13 +172,13 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
-    // 게시글 삭제
     @Transactional
     @Override
     public void deletePost(Long postId, String password, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
+        // 1. 게시글 작성자/비밀번호 체크
         if (post.getUser().equals(user)) {
             if (!post.getPassword().equals(password)) {
                 throw new InvalidPasswordException();
@@ -179,6 +187,19 @@ public class PostServiceImpl implements PostService {
             throw new PostDeleteAuthorizationException();
         }
 
+        // 2. 게시글이 동행 카테고리인 경우에만 동행 데이터 삭제
+        if (post.getCategory() == PostCategory.COMPANION) {
+            Companion companion = companionRepository.findByPost(post)
+                    .orElse(null);
+            if (companion != null) {
+                // companion_member 테이블의 관련 데이터 삭제
+                companionMemberRepository.deleteByCompanion_CompanionId(companion.getCompanionId());
+                // companion 테이블의 데이터 삭제
+                companionRepository.delete(companion);
+            }
+        }
+
+        // 3. 게시글 삭제
         postRepository.delete(post);
         clearWeeklyTopPostsCache();
     }
@@ -232,7 +253,7 @@ public class PostServiceImpl implements PostService {
 
         Comment comment = Comment.builder()
                 .comment(request.getComment())
-                .nickname(request.getNickname())
+                .nickname(user.getNickname())
                 .post(post)
                 .sequence(nextSequence)
                 .build();
@@ -293,11 +314,13 @@ public class PostServiceImpl implements PostService {
     // 좋아요
     @Transactional
     @Override
-    public void toggleLike(Long postId, Authentication authentication) {
+    public PostDetailResponse toggleLike(Long postId, Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
         post.toggleLike(user);
         postRepository.save(post);
+
+        return modelMapper.map(post, PostDetailResponse.class);
     }
 }

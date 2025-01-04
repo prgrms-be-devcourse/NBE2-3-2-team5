@@ -73,7 +73,7 @@ public class CompanionController {
         String token = authorizationHeader.replace("Bearer ", "");
         String email = jwtTokenProvider.getEmailFromToken(token);
 
-        companionService.deleteCompaion(companionId, email);
+        companionService.deleteCompanion(companionId, email);
         return ResponseEntity.noContent().build();
     }
 

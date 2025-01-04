@@ -95,7 +95,7 @@ public class CompanionService {
      * @param email     취소하고 싶은 듀저
      */
     @Transactional
-    public void deleteCompaion(Long companionId, String email) {
+    public void deleteCompanion(Long companionId, String email) {
 
         //userId 추출
         User user = userRepository.findByEmail(email)

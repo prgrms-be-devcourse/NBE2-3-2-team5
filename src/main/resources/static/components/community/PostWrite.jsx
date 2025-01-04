@@ -61,11 +61,27 @@ const PostWrite = () => {
         e.preventDefault();
         const token = localStorage.getItem("accessToken");
 
-        // 태그 문자열 -> 배열
-        const processedFormData = {
-            ...formData,
-            tags: formData.tags ? formData.tags.split(",").map((tag) => tag.trim()).filter((tag) => tag !== "") : [],
-        };
+        // 태그 문자열 -> 배열 처리
+        const tagsArray = formData.tags
+            ? formData.tags.split(",").map((tag) => tag.trim()).filter((tag) => tag !== "")
+            : [];
+
+        const processedFormData = isEditMode
+            ? {
+                // 수정 시
+                title: formData.title,
+                content: formData.content,
+                category: formData.category,
+                password: formData.password
+            }
+            : {
+                // 등록 시
+                title: formData.title,
+                content: formData.content,
+                category: formData.category,
+                password: formData.password,
+                tags: tagsArray
+            };
 
         const url = isEditMode ? `/api/companions/${postId}` : "/api/companions";
 
@@ -79,10 +95,13 @@ const PostWrite = () => {
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(isEditMode ? "게시글 수정에 실패했습니다." : "게시글 작성에 실패했습니다.");
+                    return response.text().then(errorData => {
+                        console.log('서버 에러 응답:', errorData);
+                        throw new Error(isEditMode ? "게시글 수정에 실패했습니다." : "게시글 작성에 실패했습니다.");
+                    });
                 }
                 alert(isEditMode ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.");
-                navigate("/community");
+                navigate(isEditMode ? `/post/${postId}` : "/community");
             })
             .catch((error) => {
                 console.error("Error:", error);

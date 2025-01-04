@@ -22,7 +22,7 @@ public class AppConfig {
                 .addMapping(Post::getCreatedAt, PostDetailResponse::setCreatedAt)
                 .addMapping(Post::getCategory, PostDetailResponse::setCategory)
                 .addMapping(Post::getViews, PostDetailResponse::setViews)
-                .addMapping(src -> src.getUser().getNickname(), PostDetailResponse::setWriter);
+                .addMapping(src -> src.getUser().getNickname(), PostDetailResponse::setNickname);
 
         return modelMapper;
     }
