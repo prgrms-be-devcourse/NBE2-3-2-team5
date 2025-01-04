@@ -29,7 +29,7 @@ const formatDate = (dateString) => {
 };
 
 const PostDetail = () => {
-    const { id } = useParams();
+    const { postId } = useParams();
     const navigate = useNavigate();
     const [commentInput, setCommentInput] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -47,31 +47,31 @@ const PostDetail = () => {
     };
 
     const checkAuthAndFetchPost = useCallback(async () => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken');
 
         // 초기 마운트시에만 토큰 체크 및 알림 표시
         if (isInitialMount.current) {
             isInitialMount.current = false;
             if (!token) {
                 alert('로그인이 필요합니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요.');
-                navigate('/login');
+                navigate('/html/login.html');
                 return;
             }
         }
 
         try {
-            const response = await fetch(`/api/companions/${id}?view=true`, {
+            const response = await fetch(`/api/companions/${postId}?view=true`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
-                    'Cache-Control': 'no-cache',
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
+                }
             });
 
             if (response.status === 401) {
-                localStorage.removeItem('token');
-                navigate('/api/login');
+                localStorage.removeItem('accessToken');
+                navigate('/html/login.html');
                 return;
             }
 
@@ -82,16 +82,16 @@ const PostDetail = () => {
             }
 
             const data = await response.json();
-            console.log('Fetched post data:', data);
+            console.log('서버 응답 데이터:', data);  // 전체 응답 데이터 확인
             setPost(data);
             setLikes(data.likes);
             setIsLiked(data.likedByUsers?.includes(data.currentUserId) || false);
             setIsLoading(false);
         } catch (error) {
-            console.error('Error:', error);
+            console.error('API 요청 에러:', error);  // 에러 상세 확인
             setIsLoading(false);
         }
-    }, [id, navigate]);
+    }, [postId, navigate]);
 
     useEffect(() => {
         checkAuthAndFetchPost();
@@ -103,12 +103,13 @@ const PostDetail = () => {
 
     const toggleLike = async () => {
         try {
-            const response = await fetch(`/api/companions/${id}/like`, {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`/api/companions/${postId}/like`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                credentials: 'include',
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (!response.ok) {
@@ -125,19 +126,20 @@ const PostDetail = () => {
     };
 
     const handleEdit = () => {
-        navigate(`/post/edit/${id}`);
+        navigate(`/post/edit/${postId}`);
     };
 
     const handleDelete = async () => {
         if (!window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) return;
 
         try {
-            const response = await fetch(`/api/companions/${id}`, {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`/api/companions/${postId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                credentials: 'include',
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (!response.ok) throw new Error('게시글 삭제에 실패했습니다.');
@@ -152,7 +154,7 @@ const PostDetail = () => {
         if (!window.confirm('동행 신청을 하시겠습니까?')) return;
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('accessToken');
             const response = await fetch('/api/applications', {
                 method: 'POST',
                 headers: {
@@ -160,7 +162,7 @@ const PostDetail = () => {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    companionId: id // 현재 게시글의 ID를 사용
+                    companionId: postId // 현재 게시글의 ID를 사용
                 })
             });
 
@@ -189,12 +191,13 @@ const PostDetail = () => {
         }
 
         try {
-            const response = await fetch(`/api/companions/${id}/comments`, {
+            const token = localStorage.getItem('accessToken');
+            const response = await fetch(`/api/companions/${postId}/comments`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                credentials: 'include',
                 body: JSON.stringify({ comment: commentInput }),
             });
 

@@ -24,9 +24,9 @@ const App = () => {
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/community" element={<CommunityPage />} />
-                    <Route path="/post/:id" element={<PostDetail />} />
                     <Route path="/post/write" element={<PostWrite />} />
                     <Route path="/post/edit/:postId" element={<PostWrite />} />
+                    <Route path="/post/:postId" element={<PostDetail />} />
                 </Routes>
             </div>
         </BrowserRouter>

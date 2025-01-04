@@ -122,10 +122,10 @@ const DiscussionList = () => {
     };
 
     const handleWriteClick = () => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken');
         if (!token) {
             alert('로그인이 필요합니다. [로그인] 또는 [회원가입] 후 다시 시도해주세요.');
-            navigate('/api/login');
+            navigate('/html/login.html');
             return;
         }
         navigate('/post/write');
