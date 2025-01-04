@@ -6,6 +6,9 @@ import com.example.festimo.domain.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.antlr.v4.runtime.Token;
@@ -55,12 +58,30 @@ public class UserController {
 
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies= request.getCookies();
+        String refreshToken= null;
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals("refreshToken")) {
+                    refreshToken ="Bearer " + cookie.getValue();
+                    System.out.println(refreshToken);
+                    break;
+                }
+            }
+        }
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
             throw new IllegalArgumentException("Invalid token format.");
         }
-        userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
-        return ResponseEntity.ok("Logged out successfully.");
+        userService.logout(refreshToken.substring(7));// 앞에 접두사 Bearer 제외
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);  // HTTPS 환경에서만 쿠키가 전송되도록 설정
+        cookie.setPath("/");  // 전체 도메인에서 쿠키 유효
+        cookie.setMaxAge(0);  // 쿠키 만료 시간을 0으로 설정하여 삭제
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshToken).body("Logout successful.");
     }
 
     @Operation(summary = "비밀번호 변경")
