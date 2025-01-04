@@ -10,15 +10,12 @@ const PAGINATION = {
     PAGE_SIZE: 10
 };
 
-
 //헤더
 fetch('../html/header.html')
     .then(response => response.text())
     .then(data => {
         document.getElementById('header-container').innerHTML = data;
     });
-
-
 
 // 상태 관리
 const state = {
@@ -51,7 +48,6 @@ const utils = {
                 throw new Error(errorData?.message || `요청 실패 (${response.status})`);
             }
 
-            // 응답이 있는 경우만 JSON 파싱
             return response.status !== 204 ? await response.json() : null;
         } catch (error) {
             console.error('API 요청 실패:', error);
@@ -59,26 +55,22 @@ const utils = {
         }
     },
 
-    createTableRow(data, columns, actions) {
+    createTableRow(data, columns, actions, type = 'member') {
         const row = document.createElement('tr');
-        row.setAttribute('data-id', data.userId);
+        // type에 따라 다른 ID 필드 사용
+        const id = type === 'member' ? data.userId : data.id;  // companionId 대신 id 사용
+        row.setAttribute('data-id', id);
 
         const cells = columns.map(column =>
             `<td class="${column.class || ''}">${column.render(data)}</td>`
         );
 
-        /*
         const actionButtons = actions.map(action => {
-            const button = document.createElement('button');
-            button.textContent = action.text;
-            button.addEventListener('click', () => action.handler(data.userId));
-            return button.outerHTML;
-        }).join('');
-
-         */
-
-        const actionButtons = actions.map(action => {
-            return `<button onclick="memberManager.${action.text === '수정' ? 'editMember' : 'deleteMember'}(${data.userId})">${action.text}</button>`;
+            if (type === 'member') {
+                return `<button onclick="memberManager.${action.text === '수정' ? 'editMember' : 'deleteMember'}(${id})">${action.text}</button>`;
+            } else {
+                return `<button onclick="postManager.deletePost(${id})">${action.text}</button>`;
+            }
         }).join('');
 
         row.innerHTML = [...cells, `<td>${actionButtons}</td>`].join('');
@@ -92,17 +84,13 @@ const memberManager = {
         try {
             const data = await utils.fetchWithErrorHandling(
                 `${API_ENDPOINTS.USERS}?page=${state.members.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`);
-            console.log('API Response:', data);
 
             const memberTable = document.getElementById('member-table');
             memberTable.innerHTML = '';
 
             const columns = [
                 { class: 'no', render: (member, index) => (state.members.currentPage - 1) * PAGINATION.PAGE_SIZE + index + 1 },
-                { class: 'user-id', render: member => {
-                        console.log('회원 ID 렌더링:', member);
-                        return member.userId;
-                    }},
+                { class: 'user-id', render: member => member.userId },
                 { class: 'user-name', render: member => member.userName },
                 { class: 'user-nickname', render: member => member.nickname },
                 { class: 'user-email', render: member => member.email },
@@ -121,26 +109,15 @@ const memberManager = {
             ];
 
             const actions = [
-                {
-                    text: '수정',
-                    handler: function(userId) {
-                        memberManager.editMember(userId);
-                    }
-                },
-                {
-                    text: '삭제',
-                    handler: function(userId) {
-                        memberManager.deleteMember(userId);
-                    }
-                }
+                { text: '수정' },
+                { text: '삭제' }
             ];
 
             data.content.forEach((member, index) => {
-                //console.log('Member data:', JSON.stringify(member, null, 2));
                 memberTable.appendChild(utils.createTableRow(member, columns.map(col => ({
                     ...col,
                     render: (data) => col.render(data, index)
-                })), actions));
+                })), actions, 'member'));
             });
 
             this.updatePagination(data);
@@ -165,7 +142,6 @@ const memberManager = {
         state.members.editingUserId = userId;
         const editSection = document.getElementById('edit-section');
 
-        // 폼 필드 업데이트
         ['name', 'nickname', 'email', 'role'].forEach(field => {
             const value = row.querySelector(`.user-${field}`).textContent;
             document.getElementById(`edit-${field}`).value = value;
@@ -185,7 +161,6 @@ const memberManager = {
             nickname: document.getElementById('edit-nickname').value,
             email: document.getElementById('edit-email').value,
             gender: document.getElementById('edit-gender').value,
-            //role: document.getElementById('edit-role').value,
             ratingAvg: 5
         };
 
@@ -242,25 +217,29 @@ const postManager = {
     async loadPosts() {
         try {
             const data = await utils.fetchWithErrorHandling(
-                `${API_ENDPOINTS.COMPANIONS}?page=${state.posts.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`
+                `${API_ENDPOINTS.COMPANIONS}?page=${state.posts.currentPage}&size=${PAGINATION.PAGE_SIZE}`
             );
+
+            console.log('Posts data:', data);
 
             const postTable = document.getElementById('post-table');
             postTable.innerHTML = '';
 
             const columns = [
-                { render: post => post.id },
+                { render: post => post.id },  // companionId 대신 id 사용
                 { render: post => post.title },
                 { render: post => post.writer },
                 { render: post => post.views }
             ];
 
             const actions = [
-                { text: '삭제', handler: 'postManager.deletePost' }
+                { text: '삭제' }
             ];
 
             data.content.forEach(post => {
-                postTable.appendChild(utils.createTableRow(post, columns, actions));
+                console.log('Processing post:', post);
+                // id를 사용하도록 수정
+                postTable.appendChild(utils.createTableRow(post, columns, actions, 'post'));
             });
 
             this.updatePagination(data);
@@ -276,6 +255,13 @@ const postManager = {
     },
 
     async deletePost(postId) {
+        console.log('Deleting post with ID:', postId);
+
+        if (!postId) {
+            alert('게시글 ID가 유효하지 않습니다.');
+            return;
+        }
+
         if (!confirm('정말로 삭제하시겠습니까?')) return;
 
         try {
