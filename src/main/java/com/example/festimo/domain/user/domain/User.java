@@ -79,4 +79,6 @@ public class User {
     public enum Provider {
         KAKAO, NAVER, LOCAL
     }
+
 }
+

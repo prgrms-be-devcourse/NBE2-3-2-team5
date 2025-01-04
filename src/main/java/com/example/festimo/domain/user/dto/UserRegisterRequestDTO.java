@@ -1,9 +1,10 @@
 package com.example.festimo.domain.user.dto;
 
-import jakarta.validation.constraints.Pattern;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class UserRegisterRequestDTO {
     private String userName;
     private String nickname;
