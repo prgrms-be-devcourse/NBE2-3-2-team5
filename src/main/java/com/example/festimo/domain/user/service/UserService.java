@@ -91,7 +91,7 @@ public class UserService {
                     return new BadCredentialsException("아이디 또는 비밀번호가 일치하지 않습니다..");
                 });
 
-        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+        if (user.getPassword()!=null &&!passwordEncoder.matches(dto.getPassword(), user.getPassword()) ) {
             logger.warn("Login failed. Invalid credentials for email: {}", email);
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }

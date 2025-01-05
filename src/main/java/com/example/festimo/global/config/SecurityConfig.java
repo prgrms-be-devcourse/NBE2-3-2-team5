@@ -58,8 +58,9 @@ public class SecurityConfig {
                                 "/login",
                                 "/register",
                                 "/html/festival.html",
-                                "/html/login.html"
-//                                "/**"     // 화면 확인을 위한 임시 허용
+                                "/html/login.html",
+                                "/html/**"
+//                                ""     // 화면 확인을 위한 임시 허용
                         ).permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/register", "/api/login").permitAll()
