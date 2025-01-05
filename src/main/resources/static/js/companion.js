@@ -1,23 +1,12 @@
-/*
-//테스트용!!
-function getHeaders() {
+import { apiRequest } from './apiClient.js';
 
-    return {
-        'Authorization': 'Bearer ' + "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzM2MDY0MTE2LCJleHAiOjE3MzYwNjc3MTZ9.sUL-RBG7jUGnhXP2XGskozfBFt9b2FwOzLeC2x_-BnfJ17N3swIV4eqehki31UGr"
-        ,
-        'Content-Type': 'application/json'
-    };
-}
-
-*/
-
-function getHeaders() {
-    const token = localStorage.getItem('accessToken');
-    return {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-    };
-}
+// function getHeaders() {
+//     const token = localStorage.getItem('accessToken');
+//     return {
+//         'Authorization': 'Bearer ' + token,
+//         'Content-Type': 'application/json'
+//     };
+// }
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -41,15 +30,20 @@ async function fetchCompanions() {
         document.getElementById('leaderContent').innerHTML = '<div class="loading">로딩 중...</div>';
         document.getElementById('memberContent').innerHTML = '<div class="loading">로딩 중...</div>';
 
-        const response = await fetch('/api/meet/companions/mine', {
-            headers: getHeaders()
-        });
+        // const response = await fetch('/api/meet/companions/mine', {
+        //     headers: getHeaders()
+        // });
+        //
+        // if (!response.ok) {
+        //     throw new Error('서버 응답 오류');
+        // }
+        //
+        // const data = await response.json();
+        // renderCompanions(data);
+        // return data;
 
-        if (!response.ok) {
-            throw new Error('서버 응답 오류');
-        }
-
-        const data = await response.json();
+        // [수정] apiRequest를 사용하여 Authorization 헤더 자동 추가 및 토큰 갱신 처리
+        const data = await apiRequest('/api/meet/companions/mine');
         renderCompanions(data);
         return data;
     } catch (error) {
@@ -112,7 +106,12 @@ async function loadApplications(companionId) {
             throw new Error('서버 응답 오류');
         }
 
-        const data = await response.json();
+        // const data = await response.json();
+        // const applicationTable = document.getElementById("application-table");
+        // applicationTable.innerHTML = "";
+
+        // [수정] apiRequest 사용
+        const data = await apiRequest(`/api/meet/companion/${companionId}`);
         const applicationTable = document.getElementById("application-table");
         applicationTable.innerHTML = "";
 
@@ -150,20 +149,28 @@ document.querySelector('.close-btn').addEventListener('click', () => {
 
 // 수락 함수
 async function acceptApplication(applicationId, companionId) {
+    // try {
+    //     const response = await fetch(`/api/meet/${applicationId}/accept`, {
+    //         method: "POST",
+    //         headers: getHeaders()
+    //     });
+    //
+    //     if (response.ok) {
+    //         alert("신청을 수락했습니다.");
+    //         loadApplications(companionId);
+    //         fetchCompanions();
+    //
+    //     } else {
+    //         alert("신청 수락에 실패했습니다.");
+    //     }
+
     try {
-        const response = await fetch(`/api/meet/${applicationId}/accept`, {
-            method: "POST",
-            headers: getHeaders()
-        });
+        // [수정] apiRequest 사용
+        await apiRequest(`/api/meet/${applicationId}/accept`, { method: "POST" });
+        alert("신청을 수락했습니다.");
+        loadApplications(companionId);
+        fetchCompanions();
 
-        if (response.ok) {
-            alert("신청을 수락했습니다.");
-            loadApplications(companionId);
-            fetchCompanions();
-
-        } else {
-            alert("신청 수락에 실패했습니다.");
-        }
     } catch (error) {
         console.error("Error accepting application:", error);
         alert("신청 수락 중 문제가 발생했습니다.");
@@ -173,19 +180,26 @@ async function acceptApplication(applicationId, companionId) {
 // 거절 함수
 async function rejectApplication(applicationId, companionId) {
     try {
-        const response = await fetch(`/api/meet/${applicationId}/reject`, {
-            method: "PATCH",
-            headers: getHeaders()
-        });
+        // const response = await fetch(`/api/meet/${applicationId}/reject`, {
+        //     method: "PATCH",
+        //     headers: getHeaders()
+        // });
+        //
+        // if (response.ok) {
+        //     alert("신청을 거절했습니다.");
+        //     loadApplications(companionId);
+        //     fetchCompanions();
+        //
+        // } else {
+        //     alert("신청 거절에 실패했습니다.");
+        // }
 
-        if (response.ok) {
-            alert("신청을 거절했습니다.");
-            loadApplications(companionId);
-            fetchCompanions();
+        // [수정] apiRequest 사용
+        await apiRequest(`/api/meet/${applicationId}/reject`, { method: "PATCH" });
+        alert("신청을 거절했습니다.");
+        loadApplications(companionId);
+        fetchCompanions();
 
-        } else {
-            alert("신청 거절에 실패했습니다.");
-        }
     } catch (error) {
         console.error("Error rejecting application:", error);
         alert("신청 거절 중 문제가 발생했습니다.");
@@ -196,17 +210,22 @@ async function rejectApplication(applicationId, companionId) {
 async function handleWithdraw(companionId) {
     if (confirm('정말로 이 동행에서 탈퇴하시겠습니까?')) {
         try {
-            const response = await fetch(`/api/meet/${companionId}`, {
-                method: "DELETE",
-                headers: getHeaders()
-            });
+            // const response = await fetch(`/api/meet/${companionId}`, {
+            //     method: "DELETE",
+            //     headers: getHeaders()
+            // });
+            //
+            // if (response.ok) {
+            //     alert("동행에서 성공적으로 탈퇴했습니다.");
+            //     fetchCompanions();
+            // } else {
+            //     alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
+            // }
 
-            if (response.ok) {
-                alert("동행에서 성공적으로 탈퇴했습니다.");
-                fetchCompanions();
-            } else {
-                alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
-            }
+            // [수정] apiRequest 사용
+            await apiRequest(`/api/meet/${companionId}`, { method: "DELETE" });
+            alert("동행에서 성공적으로 탈퇴했습니다.");
+            fetchCompanions();
         } catch (error) {
             console.error("동행 취소 중 오류 발생:", error);
             alert("탈퇴 처리 중 문제가 발생했습니다.");

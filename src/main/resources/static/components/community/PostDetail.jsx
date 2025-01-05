@@ -196,7 +196,7 @@ const PostDetail = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch('/api/applications', {
+            const response = await fetch('/api/meet/applications', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
