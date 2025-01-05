@@ -31,18 +31,18 @@ const Navigation = ({isLoggedIn, handleLogout}) => {
                 </button>
             ) : (
                 <>
-                    <Link
-                        to="/html/login.html"
+                    <a
+                        href="/html/login.html"
                         className="text-[#4a4a4a] hover:text-[#4a4a4a]/80 leading-[1.2]"
                     >
                         Login
-                    </Link>
-                    <Link
-                        to="html/registration_form.html"
+                    </a>
+                    <a
+                        href="html/registration_form.html"
                         className="px-4 py-[0.5rem] bg-[#5c5d8d] text-white rounded-[3px] hover:shadow-md hover:shadow-black/30 transition-all leading-[1.2]"
                     >
                         Get started
-                    </Link>
+                    </a>
                 </>
             )}
         </div>

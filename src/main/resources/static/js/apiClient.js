@@ -19,16 +19,19 @@ function isTokenExpired(token) {
  * @returns {Promise<string>} - 새로 발급된 Access Token
  */
 async function refreshAccessToken() {
+    console.log("Refreshing Access Token...");
     const response = await fetch('http://localhost:8080/api/refresh', {
         method: 'POST',
         credentials: 'include', // Refresh Token은 HttpOnly 쿠키로 전달
     });
 
     if (!response.ok) {
+        console.error("Failed to refresh Access Token, response:", response);
         throw new Error('Failed to refresh token');
     }
 
     const data = await response.json();
+    console.log("Refreshed Access Token:", data.accessToken);
     accessToken = data.accessToken; // 새로운 Access Token 저장
     localStorage.setItem('accessToken', accessToken); // LocalStorage에 저장
     return accessToken;
@@ -41,14 +44,16 @@ async function refreshAccessToken() {
  * @returns {Promise<any>} - API 응답 데이터
  */
 async function apiRequest(url, options = {}) {
-    if(!accessToken){
+    console.log("API Request initiated:", url);
+    if (!accessToken) {
+        console.error("Access Token missing. User needs to log in.");
         throw new Error('Require Login');
-    }
-    else if (isTokenExpired(accessToken)) {
+    } else if (isTokenExpired(accessToken)) {
         try {
+            console.log("Access Token expired. Refreshing...");
             await refreshAccessToken(); // Access Token 만료 시 갱신
         } catch (error) {
-            console.error('Unable to refresh token:', error);
+            console.error("Unable to refresh token:", error);
             throw new Error('Unauthorized'); // 토큰 갱신 실패 시 예외 처리
         }
     }
@@ -60,18 +65,18 @@ async function apiRequest(url, options = {}) {
         'Content-Type': 'application/json',
     };
 
+    console.log("Headers before request:", options.headers);
+
     const response = await fetch(url, options);
 
     if (!response.ok) {
         let errorData = {};
         try {
-            // ✅ 서버에서 반환된 JSON 데이터 파싱
             errorData = await response.json();
         } catch (parseError) {
-            console.error('Error parsing server response:', parseError);
+            console.error("Error parsing server response:", parseError);
         }
 
-        // ✅ 응답 상태와 에러 데이터를 함께 throw
         throw {
             status: response.status,
             data: errorData,
@@ -82,11 +87,12 @@ async function apiRequest(url, options = {}) {
     // 응답이 JSON인지 확인
     const contentType = response.headers.get('Content-Type');
     if (contentType && contentType.includes('application/json')) {
-        return response.json(); // JSON 응답 반환
+        return response.json();
     } else {
-        return response.text(); // 순수 텍스트 반환
+        return response.text();
     }
 }
+
 
 
 // 모듈 내보내기
