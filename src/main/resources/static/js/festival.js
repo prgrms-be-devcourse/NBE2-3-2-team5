@@ -5,6 +5,7 @@ let filterMonth = null;
 let filterRegion = null;
 let filterKeyword = null;
 
+
 window.onload = function () {
     document.getElementById('loading').style.display = 'flex';
     loadEvents(currentPage);

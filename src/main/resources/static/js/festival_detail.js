@@ -20,7 +20,6 @@ window.onload = function() {
         alert("축제가 존재하지 않습니다.");
     }
 }
-
 function displayEventDetails(event) {
     document.title = `${event.title} - Festimo`;
 

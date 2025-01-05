@@ -11,12 +11,6 @@ const PAGINATION = {
     PAGE_SIZE: 10
 };
 
-//헤더
-fetch('../html/header.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('header-container').innerHTML = data;
-    });
 
 // 상태 관리
 const state = {

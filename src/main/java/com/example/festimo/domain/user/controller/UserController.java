@@ -5,6 +5,9 @@ import com.example.festimo.domain.user.dto.*;
 import com.example.festimo.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -54,20 +57,69 @@ public class UserController {
                 ));
     }
 
+    @Operation(summary = "로그인 유무")
+    @GetMapping("/status")
+    public ResponseEntity<Boolean> getLoginStatus(Authentication authentication) {
+        if (authentication == null) {
+            System.out.println("Authentication is null");
+        } else {
+            System.out.println("Authentication principal: " + authentication.getPrincipal());
+            System.out.println("Authentication authorities: " + authentication.getAuthorities());
+        }
+        boolean isLoggedIn = authentication != null && authentication.isAuthenticated();
+        return ResponseEntity.ok(isLoggedIn);
+    }
+
+    // @Operation(summary = "로그아웃")
+    // @PostMapping("/logout")
+    // public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
+    //     if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
+    //         throw new IllegalArgumentException("Invalid token format.");
+    //     }
+    //     userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
+    //     return ResponseEntity.ok("Logged out successfully.");
+    //
+    //     // // Refresh Token 쿠키 무효화
+    //     // ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
+    //     //     .httpOnly(true)
+    //     //     .secure(true)
+    //     //     .path("/")
+    //     //     .maxAge(0) // 쿠키 만료
+    //     //     .sameSite("Strict")
+    //     //     .build();
+    //     //
+    //     // return ResponseEntity.ok()
+    //     //     .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
+    //     //     .body("로그아웃이 완료되었습니다.");
+    //     //
+    // }
+
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies= request.getCookies();
+        String refreshToken= null;
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals("refreshToken")) {
+                    refreshToken ="Bearer " + cookie.getValue();
+                    System.out.println(refreshToken);
+                    break;
+                }
+            }
+        }
         if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
             throw new IllegalArgumentException("Invalid token format.");
         }
-        userService.logout(refreshToken.substring(7));  // 앞에 접두사 Bearer 제외
-        return ResponseEntity.ok("Logged out successfully.");
-    }
+        userService.logout(refreshToken.substring(7));// 앞에 접두사 Bearer 제외
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);  // HTTPS 환경에서만 쿠키가 전송되도록 설정
+        cookie.setPath("/");  // 전체 도메인에서 쿠키 유효
+        cookie.setMaxAge(0);  // 쿠키 만료 시간을 0으로 설정하여 삭제
+        response.addCookie(cookie);
 
-    @Operation(summary = "비밀번호 변경")
-    @PostMapping("/change-password")
-    public ResponseEntity<String> changePassword(@RequestBody @Valid ChangePasswordDTO dto) {
-        return ResponseEntity.ok(userService.changePassword(dto));
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshToken).body("Logout successful.");
     }
 
     @Operation(summary = "회원 정보 조회")
@@ -83,17 +135,44 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
+    @Operation(summary = "비밀번호 변경")
+    @PostMapping("/user/mypage/change-password")
+    public ResponseEntity<String> changePassword(Authentication authentication, @RequestBody @Valid ChangePasswordDTO dto) {
+        // 인증된 사용자의 이메일 추출
+        String email = authentication.getName();
+
+        // 서비스 로직 호출
+        return ResponseEntity.ok(userService.changePassword(email, dto));
+    }
+
+
 
     @Operation(summary = "회원 정보 갱신")
-    @PutMapping("/user/update/{email}")
-    public ResponseEntity<String> updateUser(@PathVariable String email, @RequestBody UserUpdateRequestDTO dto) {
+    @PutMapping("/user/mypage/update")
+    public ResponseEntity<String> updateUser(Authentication authentication, @RequestBody UserUpdateRequestDTO dto) {
+        String email = authentication.getName(); // 인증된 사용자의 이메일 추출
         return ResponseEntity.ok(userService.updateUser(email, dto));
     }
 
     @Operation(summary = "회원 탈퇴")
-    @DeleteMapping("/user/delete/{email}")
-    public ResponseEntity<String> deleteUser(@PathVariable String email) {
-        return ResponseEntity.ok(userService.deleteUser(email));
+    @DeleteMapping("/user/mypage/delete")
+    public ResponseEntity<String> deleteUser(Authentication authentication) {
+        String email = authentication.getName(); // 인증된 사용자의 이메일 추출
+        userService.deleteUser(email); // 계정 삭제
+
+        // Refresh Token 쿠키 무효화
+        ResponseCookie invalidRefreshTokenCookie = ResponseCookie.from("refreshToken", "")
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0) // 쿠키 만료
+            .sameSite("Strict")
+            .build();
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, invalidRefreshTokenCookie.toString()) // 쿠키 삭제
+            .body("회원 탈퇴가 완료되었습니다.");
+        // return ResponseEntity.ok(userService.deleteUser(email));
     }
 
 

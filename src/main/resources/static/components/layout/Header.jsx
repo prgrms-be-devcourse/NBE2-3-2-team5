@@ -3,22 +3,23 @@ import {Link, useNavigate} from 'react-router-dom';
 
 const Navigation = ({isLoggedIn, handleLogout}) => {
     const navItems = [
-        {title: 'Home', path: '/'},
-        {title: 'Mypage', path: '/mypage'},
-        {title: 'Festival', path: '/html/festival.html'},
-        {title: 'Community', path: '/community'},
+        { title: 'Home', path: '/' },
+        { title: 'Mypage', path: '/html/mypage.html' },
+        { title: 'Festival', path: '/html/festival.html' },
+        { title: 'Community', path: '/community' },
+        { title: 'Companion', path: '/html/companion.html' },
     ];
 
     return (
         <div className="hidden md:flex items-center gap-8 text-[14.5px] translate-y-[2px]">
             {navItems.map((item, index) => (
                 <div key={index}>
-                    <Link
-                        to={item.path}
+                    <a
+                        href={item.path}
                         className="text-[#4a4a4a] hover:text-[#4a4a4a]/80 leading-[1.2]"
                     >
                         <span>{item.title}</span>
-                    </Link>
+                    </a>
                 </div>
             ))}
             {isLoggedIn ? (
