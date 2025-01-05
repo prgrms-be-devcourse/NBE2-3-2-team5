@@ -30,7 +30,7 @@ public class Post extends BaseTimeEntity {
     private String title;
 
     @Column(nullable = false, length = 15)
-    private String writer;
+    private String nickname;
 
     private String avatar;
 

@@ -75,6 +75,12 @@
                 // 1. JavaScript 메모리에 access token 저장 (localStorage 또는 sessionStorage 사용)
                 localStorage.setItem('accessToken', accessToken);
 
+                // userInfo 저장
+                localStorage.setItem('userInfo', JSON.stringify({
+                    nickname: data.nickname,
+                    mail: data.email,
+                }));
+
                 // 2. 로그인 성공 시 홈 경로로 리다이렉트
                 window.location.href = '/html/festival.html';
             } else {
@@ -87,7 +93,6 @@
             alert('서버와 통신 중 문제가 발생했습니다.');
         }
     });
-
 </script>
 </body>
 </html>

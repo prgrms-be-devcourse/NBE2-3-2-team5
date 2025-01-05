@@ -18,8 +18,6 @@ public interface CompanionMemberRepository extends JpaRepository<Companion_membe
     // 참가 여부 확인
     boolean existsById(@NonNull CompanionMemberId companionMemberId);
 
-
-
     // 특정 사용자가 멤버로 포함된 동행 조회
     @Query("SELECT cm FROM Companion_member cm JOIN FETCH cm.companion WHERE cm.id.userId = :userId")
     List<Companion_member> findByUserId(@Param("userId") Long userId);
@@ -28,6 +26,5 @@ public interface CompanionMemberRepository extends JpaRepository<Companion_membe
     @Query("SELECT cm FROM Companion_member cm JOIN FETCH cm.user WHERE cm.id.companionId = :companionId")
     List<Companion_member> findAllByCompanionId(@Param("companionId") Long companionId);
 
-
-
+    void deleteByCompanion_CompanionId(Long companionId);
 }

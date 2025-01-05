@@ -5,17 +5,11 @@ let filterMonth = null;
 let filterRegion = null;
 let filterKeyword = null;
 
+
 window.onload = function () {
     document.getElementById('loading').style.display = 'flex';
     loadEvents(currentPage);
 };
-
-//헤더
-fetch('../html/header.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('header-container').innerHTML = data;
-    });
 
 function loadEvents(page) {
     currentPage = page;

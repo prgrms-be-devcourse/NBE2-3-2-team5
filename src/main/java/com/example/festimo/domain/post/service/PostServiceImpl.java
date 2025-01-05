@@ -1,5 +1,8 @@
 package com.example.festimo.domain.post.service;
 
+import com.example.festimo.domain.meet.entity.Companion;
+import com.example.festimo.domain.meet.repository.CompanionMemberRepository;
+import com.example.festimo.domain.meet.repository.CompanionRepository;
 import com.example.festimo.domain.meet.service.CompanionService;
 import com.example.festimo.domain.post.dto.*;
 import com.example.festimo.domain.post.entity.Comment;
@@ -45,6 +48,8 @@ public class PostServiceImpl implements PostService {
     private final ModelMapper modelMapper;
     private final CommentRepository commentRepository;
     private final CompanionService companionService;
+    private final CompanionRepository companionRepository;
+    private final CompanionMemberRepository companionMemberRepository;
 
     // 게시글 등록
     @Transactional
@@ -56,7 +61,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = Post.builder()
                 .title(request.getTitle())
-                .writer(user.getNickname())
+                .nickname(user.getNickname())
                 .mail(user.getEmail())
                 .password(request.getPassword())
                 .content(request.getContent())
@@ -99,7 +104,7 @@ public class PostServiceImpl implements PostService {
     }
 
     // 게시글 상세 조회
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public PostDetailResponse getPostById(Long postId, boolean incrementView, Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
@@ -108,10 +113,14 @@ public class PostServiceImpl implements PostService {
 
         if (incrementView) {
             postRepository.incrementViews(postId);
+            post.setViews(post.getViews() + 1); // 클라이언트로 즉시 반영
         }
 
         boolean isOwner = post.getUser().getId().equals(user.getId());
         boolean isAdmin = user.getRole().equals(User.Role.ADMIN);
+        boolean isLiked = post.getLikedByUsers().stream()
+                .anyMatch(likedUser -> likedUser.getId().equals(user.getId()));
+
 
         List<CommentResponse> comments = post.getComments().stream()
                 .map(comment -> new CommentResponse(
@@ -120,8 +129,11 @@ public class PostServiceImpl implements PostService {
                         comment.getNickname(),
                         post.getId(),
                         comment.getCreatedAt(),
-                        comment.getUpdatedAt()))
-                .toList();
+                        comment.getUpdatedAt(),
+                        comment.getNickname().equals(user.getNickname()),
+                        isAdmin
+                ))
+                .collect(Collectors.toList());
 
         PostDetailResponse response = modelMapper.map(post, PostDetailResponse.class);
         response.setOwner(isOwner);
@@ -129,6 +141,7 @@ public class PostServiceImpl implements PostService {
         response.setComments(comments);
         response.setTags(post.getTags());
         response.setReplies(comments.size());
+        response.setLiked(isLiked);
         return response;
     }
 
@@ -164,13 +177,13 @@ public class PostServiceImpl implements PostService {
         return response;
     }
 
-    // 게시글 삭제
     @Transactional
     @Override
     public void deletePost(Long postId, String password, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(UnauthorizedException::new);
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
+        // 1. 게시글 작성자/비밀번호 체크
         if (post.getUser().equals(user)) {
             if (!post.getPassword().equals(password)) {
                 throw new InvalidPasswordException();
@@ -179,6 +192,19 @@ public class PostServiceImpl implements PostService {
             throw new PostDeleteAuthorizationException();
         }
 
+        // 2. 게시글이 동행 카테고리인 경우에만 동행 데이터 삭제
+        if (post.getCategory() == PostCategory.COMPANION) {
+            Companion companion = companionRepository.findByPost(post)
+                    .orElse(null);
+            if (companion != null) {
+                // companion_member 테이블의 관련 데이터 삭제
+                companionMemberRepository.deleteByCompanion_CompanionId(companion.getCompanionId());
+                // companion 테이블의 데이터 삭제
+                companionRepository.delete(companion);
+            }
+        }
+
+        // 3. 게시글 삭제
         postRepository.delete(post);
         clearWeeklyTopPostsCache();
     }
@@ -220,6 +246,27 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
+    // 댓글 목록 조회
+    @Override
+    public List<CommentResponse> getComments(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
+        List<Comment> comments = commentRepository.findByPostOrderBySequenceAsc(post);
+
+        String currentUserNickname = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserNickname).orElseThrow(UnauthorizedException::new);
+
+        return comments.stream()
+                .map(comment -> {
+                    CommentResponse response = modelMapper.map(comment, CommentResponse.class);
+                    // 현재 사용자가 댓글 작성자인지
+                    response.setOwner(comment.getNickname().equals(currentUser.getNickname()));
+                    // 현재 사용자가 관리자인지
+                    response.setAdmin(currentUser.getRole().equals(User.Role.ADMIN));
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
     // 댓글 등록
     @Transactional
     @Override
@@ -237,6 +284,10 @@ public class PostServiceImpl implements PostService {
                 .sequence(nextSequence)
                 .build();
         commentRepository.save(comment);
+
+        CommentResponse response = modelMapper.map(comment, CommentResponse.class);
+        response.setOwner(true);  // 새로 작성한 댓글은 현재 사용자가 작성자
+        response.setAdmin(user.getRole().equals(User.Role.ADMIN));
 
         return modelMapper.map(comment, CommentResponse.class);
     }
@@ -293,11 +344,13 @@ public class PostServiceImpl implements PostService {
     // 좋아요
     @Transactional
     @Override
-    public void toggleLike(Long postId, Authentication authentication) {
+    public PostDetailResponse toggleLike(Long postId, Authentication authentication) {
         User user = validateAuthenticationAndGetUser(authentication);
         Post post = postRepository.findById(postId).orElseThrow(PostNotFound::new);
 
         post.toggleLike(user);
         postRepository.save(post);
+
+        return modelMapper.map(post, PostDetailResponse.class);
     }
 }

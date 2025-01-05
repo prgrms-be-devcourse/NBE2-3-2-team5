@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PostListResponse {
     private Long id;
-    private String writer;
+    private String nickname;
     private String avatar;
     private String time;
     private String title;
@@ -29,7 +29,7 @@ public class PostListResponse {
 
     public PostListResponse(Post post) {
         this.id = post.getId();
-        this.writer = post.getUser().getNickname();
+        this.nickname = post.getUser().getNickname();
         this.avatar = (post.getUser().getAvatar() != null && !post.getUser().getAvatar().isEmpty())
                 ? "/imgs/" + post.getUser().getAvatar()
                 : "/imgs/default-avatar.png";

@@ -1,16 +1,15 @@
-
 /*
 //테스트용!!
 function getHeaders() {
 
     return {
-        'Authorization': 'Bearer ' + "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzM1ODQyNTk0LCJleHAiOjE3MzU4NDYxOTR9.QsjvKLOuai4LQXn760H0P58suc9JXSz6KpunAIHKa01XZLlnsCXwqBoqlmHPYIYy"
+        'Authorization': 'Bearer ' + "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ1c2VyMUBleGFtcGxlLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzM2MDY0MTE2LCJleHAiOjE3MzYwNjc3MTZ9.sUL-RBG7jUGnhXP2XGskozfBFt9b2FwOzLeC2x_-BnfJ17N3swIV4eqehki31UGr"
         ,
         'Content-Type': 'application/json'
     };
 }
-*/
 
+*/
 
 function getHeaders() {
     const token = localStorage.getItem('accessToken');
@@ -19,14 +18,6 @@ function getHeaders() {
         'Content-Type': 'application/json'
     };
 }
-
-
-
-fetch('../html/header.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('header-container').innerHTML = data;
-    });
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -212,7 +203,7 @@ async function handleWithdraw(companionId) {
 
             if (response.ok) {
                 alert("동행에서 성공적으로 탈퇴했습니다.");
-                initializeContent();
+                fetchCompanions();
             } else {
                 alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
             }

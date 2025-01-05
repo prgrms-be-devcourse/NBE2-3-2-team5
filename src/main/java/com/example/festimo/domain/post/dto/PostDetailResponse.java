@@ -19,17 +19,19 @@ import java.util.Set;
 public class PostDetailResponse {
     private Long id;
     private String title;
-    private String writer;
+    private String nickname;
+    private String avatar;
     private String mail;
     private String content;
     private PostCategory category;
     private int views;
     private int replies;
+    private int likes;
+    private Set<String> tags;
     private String createdAt;
     private String updatedAt;
     private boolean isOwner;
     private boolean isAdmin;
-    private Set<String> tags;
-    private int likes;
+    private boolean isLiked;
     private List<CommentResponse> comments = new ArrayList<>();
 }
