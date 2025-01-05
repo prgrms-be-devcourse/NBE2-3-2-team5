@@ -1,17 +1,4 @@
 import { apiRequest } from './apiClient.js'; // 공통 모듈 불러오기
-import { updateAuthLink } from './authStatus.js';
-
-
-// 헤더 로드 및 updateAuthLink 호출
-fetch('../html/header.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('header-container').innerHTML = data;
-        updateAuthLink();
-    })
-    .catch(error => {
-        console.error('Error loading header:', error);
-    });
 
 document.getElementById('password-change-form').addEventListener('submit', async (event) => {
     event.preventDefault(); // 기본 폼 제출 동작 방지

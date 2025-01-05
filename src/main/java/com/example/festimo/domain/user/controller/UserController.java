@@ -57,19 +57,6 @@ public class UserController {
                 ));
     }
 
-    @Operation(summary = "로그인 유무")
-    @GetMapping("/status")
-    public ResponseEntity<Boolean> getLoginStatus(Authentication authentication) {
-        if (authentication == null) {
-            System.out.println("Authentication is null");
-        } else {
-            System.out.println("Authentication principal: " + authentication.getPrincipal());
-            System.out.println("Authentication authorities: " + authentication.getAuthorities());
-        }
-        boolean isLoggedIn = authentication != null && authentication.isAuthenticated();
-        return ResponseEntity.ok(isLoggedIn);
-    }
-
     // @Operation(summary = "로그아웃")
     // @PostMapping("/logout")
     // public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
