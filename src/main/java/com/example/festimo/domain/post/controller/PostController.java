@@ -106,6 +106,13 @@ public class PostController {
         return ResponseEntity.ok(postDetailResponse);
     }
 
+    @Operation(summary = "댓글 목록 조회")
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long postId) {
+        List<CommentResponse> comments = postService.getComments(postId);
+        return ResponseEntity.ok(comments);
+    }
+
     @Operation(summary = "댓글 등록")
     @PostMapping("/{postId}/comments")
     public ResponseEntity<CommentResponse> createComment(

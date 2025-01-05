@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
 
 const CATEGORY_STYLES = {
     COMPANION: 'bg-blue-100 text-blue-600',
@@ -29,14 +29,14 @@ const formatDate = (dateString) => {
 };
 
 const PostDetail = () => {
-    const { postId } = useParams();
+    const {postId} = useParams();
     const navigate = useNavigate();
     const [commentInput, setCommentInput] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [post, setPost] = useState(null);
     const [likes, setLikes] = useState(0);
-    const [isLiked, setIsLiked] = useState(false);
+    const [liked, setLiked] = useState(false);
     const isInitialMount = useRef(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletePassword, setDeletePassword] = useState('');
@@ -53,7 +53,6 @@ const PostDetail = () => {
     const checkAuthAndFetchPost = useCallback(async () => {
         const token = localStorage.getItem('accessToken');
 
-        // 초기 마운트시에만 토큰 체크 및 알림 표시
         if (isInitialMount.current) {
             isInitialMount.current = false;
             if (!token) {
@@ -64,8 +63,8 @@ const PostDetail = () => {
         }
 
         try {
-            const response = await fetch(`/api/companions/${postId}?view=true`, {
-                method: 'GET',
+            // 게시글 데이터 가져오기
+            const postResponse = await fetch(`/api/companions/${postId}?view=true`, {
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json',
@@ -73,82 +72,42 @@ const PostDetail = () => {
                 }
             });
 
-            if (response.status === 401) {
-                localStorage.removeItem('accessToken');
-                navigate('/html/login.html');
-                return;
-            }
-
-            if (!response.ok) {
+            if (!postResponse.ok) {
                 throw new Error('게시글을 불러오는데 실패했습니다.');
             }
 
-            const data = await response.json();
-            setPost(data);
-            setLikes(data.likes);
-            setIsLiked(data.likedByUsers?.includes(data.currentUserId) || false);
+            const postData = await postResponse.json();
+
+            // 댓글 데이터 가져오기
+            const commentsResponse = await fetch(`/api/companions/${postId}/comments`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            if (!commentsResponse.ok) {
+                throw new Error('댓글을 불러오는데 실패했습니다.');
+            }
+
+            const commentsData = await commentsResponse.json();
+
+            setPost({
+                ...postData,
+                comments: commentsData
+            });
+            setLikes(postData.likes);
+            setLiked(postData.liked);
             setIsLoading(false);
         } catch (error) {
+            console.error('Error details:', error);
             setIsLoading(false);
         }
-    }, [postId, navigate]);
+    }, [postId]);
 
     // 게시글 데이터 가져오기
     useEffect(() => {
         checkAuthAndFetchPost();
     }, [checkAuthAndFetchPost]);
-
-    // 댓글 데이터 가져오기
-    useEffect(() => {
-        const fetchComments = async () => {
-            try {
-                const token = localStorage.getItem('accessToken');
-                const response = await fetch(`/api/companions/${postId}/comments`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error("댓글을 불러오는 데 실패했습니다.");
-                }
-
-                const data = await response.json();
-                console.log("Comments fetched:", data);
-                setPost((prev) => ({...prev, comments: data}));
-            } catch (error) {
-                console.error("Error fetching comments:", error);
-            }
-        };
-
-        fetchComments();
-    }, [postId]);
-
-    useEffect(() => {
-        const fetchPostDetails = async () => {
-            try {
-                const token = localStorage.getItem('accessToken');
-                const response = await fetch(`/api/companions/${postId}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('게시글 정보를 불러오는 데 실패했습니다.');
-                }
-
-                const data = await response.json();
-                setPost(data);
-                setIsLiked(data.isLiked);
-                setLikes(data.likes);
-            } catch (error) {
-                console.error("Error fetching post details:", error);
-            }
-        };
-
-        fetchPostDetails();
-    }, [postId]);
 
     const handleGoToList = () => {
         navigate('/community');
@@ -169,9 +128,12 @@ const PostDetail = () => {
                 throw new Error('좋아요 처리에 실패했습니다.');
             }
 
-            const updatedPost = await response.json();
-            setIsLiked(updatedPost.isLiked);
-            setLikes(updatedPost.likes);
+            // UI 업데이트 문제로 클라이언트에서 liked 상태 강제 변경
+            setPost((prev) => ({
+                ...prev,
+                likes: prev.liked ? prev.likes - 1 : prev.likes + 1,
+                liked: !prev.liked,
+            }));
         } catch (error) {
             console.error('Error:', error);
             alert('좋아요 처리 중 오류가 발생했습니다.');
@@ -196,7 +158,7 @@ const PostDetail = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const requestData = { password: deletePassword };
+            const requestData = {password: deletePassword};
             const response = await fetch(`/api/companions/${postId}`, {
                 method: 'DELETE',
                 headers: {
@@ -264,20 +226,18 @@ const PostDetail = () => {
     };
 
     const handleCommentSubmit = async () => {
-        if (isSubmitting) return;
-        setIsSubmitting(true);
-
-        if (!commentInput.trim()) {
+        if (isSubmitting || !commentInput.trim()) {
             alert('댓글을 입력해주세요.');
-            setIsSubmitting(false);
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             const token = localStorage.getItem('accessToken');
             const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-            if (!userInfo || !userInfo.nickname) {
+            if (!userInfo?.nickname) {
                 throw new Error('닉네임 정보가 없습니다. 로그인을 다시 시도해주세요.');
             }
 
@@ -297,78 +257,92 @@ const PostDetail = () => {
                 throw new Error('댓글 등록에 실패했습니다.');
             }
 
-            const newComment = await response.json();
-            setPost((prev) => ({
-                ...prev,
-                comments: [...prev.comments, {
-                    ...newComment,
-                    isOwner: true,
-                    isAdmin: false,
-                }],
-            }));
+            const commentsResponse = await fetch(`/api/companions/${postId}/comments`, {
+                headers: {'Authorization': `Bearer ${token}`},
+            });
+
+            if (!commentsResponse.ok) {
+                throw new Error('댓글 목록을 불러오는데 실패했습니다.');
+            }
+
+            const updatedComments = await commentsResponse.json();
+            setPost(prev => ({...prev, comments: updatedComments}));
             setCommentInput('');
         } catch (error) {
-            console.error('Error during comment submission:', error);
+            console.error('Error:', error);
             alert(error.message || '댓글 등록 중 오류가 발생했습니다.');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleEditComment = (sequence) => {
+    const handleEditComment = async (sequence) => {
         const newComment = prompt("댓글을 수정하세요:");
-        if (!newComment) return;
+        if (!newComment?.trim()) return;
 
         try {
             const token = localStorage.getItem("accessToken");
-            fetch(`/api/companions/${postId}/comments/${sequence}`, {
+            const response = await fetch(`/api/companions/${postId}/comments/${sequence}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({comment: newComment}),
-            })
-                .then((response) => {
-                    if (!response.ok) throw new Error("댓글 수정에 실패했습니다.");
-                    return response.json();
-                })
-                .then((updatedComment) => {
-                    setPost((prev) => ({
-                        ...prev,
-                        comments: prev.comments.map((c) =>
-                            c.sequence === sequence ? {...c, comment: updatedComment.comment} : c
-                        ),
-                    }));
-                })
-                .catch((error) => alert(error.message));
+            });
+
+            if (!response.ok) {
+                throw new Error("댓글 수정에 실패했습니다.");
+            }
+
+            // 댓글 목록 다시 불러오기
+            const commentsResponse = await fetch(`/api/companions/${postId}/comments`, {
+                headers: {'Authorization': `Bearer ${token}`},
+            });
+
+            if (!commentsResponse.ok) {
+                throw new Error('댓글 목록을 불러오는데 실패했습니다.');
+            }
+
+            const updatedComments = await commentsResponse.json();
+            setPost(prev => ({...prev, comments: updatedComments}));
         } catch (error) {
-            console.error("Error editing comment:", error);
+            console.error("Error:", error);
+            alert(error.message);
         }
     };
 
-    const handleDeleteComment = (sequence) => {
+    const handleDeleteComment = async (sequence) => {
         if (!window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) return;
 
         try {
             const token = localStorage.getItem("accessToken");
-            fetch(`/api/companions/${postId}/comments/${sequence}`, {
+            const response = await fetch(`/api/companions/${postId}/comments/${sequence}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-            })
-                .then((response) => {
-                    if (!response.ok) throw new Error("댓글 삭제에 실패했습니다.");
-                    setPost((prev) => ({
-                        ...prev,
-                        comments: prev.comments.filter((c) => c.sequence !== sequence),
-                    }));
-                })
-                .catch((error) => alert(error.message));
+            });
+
+            if (!response.ok) {
+                throw new Error("댓글 삭제에 실패했습니다.");
+            }
+
+            // 댓글 목록 다시 불러오기
+            const commentsResponse = await fetch(`/api/companions/${postId}/comments`, {
+                headers: {'Authorization': `Bearer ${token}`},
+            });
+
+            if (!commentsResponse.ok) {
+                throw new Error('댓글 목록을 불러오는데 실패했습니다.');
+            }
+
+            const updatedComments = await commentsResponse.json();
+            setPost(prev => ({...prev, comments: updatedComments}));
         } catch (error) {
-            console.error("Error deleting comment:", error);
+            console.error("Error:", error);
+            alert(error.message);
         }
     };
 
@@ -415,7 +389,8 @@ const PostDetail = () => {
                                 </button>
                                 {/* 삭제 모달 */}
                                 {showDeleteModal && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                    <div
+                                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                                         <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                                             <h3 className="text-lg font-semibold mb-4">비밀번호 확인</h3>
                                             {deleteError && (
@@ -542,10 +517,10 @@ const PostDetail = () => {
                 <button
                     onClick={toggleLike}
                     className={`px-4 py-2 text-white rounded-lg hover:opacity-90 ${
-                        isLiked ? 'bg-red-500' : 'bg-gray-300'
+                        post.liked ? 'bg-red-500' : 'bg-gray-300'
                     }`}
                 >
-                    {isLiked ? '❤️' : '🤍'} {likes}
+                    {post.liked ? '❤️' : '🤍'} {post.likes}
                 </button>
             </div>
 

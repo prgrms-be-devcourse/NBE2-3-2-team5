@@ -22,7 +22,8 @@ public class AppConfig {
                 .addMapping(Post::getCreatedAt, PostDetailResponse::setCreatedAt)
                 .addMapping(Post::getCategory, PostDetailResponse::setCategory)
                 .addMapping(Post::getViews, PostDetailResponse::setViews)
-                .addMapping(src -> src.getUser().getNickname(), PostDetailResponse::setNickname);
+                .addMapping(src -> src.getUser().getNickname(), PostDetailResponse::setNickname)
+                .addMappings(mapper -> mapper.skip(PostDetailResponse::setLiked));  // likedByUsers -> isLiked 매핑 스킵
 
         return modelMapper;
     }
