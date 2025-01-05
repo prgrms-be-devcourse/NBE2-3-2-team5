@@ -50,10 +50,10 @@ public class ApplicationService {
      * 신청 생성
      *
      * @param email    신청을 생성하는 유저의 email
-     * @param companionId 신청 동행 ID
+     * @param postId 신청 동행 ID
      * @return 생성된 신청 정보
      */
-    public ApplicationResponse createApplication(String email, Long companionId) {
+    public ApplicationResponse createApplication(String email, Long postId) {
 
 
         // userId 확인
@@ -65,6 +65,12 @@ public class ApplicationService {
                 .orElseThrow(()->new CustomException(USER_NOT_FOUND));
 
         Long userId = user.getId();
+
+
+        //postId가지고 compioId 확인
+
+        Long companionId = companionRepository.findCompanionIdByPostId(postId)
+                .orElseThrow(()->new CustomException(POST_NOT_FOUND));
 
 
         // companionId 존재 확인
