@@ -1,13 +1,10 @@
 import { apiRequest } from './apiClient.js';
 
-// function getHeaders() {
-//     const token = localStorage.getItem('accessToken');
-//     return {
-//         'Authorization': 'Bearer ' + token,
-//         'Content-Type': 'application/json'
-//     };
-// }
-
+// 전역 함수로 등록
+window.loadApplications = loadApplications;
+window.handleWithdraw = handleWithdraw;
+window.acceptApplication = acceptApplication;
+window.rejectApplication = rejectApplication;
 
 document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.tab');
@@ -24,25 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchCompanions();
 });
 
-// 동행 데이터 가져오기
 async function fetchCompanions() {
     try {
         document.getElementById('leaderContent').innerHTML = '<div class="loading">로딩 중...</div>';
         document.getElementById('memberContent').innerHTML = '<div class="loading">로딩 중...</div>';
 
-        // const response = await fetch('/api/meet/companions/mine', {
-        //     headers: getHeaders()
-        // });
-        //
-        // if (!response.ok) {
-        //     throw new Error('서버 응답 오류');
-        // }
-        //
-        // const data = await response.json();
-        // renderCompanions(data);
-        // return data;
-
-        // [수정] apiRequest를 사용하여 Authorization 헤더 자동 추가 및 토큰 갱신 처리
         const data = await apiRequest('/api/meet/companions/mine');
         renderCompanions(data);
         return data;
@@ -54,7 +37,6 @@ async function fetchCompanions() {
         return { asLeader: [], asMember: [] };
     }
 }
-
 
 function renderCompanions(data) {
     // 리더로 참여한 동행 렌더링
@@ -90,27 +72,10 @@ function renderCompanions(data) {
     `).join('') || '<div style="text-align: center; padding: 20px;">동행원으로 참여한 동행이 없습니다.</div>';
 }
 
-// 신청 리스트 로드
 async function loadApplications(companionId) {
-
-    // 모달 열기 추가
     document.getElementById('applicationModal').style.display = 'block';
 
-
     try {
-        const response = await fetch(`/api/meet/companion/${companionId}`, {
-            headers: getHeaders()
-        });
-
-        if (!response.ok) {
-            throw new Error('서버 응답 오류');
-        }
-
-        // const data = await response.json();
-        // const applicationTable = document.getElementById("application-table");
-        // applicationTable.innerHTML = "";
-
-        // [수정] apiRequest 사용
         const data = await apiRequest(`/api/meet/companion/${companionId}`);
         const applicationTable = document.getElementById("application-table");
         applicationTable.innerHTML = "";
@@ -147,82 +112,33 @@ document.querySelector('.close-btn').addEventListener('click', () => {
     document.getElementById('applicationModal').style.display = 'none';
 });
 
-// 수락 함수
 async function acceptApplication(applicationId, companionId) {
-    // try {
-    //     const response = await fetch(`/api/meet/${applicationId}/accept`, {
-    //         method: "POST",
-    //         headers: getHeaders()
-    //     });
-    //
-    //     if (response.ok) {
-    //         alert("신청을 수락했습니다.");
-    //         loadApplications(companionId);
-    //         fetchCompanions();
-    //
-    //     } else {
-    //         alert("신청 수락에 실패했습니다.");
-    //     }
-
     try {
-        // [수정] apiRequest 사용
         await apiRequest(`/api/meet/${applicationId}/accept`, { method: "POST" });
         alert("신청을 수락했습니다.");
         loadApplications(companionId);
         fetchCompanions();
-
     } catch (error) {
         console.error("Error accepting application:", error);
         alert("신청 수락 중 문제가 발생했습니다.");
     }
 }
 
-// 거절 함수
 async function rejectApplication(applicationId, companionId) {
     try {
-        // const response = await fetch(`/api/meet/${applicationId}/reject`, {
-        //     method: "PATCH",
-        //     headers: getHeaders()
-        // });
-        //
-        // if (response.ok) {
-        //     alert("신청을 거절했습니다.");
-        //     loadApplications(companionId);
-        //     fetchCompanions();
-        //
-        // } else {
-        //     alert("신청 거절에 실패했습니다.");
-        // }
-
-        // [수정] apiRequest 사용
         await apiRequest(`/api/meet/${applicationId}/reject`, { method: "PATCH" });
         alert("신청을 거절했습니다.");
         loadApplications(companionId);
         fetchCompanions();
-
     } catch (error) {
         console.error("Error rejecting application:", error);
         alert("신청 거절 중 문제가 발생했습니다.");
     }
 }
 
-// 탈퇴 함수
 async function handleWithdraw(companionId) {
     if (confirm('정말로 이 동행에서 탈퇴하시겠습니까?')) {
         try {
-            // const response = await fetch(`/api/meet/${companionId}`, {
-            //     method: "DELETE",
-            //     headers: getHeaders()
-            // });
-            //
-            // if (response.ok) {
-            //     alert("동행에서 성공적으로 탈퇴했습니다.");
-            //     fetchCompanions();
-            // } else {
-            //     alert("탈퇴에 실패했습니다. 다시 시도해주세요.");
-            // }
-
-            // [수정] apiRequest 사용
             await apiRequest(`/api/meet/${companionId}`, { method: "DELETE" });
             alert("동행에서 성공적으로 탈퇴했습니다.");
             fetchCompanions();
