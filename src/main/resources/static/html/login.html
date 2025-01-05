@@ -19,13 +19,13 @@
             <input id="username" type="text" class="input-field" placeholder="아이디" required>
             <input id="password" type="password" class="input-field" placeholder="비밀번호" required>
 
-<!--            <div class="login-options">-->
-<!--                <label class="remember-me">-->
-<!--                    <input type="checkbox">-->
-<!--                    <span>로그인 상태 유지</span>-->
-<!--                </label>-->
-<!--                <a href="#" class="forgot-password">비밀번호 찾기</a>-->
-<!--            </div>-->
+            <!--            <div class="login-options">-->
+            <!--                <label class="remember-me">-->
+            <!--                    <input type="checkbox">-->
+            <!--                    <span>로그인 상태 유지</span>-->
+            <!--                </label>-->
+            <!--                <a href="#" class="forgot-password">비밀번호 찾기</a>-->
+            <!--            </div>-->
 
             <button type="submit" class="login-button">로그인</button>
         </form>
@@ -93,25 +93,6 @@
             alert('서버와 통신 중 문제가 발생했습니다.');
         }
     });
-
-        if (accessToken) {
-            // 로그인 상태일 경우
-            loginLogoutLink.textContent = 'Logout';  // 로그인 -> 'Logout'으로 변경
-            loginLogoutLink.href = 'http://localhost:8080/api/logout';  // 필요에 따라 실제 로그아웃 기능을 구현할 수 있음
-            loginLogoutLink.addEventListener('click', function() {
-                localStorage.removeItem('accessToken');  // 로그아웃 시 localStorage에서 accessToken 제거
-                localStorage.removeItem('userInfo');    // userInfo 제거
-                window.location.reload();  // 페이지 새로고침하여 헤더 업데이트
-            });
-            getStartedLink.style.display = 'none';
-        } else {
-            // 로그인하지 않은 상태일 경우
-            loginLogoutLink.textContent = 'Login';  // 로그인하지 않으면 'Login' 상태 유지
-            loginLogoutLink.href = '#';  // 로그인 페이지로 이동하도록 수정 가능
-
-            getStartedLink.style.display = 'inline-block';
-        }
-    };
 </script>
 </body>
 </html>
