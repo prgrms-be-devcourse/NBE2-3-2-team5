@@ -23,12 +23,12 @@ public class ApplicationController {
 
     private final ApplicationService applicationService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
 
-    public ApplicationController(ApplicationService applicationService, JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
+
+    public ApplicationController(ApplicationService applicationService, JwtTokenProvider jwtTokenProvider) {
         this.applicationService = applicationService;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.userRepository = userRepository;
+
     }
 
     /**
@@ -47,6 +47,8 @@ public class ApplicationController {
         //jwt에서 이메일 추출
         String token = authorizationHeader.replace("Bearer ", "");
         String email = jwtTokenProvider.getEmailFromToken(token);
+
+        System.out.println("companionId"+ request.getCompanionId());
 
         ApplicationResponse response = applicationService.createApplication(email, request.getCompanionId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

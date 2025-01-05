@@ -22,9 +22,12 @@ public interface CompanionRepository extends JpaRepository<Companion, Long> {
         //중복체크
     Optional<Companion> findByPost(Post post);
 
-    // 특정 Companion ID와 User ID가 존재하는지 확인
-    boolean existsByCompanionIdAndLeaderId(Long companionId, Long leaderId);
 
     @Query("SELECT c.leaderId FROM Companion c WHERE c.companionId = :companionId")
     Optional<Long> findLeaderIdByCompanyId(Long companionId);
+
+
+    @Query("SELECT c.companionId FROM Companion c WHERE c.post.id = :postId")
+    Optional<Long> findCompanionIdByPostId(Long postId);
+
 }

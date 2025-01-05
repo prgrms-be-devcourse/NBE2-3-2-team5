@@ -196,7 +196,8 @@ const PostDetail = () => {
 
         try {
             const token = localStorage.getItem('accessToken');
-            const response = await fetch('/api/applications', {
+
+            const response = await fetch('/api/meet/applications', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -206,6 +207,7 @@ const PostDetail = () => {
                     companionId: postId // 현재 게시글의 ID를 사용
                 })
             });
+
 
             if (response.status === 409) {
                 alert('이미 신청한 동행입니다.');
