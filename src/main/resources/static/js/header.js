@@ -17,7 +17,11 @@ fetch('../html/header.html')
                 try{
                     const response = await fetch('http://localhost:8080/api/logout',{
                         method:'POST',
-                        credentials:'include'
+                        credentials:'include',
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`, // Authorization 헤더 추가
+                            'Content-Type': 'application/json'
+                        }
                     })
                         .then(response =>{
                             if(response.ok){
