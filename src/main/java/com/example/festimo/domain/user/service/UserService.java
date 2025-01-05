@@ -101,6 +101,10 @@ public class UserService {
         System.out.println("리프레쉬 토큰 : " + tokens.getRefreshToken());
         userRepository.save(user);
         System.out.println(user);
+
+        tokens.setNickname(user.getNickname());
+        tokens.setEmail(user.getEmail());
+
         logger.info("Login successful for email: {}", email);
         return tokens;
     }
@@ -289,7 +293,12 @@ public class UserService {
         user.setRefreshToken(newRefreshToken);
         userRepository.save(user);
 
-        return new TokenResponseDTO(newAccessToken, newRefreshToken);
+        return new TokenResponseDTO(
+                newAccessToken,
+                newRefreshToken,
+                user.getNickname(),
+                user.getEmail()
+        );
     }
 
 }

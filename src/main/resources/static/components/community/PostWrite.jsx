@@ -8,7 +8,7 @@ const PostWrite = () => {
 
     const [formData, setFormData] = useState({
         title: "",
-        writer: "",
+        nickname: "",
         mail: "",
         password: "",
         content: "",
@@ -18,22 +18,39 @@ const PostWrite = () => {
 
     useEffect(() => {
         if (isEditMode) {
-            fetch(`/api/companions/${postId}`)
-                .then(response => response.json())
-                .then(data => {
+            // 수정 모드: 게시글 데이터 불러오기
+            const token = localStorage.getItem('accessToken');
+            fetch(`/api/companions/${postId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then((response) => response.json())
+                .then((data) => {
                     setFormData({
                         title: data.title || "",
-                        writer: data.writer || "",
+                        nickname: data.nickname || "",
                         mail: data.mail || "",
                         password: "",
                         content: data.content || "",
                         category: data.category || "COMPANION",
-                        tags: (data.tags || []).join(",")
+                        tags: (data.tags || []).join(","),
                     });
                 })
-                .catch(error => console.error("Error:", error));
+                .catch((error) => console.error("Error:", error));
+        } else {
+            // 등록 모드: 사용자 정보 불러오기
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            if (userInfo) {
+                setFormData((prev) => ({
+                    ...prev,
+                    nickname: userInfo.nickname || "",
+                    mail: userInfo.mail || "",
+                }));
+            }
         }
-    }, [postId, isEditMode]);
+    }, [isEditMode, postId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -42,40 +59,62 @@ const PostWrite = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const token = localStorage.getItem("accessToken");
+
+        // 태그 문자열 -> 배열 처리
+        const tagsArray = formData.tags
+            ? formData.tags.split(",").map((tag) => tag.trim()).filter((tag) => tag !== "")
+            : [];
+
+        const processedFormData = isEditMode
+            ? {
+                // 수정 시
+                title: formData.title,
+                content: formData.content,
+                category: formData.category,
+                password: formData.password
+            }
+            : {
+                // 등록 시
+                title: formData.title,
+                content: formData.content,
+                category: formData.category,
+                password: formData.password,
+                tags: tagsArray
+            };
 
         const url = isEditMode ? `/api/companions/${postId}` : "/api/companions";
 
         fetch(url, {
             method: isEditMode ? "PUT" : "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(processedFormData),
         })
             .then((response) => {
                 if (!response.ok) {
-                    throw new Error(isEditMode ? "게시글 수정에 실패했습니다." : "게시글 작성에 실패했습니다.");
+                    return response.text().then(errorData => {
+                        console.log('서버 에러 응답:', errorData);
+                        throw new Error(isEditMode ? "게시글 수정에 실패했습니다." : "게시글 작성에 실패했습니다.");
+                    });
                 }
-                return response.json();
-            })
-            .then(() => {
                 alert(isEditMode ? "게시글이 수정되었습니다." : "게시글이 등록되었습니다.");
-                navigate("/community");
+                navigate(isEditMode ? `/post/${postId}` : "/community");
             })
             .catch((error) => {
                 console.error("Error:", error);
-                alert("오류가 발생했습니다.");
+                alert(error.message || "오류가 발생했습니다.");
             });
     };
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-            <h1 className="text-2xl font-bold mb-4">
-                {isEditMode ? "Edit Post" : "Write a New Post"}
-            </h1>
+            <h1 className="text-2xl font-bold mb-4">{isEditMode ? "게시글 수정" : "새 게시글 작성"}</h1>
             <form onSubmit={handleSubmit}>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Title</label>
+                    <label className="block font-semibold mb-2">제목</label>
                     <input
                         type="text"
                         name="title"
@@ -86,19 +125,19 @@ const PostWrite = () => {
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Writer</label>
+                    <label className="block font-semibold mb-2">작성자</label>
                     <input
                         type="text"
-                        name="writer"
-                        value={formData.writer}
+                        name="nickname"
+                        value={formData.nickname}
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                         required
-                        disabled={isEditMode}
+                        disabled
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Email</label>
+                    <label className="block font-semibold mb-2">이메일</label>
                     <input
                         type="email"
                         name="mail"
@@ -106,11 +145,11 @@ const PostWrite = () => {
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
                         required
-                        disabled={isEditMode}
+                        disabled
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Password</label>
+                    <label className="block font-semibold mb-2">비밀번호</label>
                     <input
                         type="password"
                         name="password"
@@ -121,7 +160,7 @@ const PostWrite = () => {
                     />
                 </div>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Content</label>
+                    <label className="block font-semibold mb-2">내용</label>
                     <textarea
                         name="content"
                         value={formData.content}
@@ -132,7 +171,7 @@ const PostWrite = () => {
                     ></textarea>
                 </div>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Category</label>
+                    <label className="block font-semibold mb-2">카테고리</label>
                     <select
                         name="category"
                         value={formData.category}
@@ -146,14 +185,14 @@ const PostWrite = () => {
                     </select>
                 </div>
                 <div className="mb-4">
-                    <label className="block font-semibold mb-2">Tags</label>
+                    <label className="block font-semibold mb-2">태그</label>
                     <input
                         type="text"
                         name="tags"
                         value={formData.tags}
                         onChange={handleChange}
                         className="w-full p-2 border rounded-lg"
-                        placeholder="Comma-separated tags"
+                        placeholder="태그를 쉼표로 구분해 입력하세요"
                     />
                 </div>
                 <div className="text-right">
