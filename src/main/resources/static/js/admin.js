@@ -234,6 +234,14 @@ const postManager = {
             const postTable = document.getElementById('post-table');
             postTable.innerHTML = '';
 
+            // 데이터가 없거나 content 배열이 없는 경우 처리
+            if (!data || !data.content) {
+                postTable.innerHTML = '<tr><td colspan="5" class="text-center">게시글이 없습니다.</td></tr>';
+                // 페이지네이션 업데이트도 호출해야 함
+                this.updatePagination(data);
+                return;
+            }
+
             const columns = [
                 { render: post => post.id },  // companionId 대신 id 사용
                 { render: post => post.title },
@@ -247,13 +255,16 @@ const postManager = {
 
             data.content.forEach(post => {
                 console.log('Processing post:', post);
-
                 postTable.appendChild(utils.createTableRow(post, columns, actions, 'post'));
             });
 
             this.updatePagination(data);
         } catch (error) {
             alert(`게시글 목록 로드 실패: ${error.message}`);
+            // 에러 발생 시에도 테이블을 비우고 페이지네이션 비활성화
+            const postTable = document.getElementById('post-table');
+            postTable.innerHTML = '<tr><td colspan="5" class="text-center">게시글 로드 중 오류가 발생했습니다.</td></tr>';
+            this.updatePagination(null);
         }
     },
 
@@ -303,11 +314,19 @@ const reviewManager = {
     async loadReviews() {
         try {
             const data = await utils.fetchWithErrorHandling(
-                `${API_ENDPOINTS.REVIEWS}?page=${state.reviews.currentPage - 1}&size=${PAGINATION.PAGE_SIZE}`
+                `${API_ENDPOINTS.REVIEWS}?page=${state.reviews.currentPage-1}&size=${PAGINATION.PAGE_SIZE}`
             );
 
             const reviewTable = document.getElementById('review-table');
             reviewTable.innerHTML = '';
+
+            // 데이터가 없거나 content 배열이 없는 경우 처리
+            if (!data || !data.content) {
+                reviewTable.innerHTML = '<tr><td colspan="7" class="text-center">리뷰가 없습니다.</td></tr>';
+                // 페이지네이션 업데이트도 호출
+                this.updatePagination(data);
+                return;
+            }
 
             const columns = [
                 { render: review => review.reviewId },
@@ -338,16 +357,36 @@ const reviewManager = {
             this.updatePagination(data);
         } catch (error) {
             alert(`리뷰 목록 로드 실패: ${error.message}`);
+            // 에러 발생 시에도 테이블을 비우고 페이지네이션 비활성화
+            const reviewTable = document.getElementById('review-table');
+            reviewTable.innerHTML = '<tr><td colspan="7" class="text-center">리뷰 로드 중 오류가 발생했습니다.</td></tr>';
+            this.updatePagination(null);
         }
     },
 
     async updatePagination(data) {
-        const totalPages = data.totalPages;
+        const totalPages = data?.totalPages || 0;
         const currentPage = state.reviews.currentPage;
 
-        document.getElementById('review-current-page').textContent = currentPage;
-        document.getElementById('review-prev-page').disabled = currentPage === 1;
-        document.getElementById('review-next-page').disabled = currentPage >= totalPages;
+        const currentPageEl = document.getElementById('review-current-page');
+        const prevPageEl = document.getElementById('review-prev-page');
+        const nextPageEl = document.getElementById('review-next-page');
+
+        // 현재 페이지 표시
+        currentPageEl.textContent = currentPage;
+
+        // 데이터가 없거나 오류 상태일 경우
+        if (!data || !data.content) {
+            prevPageEl.disabled = true;
+            nextPageEl.disabled = true;
+            return;
+        }
+
+        // 이전 페이지 버튼 상태 설정
+        prevPageEl.disabled = currentPage === 1;
+
+        // 다음 페이지 버튼 상태 설정
+        nextPageEl.disabled = currentPage >= totalPages;
     },
 
     async deleteReview(reviewId) {
