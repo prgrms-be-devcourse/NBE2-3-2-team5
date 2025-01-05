@@ -56,19 +56,6 @@ public class UserController {
                 .body(Collections.singletonMap("accessToken", accessToken));
     }
 
-    @Operation(summary = "로그인 유무")
-    @GetMapping("/status")
-    public ResponseEntity<Boolean> getLoginStatus(Authentication authentication) {
-        if (authentication == null) {
-            System.out.println("Authentication is null");
-        } else {
-            System.out.println("Authentication principal: " + authentication.getPrincipal());
-            System.out.println("Authentication authorities: " + authentication.getAuthorities());
-        }
-        boolean isLoggedIn = authentication != null && authentication.isAuthenticated();
-        return ResponseEntity.ok(isLoggedIn);
-    }
-
     // @Operation(summary = "로그아웃")
     // @PostMapping("/logout")
     // public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String refreshToken) {
@@ -96,31 +83,29 @@ public class UserController {
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        // 쿠키에서 리프레시 토큰 추출
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName())) {
-                    String refreshToken = cookie.getValue();
-
-                    // 로그아웃 처리
-                    userService.logout(refreshToken);
-
-                    // 리프레시 토큰 쿠키 제거
-                    Cookie clearCookie = new Cookie("refreshToken", null);
-                    clearCookie.setHttpOnly(true);
-                    clearCookie.setSecure(true);
-                    clearCookie.setPath("/");
-                    clearCookie.setMaxAge(0); // 즉시 만료
-                    response.addCookie(clearCookie);
-
-                    return ResponseEntity.ok("Logged out successfully.");
+        Cookie[] cookies= request.getCookies();
+        String refreshToken= null;
+        if(cookies != null) {
+            for(Cookie cookie : cookies) {
+                if(cookie.getName().equals("refreshToken")) {
+                    refreshToken ="Bearer " + cookie.getValue();
+                    System.out.println(refreshToken);
+                    break;
                 }
             }
         }
+        if (refreshToken == null || !refreshToken.startsWith("Bearer ")) {  // Authorization 헤더 없을 경우, Bearer 토큰 형식 아닐경우
+            throw new IllegalArgumentException("Invalid token format.");
+        }
+        userService.logout(refreshToken.substring(7));// 앞에 접두사 Bearer 제외
+        Cookie cookie = new Cookie("refreshToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);  // HTTPS 환경에서만 쿠키가 전송되도록 설정
+        cookie.setPath("/");  // 전체 도메인에서 쿠키 유효
+        cookie.setMaxAge(0);  // 쿠키 만료 시간을 0으로 설정하여 삭제
+        response.addCookie(cookie);
 
-        // 리프레시 토큰이 쿠키에 없을 경우 예외 처리
-        throw new IllegalArgumentException("Refresh token not found in cookies.");
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, refreshToken).body("Logout successful.");
     }
 
     @Operation(summary = "회원 정보 조회")
