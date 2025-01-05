@@ -356,8 +356,16 @@ const reviewManager = {
 
             this.updatePagination(data);
         } catch (error) {
+            // 404 에러는 데이터가 없는 것으로 처리
+            if (error.message.includes('404')) {
+                const reviewTable = document.getElementById('review-table');
+                reviewTable.innerHTML = '<tr><td colspan="7" class="text-center">리뷰가 없습니다.</td></tr>';
+                this.updatePagination(null);
+                return;
+            }
+
+            // 다른 에러는 기존대로 처리
             alert(`리뷰 목록 로드 실패: ${error.message}`);
-            // 에러 발생 시에도 테이블을 비우고 페이지네이션 비활성화
             const reviewTable = document.getElementById('review-table');
             reviewTable.innerHTML = '<tr><td colspan="7" class="text-center">리뷰 로드 중 오류가 발생했습니다.</td></tr>';
             this.updatePagination(null);
