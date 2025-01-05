@@ -51,11 +51,6 @@ public class FestivalController {
         return ResponseEntity.ok("모든 축제 api를 성공적으로 불러왔습니다");
     }
 
-    @GetMapping("/api/mauallyGetAllEvents")
-    public void mauallyGetAllEvents() {
-        festivalService.refreshEvents();
-    }
-
     @ResponseBody
     @GetMapping("/api/events")
     @Operation(summary = "전체 축제 조회")
