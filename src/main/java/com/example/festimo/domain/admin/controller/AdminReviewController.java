@@ -1,31 +1,29 @@
 package com.example.festimo.domain.admin.controller;
 
-import com.example.festimo.domain.admin.service.AdminReviewService;
-import com.example.festimo.domain.review.dto.ReviewResponseDTO;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import lombok.RequiredArgsConstructor;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+import com.example.festimo.domain.admin.service.AdminReviewService;
+import com.example.festimo.domain.review.dto.ReviewResponseDTO;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/reviews")
-@Tag(name = "관리자 API")
-@RequiredArgsConstructor
+@Tag(name = "관리자 API", description = "관리자가 리뷰를 관리하는 API")
 public class AdminReviewController {
 
-    @Autowired
     private final AdminReviewService adminReviewService;
 
-
+    public AdminReviewController(AdminReviewService adminReviewService) {
+        this.adminReviewService = adminReviewService;
+    }
 
     /**
      * 관리자의 리뷰 조회 (최신순)
@@ -45,7 +43,6 @@ public class AdminReviewController {
         return ResponseEntity.ok(reviews);
     }
 
-
     /**
      * 관리자의 리뷰 삭제
      *
@@ -54,9 +51,8 @@ public class AdminReviewController {
      */
     @DeleteMapping("/{reviewId}")
     @Operation(summary = "관리자의 리뷰 삭제", description = "특정 리뷰 삭제")
-    public ResponseEntity<Void> deleteReview(@PathVariable("reviewId") Long reviewId) {
+    public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
         adminReviewService.deleteReview(reviewId);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -10,7 +10,7 @@ import com.example.festimo.domain.meet.entity.Applications;
 @Mapper
 public interface ApplicationMapper {
 
-    // Mapper 인스턴스 생성
+
     ApplicationMapper INSTANCE= Mappers.getMapper(ApplicationMapper.class);
 
     // Entity → DTO 매핑
@@ -22,6 +22,5 @@ public interface ApplicationMapper {
     ApplicationResponse toDto(Applications application);
 
 }
-
 
 

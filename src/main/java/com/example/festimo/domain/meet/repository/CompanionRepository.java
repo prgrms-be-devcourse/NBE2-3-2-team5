@@ -19,7 +19,7 @@ public interface CompanionRepository extends JpaRepository<Companion, Long> {
     // 리더 ID로 모임 조회
     List<Companion> findByLeaderId(Long leaderId);
 
-        //중복체크
+    //중복체크
     Optional<Companion> findByPost(Post post);
 
 

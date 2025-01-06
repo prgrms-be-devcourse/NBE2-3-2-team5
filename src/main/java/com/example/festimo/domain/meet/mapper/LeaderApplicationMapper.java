@@ -1,7 +1,5 @@
 package com.example.festimo.domain.meet.mapper;
 
-import java.util.List;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.mapstruct.Mapping;
@@ -15,6 +13,7 @@ public interface LeaderApplicationMapper {
 
     LeaderApplicationMapper INSTANCE = Mappers.getMapper(LeaderApplicationMapper.class);
 
+    // Entity → DTO 매핑
     @Mapping(source = "application.applicationId", target = "applicationId")
     @Mapping(source = "application.userId", target = "userId")
     @Mapping(source = "application.companionId", target = "companionId")
@@ -23,5 +22,4 @@ public interface LeaderApplicationMapper {
     @Mapping(source = "application.appliedDate", target = "appliedDate")
     LeaderApplicationResponse toDto(Applications application, String nickname);
 
-    List<LeaderApplicationResponse> toDtoList(List<Applications> applications);
 }

@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Table(name = "companion_member")
-public class Companion_member {
+public class CompanionMember {
 
     @EmbeddedId
     private CompanionMemberId id;
