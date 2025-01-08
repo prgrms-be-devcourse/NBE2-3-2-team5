@@ -1,19 +1,14 @@
 # 🎊 축제 정보 공유 및 동행 서비스앱 페스티모
 
-![readme_mockup2](https://user-images.githubusercontent.com/112460466/210706312-6a44b60d-a42e-4210-b334-9e5983f70fb3.png)
-
-- 배포 URL : https://ohmycode-readme.netlify.app
-- Test ID : readme@test.com
-- Test PW : 123123
-
 <br>
 
 ## 프로젝트 소개
 
-- README는 책을 좋아하는 사람들이 자신의 책 취향을 공유하고, 다 읽은 책을 판매할 수 있는 SNS입니다.
-- 개인의 프로필 페이지에 좋아하는 구절 등 책에 대한 정보를 작성하고 판매하고 싶은 책을 등록할 수 있습니다.
-- 검색을 통해 책 취향이 비슷한 다른 유저들의 피드를 구경할 수 있습니다.
-- 다양한 유저들을 팔로우하며 마음에 드는 게시글에 좋아요를 누르거나 댓글을 작성할 수 있습니다.
+- 날짜, 지역 등으로 정리된 축제 정보를 제공해 사용자가 필요한 정보를 쉽게 찾을 수 있는 환경을 제공
+- 축제 동행자를 모집하고 소통할 수 있는 커뮤니티 기능 제공
+- 축제 경험을 공유하고 싶은 사람들,특히 자신이 다녀온 축제에 대한 리뷰를 통해
+  다른 사람들에게 도움을 주고 싶은 사람들을 위한 공간
+- 축제에 대한 정보를 공유하고, 동행자를 만나고, 리뷰를 남기는 등의 과정을 통해 축제를 즐기는 새로운 문화를 창출
 
 <br>
 
@@ -21,9 +16,9 @@
 
 <div align="center">
 
-| **고지연** | **김민제** | **양희지** | **지창언** |
-| :------: |  :------: | :------: | :------: |
-| [<img src="https://avatars.githubusercontent.com/u/106502312?v=4" height=150 width=150> <br/> @yeon1615](https://github.com/yeon1615) | [<img src="https://avatars.githubusercontent.com/u/112460466?v=4" height=150 width=150> <br/> @Cheorizzang](https://github.com/Cheorizzang) | [<img src="https://avatars.githubusercontent.com/u/112460506?v=4" height=150 width=150> <br/> @heejiyang](https://github.com/heejiyang) | [<img src="https://avatars.githubusercontent.com/u/76766459?v=4" height=150 width=150> <br/> @journey-ji](https://github.com/journey-ji) |
+| **김태영** | **이하연** | **남주연** | **황규리** | **박현욱** |
+| :------: |  :------: | :------: | :------: | :------: |
+|  |  |  |  |  |
 
 </div>
 
