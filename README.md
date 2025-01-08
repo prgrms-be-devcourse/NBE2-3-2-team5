@@ -24,15 +24,12 @@
 
 ## 1. 개발 환경
 
-- Front : HTML, React, styled-components, Recoil
-- Back-end : 제공된 API 활용
+- Front : HTML, CSS, JavaScript, React
+- Back-end : Spring Boot, JWT, Spring Data JPA, Spring Security, MariaDB, Redis, OAuth2
 - 버전 및 이슈관리 : Github, Github Issues, Github Project
-- 협업 툴 : Discord, Notion, Github Wiki
-- 서비스 배포 환경 : Netlify
+- 협업 툴 : Discord, Notion, Gether
 - 디자인 : [Figma](https://www.figma.com/file/fAisC2pEKzxTOzet9CfqML/README(oh-my-code)?node-id=39%3A1814)
-- [커밋 컨벤션](https://github.com/likelion-project-README/README/wiki/%EC%BB%A4%EB%B0%8B-%EC%BB%A8%EB%B2%A4%EC%85%98)
-- [코드 컨벤션](https://github.com/likelion-project-README/README/wiki/%EC%BD%94%EB%93%9C-%EC%BB%A8%EB%B2%A4%EC%85%98)
-- [스프라이트](https://github.com/likelion-project-README/README/wiki/%EC%8A%A4%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8A%B8)
+<br>
 <br>
 
 ## 2. 채택한 개발 기술과 브랜치 전략
@@ -179,13 +176,15 @@
 
 <br>
 
-### 🐬지창언
+
+### 🐬황규리
 
 - **UI**
-    - 페이지 : 사용자 프로필 페이지
-    - 공통 컴포넌트 : 탑배너, 하단 모달창
+    - 페이지 : 동행페이지, 관리자 페이지
 - **기능**
-    - 팔로우 & 언팔로우, 로그아웃, 하단 모달창, 댓글 삭제, 게시글 삭제, 상품 삭제, 사용자 게시글 앨범형 이미지, 탑 배너 뒤로가기 버튼, Alert 모달
+    - 동행 : 동행 신청, 동행 신청 리스트 조회, 동행 수락, 동행 거절, 동행 조회, 동행 탈퇴
+    - 관리자 : 회원 조회, 회원 수정, 회원 삭제, 게시글 삭제, 리뷰 조회, 리뷰 삭제
+
     
 <br>
 
