@@ -231,7 +231,19 @@
 
 <br>
 
-## 5. 프로젝트 후기
+## 5. ERD
+
+![ERD Diagram](https://github.com/prgrms-be-devcourse/NBE2-3-2-team5/blob/main/ERD.jpeg?raw=true)
+
+<br>
+
+## 6. API 명세서
+
+![API 명세서](https://github.com/prgrms-be-devcourse/NBE2-3-2-team5/blob/main/API%20%E1%84%86%E1%85%A7%E1%86%BC%E1%84%89%E1%85%A6%E1%84%89%E1%85%A5.png?raw=true)
+
+<br>
+
+## 7. 프로젝트 후기
 
 ### 🍊 김태영
 
