@@ -1,6 +1,5 @@
 package com.example.festimo.domain.review.dto;
 
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;

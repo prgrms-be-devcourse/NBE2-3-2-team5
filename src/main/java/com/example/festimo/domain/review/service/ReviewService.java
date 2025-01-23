@@ -33,7 +33,6 @@ public class ReviewService {
 
 	}
 
-
 	// public String createReview(ReviewRequestDTO requestDTO) {
 	// 	try {
 	// 		Review review = modelMapper.map(requestDTO, Review.class);
@@ -71,8 +70,6 @@ public class ReviewService {
 			throw new RuntimeException("Failed to create review. Reason: " + e.getMessage());
 		}
 	}
-
-
 
 	public List<ReviewResponseDTO> getReviewsForUser(Long revieweeId) {
 		List<Review> reviews = reviewRepository.findByRevieweeId(revieweeId);
