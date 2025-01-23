@@ -1,4 +1,4 @@
-import { apiRequest } from './apiClient.js'; // 공통 모듈 불러오기
+import {apiRequest} from './apiClient.js'; // 공통 모듈 불러오기
 
 // 사용자 데이터를 가져와서 HTML 업데이트
 async function fetchUserData() {
@@ -8,14 +8,14 @@ async function fetchUserData() {
         });
 
         // 사용자 정보 업데이트
-        document.getElementById('welcome-message').textContent = `Welcome, ${data.userName}`;
+        document.getElementById('welcome-message').textContent = `${data.userName}`;
         document.getElementById('nickname').textContent = data.nickname;
         document.getElementById('email').textContent = data.email;
     } catch (error) {
-        if(error.message==='Require Login'){
+        if (error.message === 'Require Login') {
             alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.');
             window.location.href = '/html/login.html';
-        }else {
+        } else {
             console.error('Error fetching user data:', error);
             alert('사용자 정보를 불러오지 못했습니다. 다시 시도해주세요.');
         }
@@ -25,7 +25,7 @@ async function fetchUserData() {
 // 내가 쓴 리뷰 가져오기
 async function fetchWrittenReviews(page = 0, size = 5) {
     try {
-        const data = await apiRequest(`/api/reviews/reviewer/mypage/paged?page=${page}&size=${size}`, { method: 'GET' });
+        const data = await apiRequest(`/api/reviews/reviewer/mypage/paged?page=${page}&size=${size}`, {method: 'GET'});
 
         const reviewsContainer = document.getElementById('written-reviews-container');
         reviewsContainer.innerHTML = ''; // 기존 내용을 비움
@@ -39,9 +39,13 @@ async function fetchWrittenReviews(page = 0, size = 5) {
             const reviewElement = document.createElement('div');
             reviewElement.classList.add('review-item');
             reviewElement.innerHTML = `
-                <p><strong>평점:</strong> ${review.rating}</p>
-                <p><strong>내용:</strong> ${review.content}</p>
-                <p><strong>작성일:</strong> ${new Date(review.createdAt).toLocaleDateString()}</p>
+                <div class="review-header">
+                    <span class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+                    <span class="review-date">${new Date(review.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div class="review-content">
+                    <p>${review.content}</p>
+                </div>
             `;
             reviewsContainer.appendChild(reviewElement);
         });
@@ -52,10 +56,11 @@ async function fetchWrittenReviews(page = 0, size = 5) {
     }
 }
 
+
 // 내가 받은 리뷰 가져오기
 async function fetchReceivedReviews(page = 0, size = 5) {
     try {
-        const data = await apiRequest(`/api/reviews/reviewee/mypage/paged?page=${page}&size=${size}`, { method: 'GET' });
+        const data = await apiRequest(`/api/reviews/reviewee/mypage/paged?page=${page}&size=${size}`, {method: 'GET'});
 
         const reviewsContainer = document.getElementById('received-reviews-container');
         reviewsContainer.innerHTML = ''; // 기존 내용을 비움
@@ -69,9 +74,13 @@ async function fetchReceivedReviews(page = 0, size = 5) {
             const reviewElement = document.createElement('div');
             reviewElement.classList.add('review-item');
             reviewElement.innerHTML = `
-                <p><strong>평점:</strong> ${review.rating}</p>
-                <p><strong>내용:</strong> ${review.content}</p>
-                <p><strong>작성일:</strong> ${new Date(review.createdAt).toLocaleDateString()}</p>
+                <div class="review-header">
+                    <span class="review-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+                    <span class="review-date">${new Date(review.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div class="review-content">
+                    <p>${review.content}</p>
+                </div>
             `;
             reviewsContainer.appendChild(reviewElement);
         });
@@ -81,6 +90,7 @@ async function fetchReceivedReviews(page = 0, size = 5) {
         console.error('Error fetching received reviews:', error);
     }
 }
+
 
 // 페이지네이션 버튼 렌더링
 function renderPagination(totalPages, currentPage, fetchFunction, containerId) {

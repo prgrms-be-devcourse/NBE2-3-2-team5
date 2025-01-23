@@ -23,6 +23,7 @@ import com.example.festimo.domain.review.dto.ReviewRequestDTO;
 import com.example.festimo.domain.review.dto.ReviewResponseDTO;
 import com.example.festimo.domain.review.dto.ReviewUpdateDTO;
 import com.example.festimo.domain.review.service.ReviewService;
+import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.domain.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,11 +39,24 @@ public class ReviewController {
 
 	private final ReviewService reviewService;
 	private final UserService userService;
+	private final UserRepository userRepository;
 
 	@Operation(summary = "리뷰 작성")
 	@PostMapping
-	public ResponseEntity<String> createReview(@RequestBody @Valid ReviewRequestDTO requestDTO) {
+	public ResponseEntity<String> createReview(Authentication authentication,
+		@RequestBody @Valid ReviewRequestDTO requestDTO) {
+		// 인증 정보에서 이메일 가져오기
+		String email = authentication.getName();
+
+		// 이메일로 사용자 ID 조회
+		Long reviewerId = userRepository.findUserIdByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+		// RequestDTO에 reviewerId 설정
+		requestDTO.setReviewerId(reviewerId);
+
+		// 리뷰 생성 서비스 호출
 		String message = reviewService.createReview(requestDTO);
+
 		return ResponseEntity.status(HttpStatus.CREATED).body(message);
 	}
 
@@ -86,7 +100,6 @@ public class ReviewController {
 		return ResponseEntity.ok(reviews);
 	}
 
-
 	@Operation(summary = "내가 쓴 리뷰 조회")
 	@GetMapping("/reviewer/{reviewerId}")
 	public ResponseEntity<List<ReviewResponseDTO>> getReviewsByReviewer(@PathVariable Long reviewerId) {
@@ -112,9 +125,6 @@ public class ReviewController {
 
 		return ResponseEntity.ok(reviews);
 	}
-
-
-
 
 	@Operation(summary = "리뷰 삭제")
 	@DeleteMapping("/{reviewId}")

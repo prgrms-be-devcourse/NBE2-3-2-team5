@@ -38,4 +38,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.id AS userId, u.nickname AS nickname FROM User u WHERE u.id IN :userIds")
     List<UserNicknameProjection> findNicknamesByUserIds(List<Long> userIds);
+
+    @Query("SELECT u.id FROM User u WHERE u.email = :email")
+    Optional<Long> findUserIdByEmail(@Param("email") String email);
 }

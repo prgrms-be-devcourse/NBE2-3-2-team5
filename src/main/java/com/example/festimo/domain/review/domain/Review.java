@@ -33,7 +33,8 @@ public class Review {
 	private Long revieweeId; // 대상자
 
 	@Column(nullable = false)
-	@Min(1) @Max(5) // 1~5 사이의 값만 허용
+	@Min(1)
+	@Max(5) // 1~5 사이의 값만 허용
 	private int rating; // 평점 숫자
 
 	@Column(nullable = false, length = 255)
