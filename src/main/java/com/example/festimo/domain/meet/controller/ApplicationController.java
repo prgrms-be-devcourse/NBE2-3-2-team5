@@ -2,16 +2,19 @@ package com.example.festimo.domain.meet.controller;
 
 import java.util.List;
 
+import com.example.festimo.domain.meet.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import com.example.festimo.domain.meet.dto.ApplicationRequest;
-import com.example.festimo.domain.meet.dto.ApplicationResponse;
-import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
 import com.example.festimo.domain.meet.service.ApplicationService;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
 
@@ -107,6 +110,22 @@ public class ApplicationController {
 
         applicationService.rejectApplication(applicationId,email);
         return ResponseEntity.ok().build();
+    }
+
+
+    @GetMapping("/{applicationId}/reviews")
+    public ResponseEntity<Page<ApplicantReviewResponse>> getApplicantReview(
+            @PathVariable Long applicationId,
+            int page){
+
+        Pageable pageable = PageRequest.of(page,5, Sort.by("createdAt").descending());
+        Page <ApplicantReviewResponse> reviews = applicationService.getApplicantReviews(applicationId,pageable);
+
+        if(reviews.isEmpty()){
+            return ResponseEntity.noContent().build();   //리뷰가 없을 경우
+        }
+
+        return ResponseEntity.ok(reviews);
     }
 
 

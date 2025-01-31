@@ -2,17 +2,22 @@ package com.example.festimo.domain.meet.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+
 import java.util.stream.Collectors;
 
+import com.example.festimo.domain.meet.dto.*;
+import com.example.festimo.domain.review.domain.Review;
+import com.example.festimo.domain.review.repository.ReviewRepository;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.festimo.domain.meet.entity.CompanionMemberId;
 import com.example.festimo.domain.meet.entity.CompanionMember;
 import com.example.festimo.domain.meet.repository.CompanionMemberRepository;
-import com.example.festimo.domain.meet.dto.ApplicationResponse;
-import com.example.festimo.domain.meet.dto.LeaderApplicationResponse;
 import com.example.festimo.domain.meet.entity.Applications;
 import com.example.festimo.domain.meet.mapper.ApplicationMapper;
 import com.example.festimo.domain.meet.mapper.LeaderApplicationMapper;
@@ -21,11 +26,12 @@ import com.example.festimo.domain.meet.repository.CompanionRepository;
 import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
-import com.example.festimo.domain.user.dto.UserNicknameProjection;
+
 
 
 import static com.example.festimo.exception.ErrorCode.*;
 
+@RequiredArgsConstructor
 @Service
 public class ApplicationService {
 
@@ -33,18 +39,7 @@ public class ApplicationService {
     private final CompanionRepository companionRepository;
     private final UserRepository userRepository;
     private final CompanionMemberRepository companionMemberRepository;
-
-    public ApplicationService(
-            ApplicationRepository applicationRepository,
-            CompanionRepository companionRepository,
-            UserRepository userRepository,
-            CompanionMemberRepository companionMemberRepository
-    ) {
-        this.applicationRepository = applicationRepository;
-        this.companionRepository = companionRepository;
-        this.userRepository = userRepository;
-        this.companionMemberRepository = companionMemberRepository;
-    }
+    private final ReviewRepository reviewRepository;
 
     private User getUserFromEmail(String email) {
         return userRepository.findByEmail(email)
@@ -117,16 +112,11 @@ public class ApplicationService {
                 .map(Applications::getUserId)
                 .collect(Collectors.toList());
 
-        Map<Long, String> userNicknames = userRepository.findNicknamesByUserIds(userIds)
-                .stream()
-                .collect(Collectors.toMap(
-                        UserNicknameProjection::getUserId,
-                        UserNicknameProjection::getNickname
-                ));
 
-        return applications.stream()
-                .map(app -> LeaderApplicationMapper.INSTANCE.toDto(app, userNicknames.get(app.getUserId())))
-                .collect(Collectors.toList());
+        List<ApplicateUsersProjection> users = userRepository.findApplicateInfoByUserIds(userIds);
+
+        return LeaderApplicationMapper.INSTANCE.toDtoList(users);
+
     }
 
     /**
@@ -180,4 +170,33 @@ public class ApplicationService {
         application.setStatus(Applications.Status.REJECTED);
         applicationRepository.save(application);
     }
+
+
+
+    /**
+     * 신청자 상세 정보
+     *
+     * @param applicationId 조회하고 싶은 applicationId
+     */
+    public Page<ApplicantReviewResponse> getApplicantReviews(Long applicationId, Pageable pageable) {
+
+
+        //applicationId로 userId 찾기
+        Applications application = applicationRepository.findById(applicationId)
+                .orElseThrow( () -> new CustomException(APPLICATION_NOT_FOUND));
+
+        Long userId = application.getUserId();
+
+
+
+        //userId( revieweeId) 기준으로 리뷰 조회 (페이징 처리)
+        Page<Review> reviews = reviewRepository.findByRevieweeId(userId, pageable);
+
+        return reviews.map(review->new ApplicantReviewResponse(review.getRating(), review.getContent()));
+    }
+
+
+
+
+
 }

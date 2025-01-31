@@ -1,5 +1,7 @@
 package com.example.festimo.domain.user.repository;
 
+
+import com.example.festimo.domain.meet.dto.ApplicateUsersProjection;
 import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.dto.UserNicknameProjection;
 import io.micrometer.common.lang.NonNull;
@@ -41,4 +43,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Optional<Long> findUserIdByEmail(@Param("email") String email);
+
+    @Query("SELECT u.id as userId, u.nickname as nickname, u.gender as gender, u.ratingAvg as ratingAvg " +
+            "FROM User u WHERE u.id IN :userIds")
+    List<ApplicateUsersProjection> findApplicateInfoByUserIds(@Param("userIds") List<Long> userIds);
+
 }
