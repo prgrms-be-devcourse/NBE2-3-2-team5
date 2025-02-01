@@ -1,5 +1,6 @@
 package com.example.festimo.domain.admin.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/posts")
 @Tag(name = "관리자 API", description = "관리자가 게시글을 관리하는 API")
@@ -19,9 +21,6 @@ public class AdminPostController {
 
     private final AdminPostService adminPostService;
 
-    public AdminPostController(AdminPostService adminPostService) {
-        this.adminPostService = adminPostService;
-    }
 
     /**
      * 관리자의 게시글 삭제

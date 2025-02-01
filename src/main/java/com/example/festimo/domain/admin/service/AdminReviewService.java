@@ -1,5 +1,6 @@
 package com.example.festimo.domain.admin.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,14 +13,13 @@ import com.example.festimo.domain.review.repository.ReviewRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
 
+
+@RequiredArgsConstructor
 @Service
 public class AdminReviewService {
 
     private final ReviewRepository reviewRepository;
 
-    public AdminReviewService(ReviewRepository reviewRepository) {
-        this.reviewRepository = reviewRepository;
-    }
 
     /**
      * 모든 리뷰를 페이지네이션하여 조회합니다.

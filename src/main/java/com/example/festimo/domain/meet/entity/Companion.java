@@ -3,6 +3,7 @@ package com.example.festimo.domain.meet.entity;
 import java.time.LocalDateTime;
 
 import com.example.festimo.domain.post.entity.Post;
+import com.example.festimo.exception.InvalidTitleException;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -30,4 +31,24 @@ public class Companion {
     @OneToOne
     @JoinColumn(name = "post_id", nullable = false, unique = true) // 외래 키 설정
     private Post post;
+
+    @Column(nullable = false, length = 255)
+    private String title = "동행";
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CompanionStatus status = CompanionStatus.ONGOING;
+
+    public void changeTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new InvalidTitleException();
+        }
+        this.title = title;
+    }
+
+    public void changeStatus(CompanionStatus newStatus) {
+        this.status = newStatus;
+    }
+
+
 }

@@ -48,7 +48,7 @@ public class ApplicationService {
 
     private void validateLeaderAccess(Long companionId, Long userId) {
         Long leaderId = companionRepository.findLeaderIdByCompanyId(companionId)
-                .orElseThrow(() -> new CustomException(COMPANY_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(COMPANION_NOT_FOUND));
 
         if (!userId.equals(leaderId)) {
             throw new CustomException(ACCESS_DENIED);
@@ -81,7 +81,7 @@ public class ApplicationService {
                 .orElseThrow(() -> new CustomException(POST_NOT_FOUND));
 
         if (!companionRepository.existsById(companionId)) {
-            throw new CustomException(COMPANY_NOT_FOUND);
+            throw new CustomException(COMPANION_NOT_FOUND);
         }
 
         if (applicationRepository.existsByUserIdAndCompanionId(user.getId(), companionId)) {

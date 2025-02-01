@@ -1,6 +1,7 @@
 package com.example.festimo.domain.admin.service;
 
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,14 +16,12 @@ import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.exception.ErrorCode;
 
+@RequiredArgsConstructor
 @Service
 public class AdminService {
 
     private final UserRepository userRepository;
 
-    public AdminService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     /**
      * 모든 회원을 페이지네이션하여 조회합니다.

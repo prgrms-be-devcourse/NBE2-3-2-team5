@@ -9,6 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanionResponse {
 
+    private String title;
+
     private Long companionId;  //모임 id
     private Long leaderId;  //리더 id
     private String leaderName;  //리더 이름

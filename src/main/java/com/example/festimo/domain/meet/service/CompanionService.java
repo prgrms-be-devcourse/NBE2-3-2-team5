@@ -4,12 +4,14 @@ import com.example.festimo.domain.meet.dto.CompanionResponse;
 import com.example.festimo.domain.meet.entity.Companion;
 import com.example.festimo.domain.meet.entity.CompanionMemberId;
 import com.example.festimo.domain.meet.entity.CompanionMember;
+import com.example.festimo.domain.meet.entity.CompanionStatus;
 import com.example.festimo.domain.meet.repository.CompanionMemberRepository;
 import com.example.festimo.domain.meet.repository.CompanionRepository;
 import com.example.festimo.domain.post.entity.Post;
 import com.example.festimo.domain.post.repository.PostRepository;
 import com.example.festimo.domain.user.domain.User;
 import com.example.festimo.domain.user.repository.UserRepository;
+import com.example.festimo.exception.CompanionNotFoundException;
 import com.example.festimo.exception.CustomException;
 
 import org.springframework.stereotype.Service;
@@ -66,7 +68,7 @@ public class CompanionService {
 
         // companion 추가
         LocalDateTime now = LocalDateTime.now();
-        Companion companion = new Companion(null, user.getId(), now, post);
+        Companion companion = new Companion(null, user.getId(), now, post, "동행", CompanionStatus.ONGOING);
         companionRepository.save(companion);
 
         // companion_member 추가
@@ -98,7 +100,7 @@ public class CompanionService {
         CompanionMemberId companionMemberId = new CompanionMemberId(companionId, user.getId());
 
         if (!companionMemberRepository.existsById(companionMemberId)) {
-            throw new CustomException(COMPANION_NOT_FOUND);
+            throw new CustomException(COMPANION_MEMBER_NOT_FOUND);
         }
 
         companionMemberRepository.deleteById(companionMemberId);
@@ -133,7 +135,7 @@ public class CompanionService {
     public List<CompanionResponse> getCompanionAsMember(Long userId) {
         List<CompanionMember> companionMembers = companionMemberRepository.findByUserId(userId).stream()
                 .filter(member -> member.getCompanion() != null && !member.getCompanion().getLeaderId().equals(userId))
-                .collect(Collectors.toList());
+                .toList();
 
         if (companionMembers.isEmpty()) {
             return Collections.emptyList();
@@ -163,10 +165,80 @@ public class CompanionService {
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
 
         return new CompanionResponse(
+                companion.getTitle(),
                 companion.getCompanionId(),
                 companion.getLeaderId(),
                 leader.getUserName(),
                 members
         );
     }
+
+    /**
+     * Companion title 변경
+     *
+     */
+    @Transactional
+    public void updateTitle(Long companionId, String title, String email) {
+        User user = getUserFromEmail(email);
+        validateLeaderAccess(companionId, user.getId());
+
+        Companion companion = companionRepository.findById(companionId)
+                .orElseThrow(() -> new CustomException(COMPANION_MEMBER_NOT_FOUND));
+
+        companion.changeTitle(title);// 엔티티 수정
+
+    }
+
+    /**
+     * Companion state 변경 (진행중->완료)
+     *
+     */
+    @Transactional
+    public void completeCompanion(Long companionId, String email) {
+        User user = getUserFromEmail(email);
+        validateLeaderAccess(companionId, user.getId());
+
+        Companion companion = companionRepository.findById(companionId)
+            .orElseThrow(() -> new CompanionNotFoundException());
+
+        if(companion.getStatus() == CompanionStatus.COMPLETED) {
+            throw new CustomException(ALREADY_COMPLETED);
+        }
+
+        companion.changeStatus(CompanionStatus.COMPLETED);
+
+    }
+
+    /**
+     * Companion state 변경 (완료->진행중)
+     *
+     */
+    @Transactional
+    public void restoreCompanion(Long companionId, String email) {
+        User user = getUserFromEmail(email);
+        validateLeaderAccess(companionId, user.getId());
+
+        Companion companion = companionRepository.findById(companionId)
+                .orElseThrow(() -> new CompanionNotFoundException());
+
+        if (companion.getStatus() == CompanionStatus.ONGOING) {
+            throw new CustomException(ALREADY_ONGOING);
+        }
+
+        companion.changeStatus(CompanionStatus.ONGOING);
+    }
+
+
+
+
+    private void validateLeaderAccess(Long companionId, Long userId) {
+        Long leaderId = companionRepository.findLeaderIdByCompanyId(companionId)
+                .orElseThrow(() -> new CustomException(COMPANION_NOT_FOUND));
+
+        if (!userId.equals(leaderId)) {
+            throw new CustomException(ACCESS_DENIED);
+        }
+    }
+
+
 }

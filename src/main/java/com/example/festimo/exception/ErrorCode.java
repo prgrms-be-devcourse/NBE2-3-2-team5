@@ -34,6 +34,13 @@ public enum ErrorCode {
     PASSWORD_MISSING_NUMBER(HttpStatus.BAD_REQUEST, "비밀번호 숫자를 확인해주세요."),
     PASSWORD_MISSING_SPECIAL_CHARACTER(HttpStatus.BAD_REQUEST, "비밀번호 특수문자를 확인해주세요."),
 
+    INVALID_TITLE(HttpStatus.BAD_REQUEST, "제목을 비울 수 없습니다."),
+
+    ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 완료된 동행입니다."),
+    ALREADY_ONGOING(HttpStatus.BAD_REQUEST, "이미 진행 중인 동행입니다."),
+
+
+
     /*
      * 401 UNAUTHORIZED
      */
@@ -63,11 +70,11 @@ public enum ErrorCode {
 
     REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
 
-    COMPANY_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 동행을 찾을 수 없습니다."),
+    COMPANION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 동행을 찾을 수 없습니다."),
 
     APPLICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 신청을 찾을 수 없습니다."),
 
-    COMPANION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 동행의 동행원이 아닙니다."),
+    COMPANION_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 동행의 동행원이 아닙니다."),
 
 
     /*

@@ -2,6 +2,7 @@ package com.example.festimo.domain.admin.controller;
 
 import jakarta.validation.Valid;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import com.example.festimo.domain.admin.dto.AdminDTO;
 import com.example.festimo.domain.admin.dto.AdminUpdateUserDTO;
 import com.example.festimo.domain.admin.service.AdminService;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin")
 @Tag(name = "관리자 API", description = "관리자가 회원 정보를 관리하는 API")
@@ -20,9 +22,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    public AdminController(AdminService adminService) {
-        this.adminService = adminService;
-    }
+
 
     /**
      * 모든 회원 조회

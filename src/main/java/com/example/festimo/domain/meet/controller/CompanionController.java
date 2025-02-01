@@ -89,4 +89,41 @@ public class CompanionController {
 
         return ResponseEntity.ok(response);
     }
+
+    //동행 이름 수정
+    @PatchMapping("/{companionId}/title")
+    public ResponseEntity<Void> updateCompanionTitle(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long companionId,
+            @RequestBody String title) {
+
+        String email = getEmailFromHeader(authorizationHeader);
+
+        companionService.updateTitle(companionId, title,email);
+        return ResponseEntity.noContent().build();
+
+    }
+
+    //동행 상태 변경 (진행->완료)
+    @PatchMapping("/{companionId}/status/completed")
+    public ResponseEntity<Void> completeCompanion(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long companionId) {
+
+        String email = getEmailFromHeader(authorizationHeader);
+        companionService.completeCompanion(companionId, email);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    //동행 상태 변경 (완료->진행)
+    @PatchMapping("/{companionId}/status/ongoing")
+    public ResponseEntity<Void> restoreCompanion(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long companionId) {
+
+        String email = getEmailFromHeader(authorizationHeader);
+        companionService.restoreCompanion(companionId, email);
+        return ResponseEntity.noContent().build();
+    }
 }

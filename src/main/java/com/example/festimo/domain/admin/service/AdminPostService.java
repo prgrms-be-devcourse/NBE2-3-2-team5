@@ -1,5 +1,6 @@
 package com.example.festimo.domain.admin.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,14 +10,12 @@ import com.example.festimo.exception.CustomException;
 
 import static com.example.festimo.exception.ErrorCode.POST_NOT_FOUND;
 
+@RequiredArgsConstructor
 @Service
 public class AdminPostService {
 
     private final PostRepository postRepository;
 
-    public AdminPostService(PostRepository postRepository) {
-        this.postRepository = postRepository;
-    }
 
     /**
      * 관리자가 게시글을 삭제합니다.

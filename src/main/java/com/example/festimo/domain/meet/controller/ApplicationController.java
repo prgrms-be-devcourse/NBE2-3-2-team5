@@ -3,6 +3,7 @@ package com.example.festimo.domain.meet.controller;
 import java.util.List;
 
 import com.example.festimo.domain.meet.dto.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.example.festimo.domain.meet.service.ApplicationService;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/meet")
 @Tag(name = "동행 API", description = "동행 관련 API")
@@ -26,14 +27,6 @@ public class ApplicationController {
 
     private final ApplicationService applicationService;
     private final JwtTokenProvider jwtTokenProvider;
-
-
-    public ApplicationController(ApplicationService applicationService, JwtTokenProvider jwtTokenProvider) {
-        this.applicationService = applicationService;
-        this.jwtTokenProvider = jwtTokenProvider;
-
-    }
-
 
 
     /**
@@ -49,9 +42,8 @@ public class ApplicationController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody ApplicationRequest request) {
 
-        String email = getEmailFromHeader(authorizationHeader);
 
-        ApplicationResponse response = applicationService.createApplication(email, request.getCompanionId());
+        ApplicationResponse response = applicationService.createApplication(authorizationHeader, request.getCompanionId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -112,7 +104,12 @@ public class ApplicationController {
         return ResponseEntity.ok().build();
     }
 
-
+    /**
+     * 신청자 리뷰 확인
+     *
+     * @param applicationId 확인하고 싶은 신청자의 신청 ID
+     * @param page
+     */
     @GetMapping("/{applicationId}/reviews")
     public ResponseEntity<Page<ApplicantReviewResponse>> getApplicantReview(
             @PathVariable Long applicationId,
@@ -127,6 +124,7 @@ public class ApplicationController {
 
         return ResponseEntity.ok(reviews);
     }
+
 
 
     //Header에서 email

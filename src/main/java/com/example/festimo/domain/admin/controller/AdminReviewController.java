@@ -1,5 +1,6 @@
 package com.example.festimo.domain.admin.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,16 +15,13 @@ import com.example.festimo.domain.admin.service.AdminReviewService;
 import com.example.festimo.domain.review.dto.ReviewResponseDTO;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/reviews")
 @Tag(name = "관리자 API", description = "관리자가 리뷰를 관리하는 API")
 public class AdminReviewController {
 
     private final AdminReviewService adminReviewService;
-
-    public AdminReviewController(AdminReviewService adminReviewService) {
-        this.adminReviewService = adminReviewService;
-    }
 
     /**
      * 관리자의 리뷰 조회 (최신순)
