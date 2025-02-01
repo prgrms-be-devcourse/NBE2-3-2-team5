@@ -14,6 +14,7 @@ import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CompanionNotFoundException;
 import com.example.festimo.exception.CustomException;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static com.example.festimo.exception.ErrorCode.*;
 
+@RequiredArgsConstructor
 @Service
 public class CompanionService {
 
@@ -32,17 +34,6 @@ public class CompanionService {
     private final CompanionRepository companionRepository;
     private final UserRepository userRepository;
 
-    public CompanionService(
-            CompanionMemberRepository companionMemberRepository,
-            PostRepository postRepository,
-            CompanionRepository companionRepository,
-            UserRepository userRepository) {
-
-        this.companionMemberRepository = companionMemberRepository;
-        this.postRepository = postRepository;
-        this.companionRepository = companionRepository;
-        this.userRepository = userRepository;
-    }
 
     private User getUserFromEmail(String email) {
         return userRepository.findByEmail(email)
@@ -199,7 +190,7 @@ public class CompanionService {
         validateLeaderAccess(companionId, user.getId());
 
         Companion companion = companionRepository.findById(companionId)
-            .orElseThrow(() -> new CompanionNotFoundException());
+            .orElseThrow(CompanionNotFoundException :: new);
 
         if(companion.getStatus() == CompanionStatus.COMPLETED) {
             throw new CustomException(ALREADY_COMPLETED);
@@ -219,7 +210,7 @@ public class CompanionService {
         validateLeaderAccess(companionId, user.getId());
 
         Companion companion = companionRepository.findById(companionId)
-                .orElseThrow(() -> new CompanionNotFoundException());
+                .orElseThrow(CompanionNotFoundException :: new);
 
         if (companion.getStatus() == CompanionStatus.ONGOING) {
             throw new CustomException(ALREADY_ONGOING);

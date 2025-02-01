@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -22,7 +23,7 @@ import com.example.festimo.domain.user.repository.UserRepository;
 import com.example.festimo.exception.CustomException;
 import com.example.festimo.global.utils.jwt.JwtTokenProvider;
 
-
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/meet")
 @Tag(name = "동행 API", description = "동행 관련 API")
@@ -32,11 +33,6 @@ public class CompanionController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
-    public CompanionController(CompanionService companionService, JwtTokenProvider jwtTokenProvider, UserRepository userRepository) {
-        this.companionService = companionService;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.userRepository = userRepository;
-    }
 
     private String getEmailFromHeader(String authorizationHeader) {
         String token = authorizationHeader.replace("Bearer ", "");

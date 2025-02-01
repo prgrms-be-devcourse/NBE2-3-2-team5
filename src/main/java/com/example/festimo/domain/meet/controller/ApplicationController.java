@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,8 +42,9 @@ public class ApplicationController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody ApplicationRequest request) {
 
+        String email = getEmailFromHeader(authorizationHeader);
 
-        ApplicationResponse response = applicationService.createApplication(authorizationHeader, request.getCompanionId());
+        ApplicationResponse response = applicationService.createApplication(email, request.getCompanionId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

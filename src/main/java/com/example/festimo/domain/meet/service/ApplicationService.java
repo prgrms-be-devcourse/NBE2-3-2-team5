@@ -41,6 +41,8 @@ public class ApplicationService {
     private final CompanionMemberRepository companionMemberRepository;
     private final ReviewRepository reviewRepository;
 
+
+
     private User getUserFromEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(USER_NOT_FOUND));
